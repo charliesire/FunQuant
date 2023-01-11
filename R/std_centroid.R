@@ -1,0 +1,37 @@
+#' @title Computation of the IS centroid standard deviation for different sets of prototypes.
+#'
+#' @param outputs The output samples that need to be quantized. Useful only if cell_numbers == NULL.
+#' @param gamma_list A list of gamma on which we want to evaluate the IS centroid standard deviation. Each gamma is a set of prototypes.
+#' @param density_ratio density_ratio indicates the weight fX/g of each output.
+#' @param distance_func  A function computng a distance between two elements in the output spaces.
+#' @param cells The Voronoï cell numbers that we are investigating.
+#' @param nv The size of the sample for which we want to estimate the IS centroid standard deviation.
+#' @param cell_numbers An optional list providing for each set of prototypes the voronoi cell number of every output.
+#' @return A list providing for each set of prototypes a list the IS centroid standard deviation for each voronoi cell
+#' @export
+#'
+#' @examples
+std_centroid = function(outputs, gamma_list, density_ratio, distance_func, cells, cell_numbers = NULL, nv){
+  weighted_map = t(matrix(outputs, nrow = prod(dim(outputs)[-length(dim(outputs))]),ncol = dim(outputs)[-length(dim(outputs))]))*densite_vec
+  std_ratio_list = list()
+  for(it in 1:length(gamma_list)){#for all Gamma
+    std_ratio_list[[it]] = as.list(rep(0,gamma))
+    if(is.null(cell_numbers)){cell_numbers_it = get_cell_numbers(outputs, gamma, distance_func)}
+    else{cell_numbers_it = cell_numbers[[it]]}
+    for(j in cells){#for all voronoi cells
+      map_loop = weighted_map #weighted map is the set of maps multiplied by the weights f_{x}/mu
+      density_voronoi = density_ratio*(cell_numbers_it == j) #densite_num is the vector of the weights multiplied by the characteristic function of the voronoi cell
+      for(i in 1:length(cell_numbers_it)){
+        if(cell_numbers_it[i] != j){map_loop[i,] = rep(0,length(map_loop[i,]))} #this
+      } #map_loop is now the set of maps multiplied by the weights f_{x}/mu multiplied by the characteristic function of the voronoi cell
+      covariance = apply(map_loop,2,function(x){cov(x,densite_num)})/nv #this is the covariance between Ai and B for all i
+      moy1 = apply(map_loop,2, mean) #This is the empirical expectation of Ai for all i
+      moy2 = mean(density_voronoi) #This is the empirical expectation of B
+      var1 = apply(map_loop,2,var)/nv #This is the empirical variance of Ai for all i
+      var2 = var(density_voronoi)/nv #This is the empirical variance of B
+      std_ratio_list[[it]][[j]] = sqrt(moy1^2/moy2^2*(var1/moy1^2+var2/moy2^2-2*covariance/moy1/moy2)) #This is the empirical standard error of the ratio
+
+    }
+  }
+  return(std_ratio_list)
+}
