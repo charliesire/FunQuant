@@ -5,7 +5,8 @@
 #' @return A list of matrices prototypes
 #' @export
 #'
-#' @examples gamma = list(1:5, runif(5), rep(0,5))
+#' @examples
+#' oned_to_matrix(list(1:5, runif(5), rep(0,5)))
 oned_to_matrix = function(gamma){
   gamma = lapply(1:length(gamma), function(j){
     if(is.null(dim(gamma[[j]])) | length(dim(gamma[[j]])) == 1){t(as.matrix(gamma[[j]]))}

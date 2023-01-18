@@ -1,7 +1,8 @@
 #' @title Predict the output class of a validation sample with random forest classifier for different hyperparameters values
 #'
-#' @param x A dataframe of inputs
-#' @param y A vector of categorical output
+#' @param xtrain A dataframe of training inputs
+#' @param xtest A dataframe of test inputs
+#' @param ytrain A vector of training outputs for the random forests
 #' @param list_search A list containing for each hyperparameters to be tested a list of the tested values.
 #' @param ... other parameters of \code{\link{randomForest}} function from \code{randomForest}.
 #'
@@ -9,7 +10,7 @@
 #' @export
 #'
 #' @examples
-pred_rf_training_test = function(xtrain, xtest, ytrain, list_search,...){
+rf_pred_training_test = function(xtrain, xtest, ytrain, list_search,...){
   pred = list()
   for(i in 1:length(list_search[[1]])){
     liste_cv = list()

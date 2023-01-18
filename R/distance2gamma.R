@@ -8,6 +8,7 @@
 #' @export
 #'
 #' @examples
+#' distance_to_gamma(array(1:9, dim = c(3,3)), list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3,3))), distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))})
 distance_to_gamma = function(x, gamma, distance_func){
   distance = Vectorize(function(k){distance_func(x, gamma[[k]])})(1:length(gamma))
   return(list(cellule = which.min(distance), dist = min(distance)))

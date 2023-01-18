@@ -1,4 +1,4 @@
-#' @title Computing the relative errors when predicting the membership probabilities by kfold cross validation with a classification step, for different values of hyperparameters
+#' @title Computation of the Root Mean Square Error at each pixel of the outputs by kfold Cross Validation with a classification step, for different values of hyperparameters
 #'
 #' @param design A dataframe of inputs
 #' @param outputs The output samples on which the metamodel will be trained and tested by kfold cross validation
@@ -6,9 +6,6 @@
 #' @param list_search A list containing for each hyperparameters to be tested a list of the tested values.
 #' @param nb_folds Number of folds
 #' @param seed An optional random seed
-#' @param density_ratio density_ratio indicates the weight fX/g of each output
-#' @param gamma A set of l prototypes defining the Voronoï cells
-#' @param distance_func  A function computng a distance between two elements in the output spaces.
 #' @param return_pred A boolean indicating whether the predicted outputs should be returned or not
 #' @param only_positive A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.
 #' @param ncoeff The number of coefficients used for PCA
@@ -42,22 +39,21 @@
 #' for each principal component. At this stage, the parameters must be provided as well, and are not estimated.
 #' @param control an optional list of control parameters for optimization. For details, see \code{\link{km}}).
 #' @param type A character string corresponding to the kriging family, to be chosen between simple kriging ("SK"), or universal kriging ("UK"). Default is "UK.
-#' @param bias A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoï cell.
 #' @param ... other parameters of \code{\link{randomForest}} function from \code{randomForest}.
+
 #'
 #' @return A list containing several outputs :
 #' - list_search the list containing for each hyperparameters to be tested a list of the tested values.
-#' - probas_pred_df a dataframe indicating for each combination of hyperparameters values the obtained predicted membership probabilities
-#' - relative_error_df a dataframe indicating for each combination of hyperparameters values the relative error when predicting the membership probabilities
-#' - outputs_pred an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.#' @export
+#' - outputs_rmse is a list of objects that have the same dimension as an output, obtained for each combination of hyperparameters values. Each element (called pixel here) of the objects is the RMSE computed between the predicted values of the pixel and the true value of the pixel.
+#' - outputs_pred is an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 #'#' @export
 #'
 #' @examples
-rf_proba_k_fold = function(design, outputs, threshold, list_search, nb_folds, density_ratio, gamma, distance_func,return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
+rf_rmse_k_fold = function(design, outputs, threshold, list_search, nb_folds, return_pred = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
                           coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                           nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                           parinit = NULL, multistart=1,
-                          kernel=NULL,control = NULL,type = "UK",bias = NULL,...){
+                          kernel=NULL,control = NULL,type = "UK",...){
   if(is.null(seed)==FALSE){set.seed(seed)}
   folds = kfold(length(density_ratio), nb_folds)
   probas_true = get_probas(density_ratio = density_ratio, outputs = outputs, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
@@ -114,12 +110,11 @@ rf_proba_k_fold = function(design, outputs, threshold, list_search, nb_folds, de
     }
     dimnames(outputs_pred[[i]]) = NULL
     if(only_positive){outputs_pred[[i]] = (outputs_pred[[i]] > 0)*outputs_pred[[i]]}
-    probas_pred_cv = get_probas(density_ratio = density_ratio, outputs = outputs_pred[[i]], gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
-    probas_pred_df = rbind(probas_pred_df,probas_pred_cv)
-    relative_error_df = rbind(relative_error_df, abs(probas_pred_cv - probas_true)/probas_true)
+    err = (outputs_pred[[i]] - outputs)^2
+    outputs_rmse[[i]] = sqrt(apply(err, 1:(length(dim(err))-1), mean))
     if(return_pred == FALSE){outputs_pred = list()}
   }
   if(return_pred == FALSE){outputs_pred = NULL}
-  return(list(list_search = list_search,probas_pred = probas_pred_df, error = relative_error_df, outputs_pred = outputs_pred))
+  return(list(list_search = list_search, outputs_rmse = outputs_rmse, outputs_pred = outputs_pred))
 }
 

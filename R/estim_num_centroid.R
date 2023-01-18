@@ -9,7 +9,12 @@
 #' @export
 #'
 #' @examples
-estim_1 = function(outputs, cell_numbers, density_ratio, cell){
+#' outputs = array(runif(9*20)*15, dim = c(3,3,20))
+#' cell_numbers = c(1,3,2,1,2,1,1,2,3,3,2,2,2,2,2,3,1,1,3,3)
+#' density_ratio = rep(1,20)
+#' cell = 3
+#' estim_num_centroid(outputs = outputs,cell_numbers = cell_numbers, density_ratio = density_ratio, cell = cell)
+estim_num_centroid = function(outputs, cell_numbers, density_ratio, cell){
   outputs_cell = Subset(x = outputs, along = length(dim(outputs)), indices = which(cell_numbers == cell))
   outputs_cell = matrix(outputs_cell, nrow = prod(dim(outputs)[1:(length(dim(outputs))-1)]))
   outputs_cell = t(outputs_cell)

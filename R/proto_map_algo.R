@@ -2,7 +2,6 @@
 #' @title The prototype maps algorithm. Providing prototype outputs and their probability masses.
 
 #' @param gamma
-#'
 #' @param outputs The output samples that need to be quantized
 #' @param method_IS The method of Importance Sampling : "unique" means there is a unique biased density involved, "percell" means there is one biased density (and then one biased sample) for each cell. Default is "unique".
 #' @param density_ratio A vector indicating the weight fX/g of each output. Default is a vector of 1.
@@ -11,7 +10,8 @@
 #' @param print_progress A boolean indicating whether to print the iterations or not. Default is FALSE.
 #' @param threshold A real positive number. When the distance between the new centroids and the previous ones is lower than this value, then we stop the algorithm.
 #' @param trace A boolean. If TRUE, tracing information on the progress of the algorithm is produced. Default is FALSE.
-#'
+#' @param bias A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default is 0 for all Voronoi cells.
+
 #' @return A list containing :
 #' - gamma : the list of prototypes
 #' - probas : a vector indicating the probability mass of the prototypes
@@ -22,6 +22,12 @@
 #' @export
 #'
 #' @examples
+#' gamma = list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3,3)))
+#' outputs = array(runif(9*20)*15, dim = c(3,3,20))
+#' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
+#' proto_map_algo(gamma = gamma, outputs = outputs, distance_func = distance_func)
+
+
 
 proto_map_algo = function(gamma, outputs, method_IS = "unique", density_ratio = rep(1, dim(outputs)[length(dim(outputs))]), budget = 10^3, threshold = 0, distance_func, print_progress = FALSE, trace = FALSE, bias = rep(0,length(gamma))){
   if(is.null(dim(outputs))){outputs = t(as.matrix(outputs))}

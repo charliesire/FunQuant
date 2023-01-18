@@ -3,14 +3,19 @@
 #' @param outputs The output samples that need to be quantized
 #' @param cell_numbers The voronoi cell number of every output
 #' @param method_IS The method of Importance Sampling : "unique" means there is a unique biased density involved, "percell" means there is one biased density (and then one biased sample) for each cell.
-#'
 #' @param density_ratio density_ratio indicates the weight fX/g of each output
-#'
+#' @param bias A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default is 0 for all Voronoi cells.
+
 #' @return The centroid and the probability mass of each probability cell
 #' @export
 #'
 #' @examples
-compute_centroids_and_proba = function(outputs, cell_numbers, method_IS = "unique", density_ratio = NULL, bias = rep(0,length(unique(unlist(cell_numbers))))){
+#' outputs = array(runif(9*20)*15, dim = c(3,3,20))
+#' cell_numbers = c(1,3,2,1,2,1,1,2,3,3,2,2,2,2,2,3,1,1,3,3)
+#' density_ratio = rep(1,20)
+#' compute_centroids_and_proba(outputs = outputs,cell_numbers = cell_numbers, density_ratio = density_ratio)
+
+compute_centroids_and_proba = function(outputs, cell_numbers, method_IS = "unique", density_ratio, bias = rep(0,length(unique(unlist(cell_numbers))))){
   n = length(cell_numbers)#nb of outputs
   nb_cells = length(unique(unlist(cell_numbers)))
   centroids = list()
@@ -26,8 +31,8 @@ compute_centroids_and_proba = function(outputs, cell_numbers, method_IS = "uniqu
       cell_numbers_j = cell_numbers[[j]]
       density_j = density_ratio[[j]]
     }
-    numerator =  estim_1(outputs = outputs_j, cell_numbers = cell_numbers_j, density_ratio = density_j, cell = j) ## Sum the Y(X)f/nu of the cell
-    denominator = estim_2(density_ratio = density_j, cell_numbers = cell_numbers_j, cell = j, bias = bias[j])
+    numerator =  estim_num_centroid(outputs = outputs_j, cell_numbers = cell_numbers_j, density_ratio = density_j, cell = j) ## Sum the Y(X)f/nu of the cell
+    denominator = estim_denom_centroid(density_ratio = density_j, cell_numbers = cell_numbers_j, cell = j, bias = bias[j])
     centroids[[j]] = numerator/denominator
     probas = c(probas, denominator/n)
   }

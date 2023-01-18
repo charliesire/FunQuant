@@ -37,9 +37,25 @@
 #' @param ... other parameters of \code{\link{km}} function from \code{DiceKriging}.
 #'
 #' @return A list of lists of objects of class \code{\linkS4class{km}}. The length of the output list is the length of ncoeff_vec. For each ncoeff of ncoeff_vec, a list of npc objects of class \code{\linkS4class{km}} is computed.
+#' @import waveslim
+#' @import foreach
+#' @import DiceKriging
 #' @export
 #'
 #' @examples
+#' func2D <- function(X){
+#' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
+#' n<-nrow(X)
+#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+#' Ymaps<- array(unlist(Y),dim=c(20,20,n))
+#' return(Ymaps)
+#' }
+#' design = data.frame(X = seq(-1,1,l= 8))
+#' outputs = func2D(design)
+#' ncoeff_vec = c(50,100,200,400)
+#' npc = 4
+#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
+#' models = create_models_tuning(outputs = outputs, ncoeff_vec = ncoeff_vec, npc = 4, design = design, control = list(trace = FALSE))
 create_models_tuning = function(outputs, ncoeff_vec, npc, formula = ~1,design, covtype="matern5_2", boundary = "periodic",J=1,
                                 coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                                 nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
@@ -47,11 +63,11 @@ create_models_tuning = function(outputs, ncoeff_vec, npc, formula = ~1,design, c
                                 kernel=NULL, control = NULL,...){
   model_tuning = list()
   for(i in 1:length(ncoeff_vec)){
-    print(i)
     set.seed(1)
     ncoeff = ncoeff_vec[i]
     fp = Fpca2d.Wavelets(outputs, wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
-    model_tuning[[i]] = km_Fpca2d(formula = formula, design = design, response = fp, covtype = covtype, coef.trend = coef.trend, coef.var = coef.var, coef.cov = coef.cov, control = control, nugget = nugget, multistart=multistart, lower = lower)
+    model_tuning[[i]] = km_Fpca2d(formula = formula, design = design, response = fp, covtype = covtype, coef.trend = coef.trend, coef.var = coef.var, coef.cov = coef.cov, control = control, nugget = nugget, multistart=multistart, lower = lower,...)
   }
   return(model_tuning)
 }
+

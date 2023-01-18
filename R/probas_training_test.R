@@ -44,7 +44,7 @@
 #' for each principal component. At this stage, the parameters must be provided as well, and are not estimated.
 #' @param control an optional list of control parameters for optimization. For details, see \code{\link{km}}).
 #' @param type A character string corresponding to the kriging family, to be chosen between simple kriging ("SK"), or universal kriging ("UK"). Default is "UK.
-#' @param bias A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoï cell.
+#' @param bias A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default is 0 for all Voronoi cells.
 #' @param ... other parameters of \code{\link{km}} function from \code{DiceKriging}.
 #'
 #' @return A list containing several outputs :
@@ -54,12 +54,29 @@
 #' @export
 #'
 #' @examples
+#' func2D <- function(X){
+#' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
+#' n<-nrow(X)
+#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+#' Ymaps<- array(unlist(Y),dim=c(20,20,n))
+#' return(Ymaps)
+#' }
+#' design_train = data.frame(X = seq(-1,1,l= 8))
+#' outputs_train = func2D(design_train)
+#' design_test = data.frame(X = seq(-0.99,0.99,l=50))
+#' outputs_test = func2D(design_test)
+#' gamma = lapply(c(10,20,30,40,50), function(i){outputs_test[,,i]})
+#' density_ratio = rep(1, 50)
+#' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
+#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
+#' list_probas_train_test = probas_training_test(gamma = gamma, density_ratio = density_ratio, distance_func = distance_func, return_pred = T, outputs_train = outputs_train, outputs_test = outputs_test, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design_train = design_train, design_test = design_test, control = list(trace = FALSE))
+
 probas_training_test = function(outputs_train,outputs_test, density_ratio, gamma, distance_func, model_tuning = NULL, ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design_train, design_test, covtype="matern5_2",boundary = "periodic",J=1,
                                 coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                                 nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                                 parinit = NULL, multistart=1,
-                                kernel=NULL,control = NULL,type = "UK",bias = bias, ...){
-  dimnames(outputs) = NULL
+                                kernel=NULL,control = NULL,type = "UK",bias = rep(0, length(gamma)), ...){
+  dimnames(outputs_train) = NULL
   if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs_train, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design_train, covtype=covtype,
                                                                 coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                                                                 nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
@@ -76,7 +93,7 @@ probas_training_test = function(outputs_train,outputs_test, density_ratio, gamma
     indice_coeff = which(ncoeff_vec == ncoeff)
     fp = Fpca2d.Wavelets(outputs_train, wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
     model = lapply(1:npc, function(k){model_tuning[[indice_coeff]][[k]]})
-    pred =  sapply(1:npc, function(k){predict(object = model[[k]], newdata = design_test, type = type, compute = FALSE)$mean})
+    pred =  sapply(1:npc, function(k){predict(object = model[[k]], newdata = design_test, type = type, compute = FALSE, checkNames = F)$mean})
     outputs_pred = inverse_Fpca2d(pred,fp)
     if(return_pred){outputs_pred_list[[i]] = outputs_pred}
     probas_pred_cv = get_probas(density_ratio = density_ratio, outputs = outputs_pred, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)

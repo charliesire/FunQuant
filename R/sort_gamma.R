@@ -6,6 +6,8 @@
 #' @export
 #'
 #' @examples
+#'
+#' sort_gamma(gamma = list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3,3))))
 sort_gamma = function(gamma){
   gamma_sorted = gamma
   sums = Vectorize(function(k){sum(abs(gamma[[k]]))})(1:length(gamma))

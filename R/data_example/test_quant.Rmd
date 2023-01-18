@@ -33,7 +33,6 @@ library(randomForest)
 library(png)
 library(ClimProjDiags)
 library(dismo)
-```
 ```{r}
 #outputs = outputs[,, qui_nb]
 #density_ratio = density_ratio[qui_nb]
@@ -77,7 +76,6 @@ fp = Fpca2d.Wavelets(outputs[,,qui_nb], wf = "d4", boundary = "periodic", J = 1,
 num_pred = get_cell_numbers(outputs = outputs_loo, gamma = gamma, distance_func = distance_func)
 
 sum(num_pred != num_true)
-```
 
 ```{r}
 outputs = outputs[,, qui_nb]

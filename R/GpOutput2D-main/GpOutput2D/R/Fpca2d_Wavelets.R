@@ -116,6 +116,7 @@ Fpca2d.Wavelets<-function(x,
   ###########
   ### PCA ###
   ###########
+  ttt <<- t(x_pca)
   pca <- prcomp(t(x_pca),center=center,scale.=scale.,...)
 
   ######################

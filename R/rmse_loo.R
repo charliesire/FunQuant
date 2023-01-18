@@ -40,12 +40,23 @@
 #' @param ... other parameters of \code{\link{km}} function from \code{DiceKriging}.
 #' @return A list containing several outputs :
 #' - grid_cv is the grid made with the pairs (npc, ncoeff) that are tested
-#' - output_rmse is a list of objects that have the same dimension as an output, obtained for each pair (npc, ncoeff). Each element (called pixel here) of the objects is the RMSE computed between the predicted values of the pixel and the true value of the pixel.
+#' - outputs_rmse is a list of objects that have the same dimension as an output, obtained for each pair (npc, ncoeff). Each element (called pixel here) of the objects is the RMSE computed between the predicted values of the pixel and the true value of the pixel.
 #' - outputs_pred is an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 
 #' @export
 #'
 #' @examples
+#' func2D <- function(X){
+#' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
+#' n<-nrow(X)
+#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+#' Ymaps<- array(unlist(Y),dim=c(20,20,n))
+#' return(Ymaps)
+#' }
+#' design = data.frame(X = seq(-1,1,l= 8))
+#' outputs = func2D(design)
+#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
+#' list_rmse_loo = rmse_loo(outputs = outputs, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design = design, control = list(trace = FALSE))
 rmse_loo = function(outputs, model_tuning = NULL, ncoeff_vec,npc_vec, return_pred = FALSE, formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
                     coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                     nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
@@ -58,10 +69,9 @@ rmse_loo = function(outputs, model_tuning = NULL, ncoeff_vec,npc_vec, return_pre
                                                                 parinit = parinit, multistart=multistart,
                                                                 kernel=kernel,control = control,...)}
   grid_cv = expand.grid(ncoeff_vec, npc_vec)
-  output_rmse = list()
+  outputs_rmse = list()
   outputs_loo_list = list()
   for(i in 1:nrow(grid_cv)){
-    print(i)
     ncoeff = grid_cv[i,1]
     npc = grid_cv[i,2]
     indice_coeff = which(ncoeff_vec == ncoeff)
@@ -71,8 +81,9 @@ rmse_loo = function(outputs, model_tuning = NULL, ncoeff_vec,npc_vec, return_pre
     outputs_loo = inverse_Fpca2d(pred,fp)
     if(return_pred){outputs_loo_list[[i]] = outputs_loo}
     err = (outputs_loo - outputs)^2
-    output_rmse[[i]] = sqrt(apply(err, 1:(length(dim(err))-1), mean))
+    outputs_rmse[[i]] = sqrt(apply(err, 1:(length(dim(err))-1), mean))
   }
   if(return_pred == FALSE){outputs_loo = NULL}
-  return(list(grid_cv = grid_cv, output_rmse = output_rmse, outputs_pred = outputs_loo_list))
+  return(list(grid_cv = grid_cv, outputs_rmse = outputs_rmse, outputs_pred = outputs_loo_list))
 }
+

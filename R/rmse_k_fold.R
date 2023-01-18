@@ -43,11 +43,23 @@
 #'
 #' @return A list containing several outputs :
 #' - grid_cv is the grid made with the pairs (npc, ncoeff) that are tested
-#' - output_rmse is a list of objects that have the same dimension as an output, obtained for each pair (npc, ncoeff). Each element (called pixel here) of the objects is the RMSE computed between the predicted values of the pixel and the true value of the pixel.
+#' - outputs_rmse is a list of objects that have the same dimension as an output, obtained for each pair (npc, ncoeff). Each element (called pixel here) of the objects is the RMSE computed between the predicted values of the pixel and the true value of the pixel.
 #' - outputs_pred is an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 #' @export
-#'
+#' @importFrom dismo kfold
 #' @examples
+#' func2D <- function(X){
+#' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
+#' n<-nrow(X)
+#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+#' Ymaps<- array(unlist(Y),dim=c(20,20,n))
+#' return(Ymaps)
+#' }
+#' design = data.frame(X = seq(-1,1,l= 20))
+#' outputs = func2D(design)
+#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
+#' list_rmse_k_fold = rmse_k_fold(outputs = outputs, nb_folds = 5, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design = design, control = list(trace = FALSE))
+
 rmse_k_fold = function(outputs, nb_folds, model_tuning = NULL, ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
                          coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                          nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
@@ -57,17 +69,17 @@ rmse_k_fold = function(outputs, nb_folds, model_tuning = NULL, ncoeff_vec,npc_ve
   length_dim = length(dim(outputs))
   dimnames(outputs) = NULL
   grid_cv = expand.grid(ncoeff_vec, npc_vec)
-  folds = kfold(length(density_ratio), nb_folds)
-  maps_rmse = list()
+  folds = kfold(dim(outputs)[length(dim(outputs))], nb_folds)
+  outputs_rmse = list()
   outputs_pred_list = list()
   outputs_pred = list()
   relative_error_df = data.frame()
   for(k in 1:nb_folds){
-    outputs_pred_list[[k]] = rmse_training_test(outputs_train = Subset(outputs,along = length(dim(outputs)), indices = which(folds != k)),outputs_test = Subset(outputs,along = length(dim(outputs)), indices = which(folds == k)), ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = design[folds !=k,], design_test = design[folds == k,], covtype=covtype,boundary = boundary,J=J,
+    outputs_pred_list[[k]] = rmse_training_test(outputs_train = Subset(outputs,along = length(dim(outputs)), indices = which(folds != k)),outputs_test = Subset(outputs,along = length(dim(outputs)), indices = which(folds == k)), ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype,boundary = boundary,J=J,
                                                 coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                                                 nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                                                 parinit = parinit, multistart=multistart,
-                                                kernel=kernel,control = control,type = type,...)$outputs_pred
+                                                kernel=kernel,control = control,type = type)$outputs_pred
   }
   for(i in 1:nrow(grid_cv)){
     outputs_pred[[i]] = array(NA, dim = dim(outputs))
@@ -75,10 +87,10 @@ rmse_k_fold = function(outputs, nb_folds, model_tuning = NULL, ncoeff_vec,npc_ve
       outputs_pred[[i]][,,folds == k] = outputs_pred_list[[k]][[i]]
     }
     err = (outputs_pred[[i]] - outputs)^2
-    maps_rmse[[i]] = sqrt(apply(err, 1:(length(dim(err))-1), mean))
+    outputs_rmse[[i]] = sqrt(apply(err, 1:(length(dim(err))-1), mean))
   }
   if(return_pred == FALSE){outputs_pred = NULL}
-  return(list(grid_cv = grid_cv, maps_rmse = maps_rmse, outputs_pred = outputs_pred_list))
+  return(list(grid_cv = grid_cv, outputs_rmse = outputs_rmse, outputs_pred = outputs_pred_list))
 }
 
 

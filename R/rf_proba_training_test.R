@@ -1,11 +1,17 @@
-#' @title Computing the relative errors when predicting the membership probabilities by kfold cross validation with a classification step, for different values of hyperparameters
+#' @title Computing the relative errors when predicting the membership probabilities of a validation output sample with a classification step, for different values of hyperparameters
 #'
-#' @param design A dataframe of inputs
-#' @param outputs The output samples on which the metamodel will be trained and tested by kfold cross validation
+#' @param design_train a data frame representing the design of experiments of the training part.
+#' The ith row contains the values of the d input variables corresponding
+#' to the ith evaluation.
+#' @param design_test a data frame representing the design of experiments of the validation part.
+#' The ith row contains the values of the d input variables corresponding
+#' to the ith evaluation.
+#' @param outputs_train The training output samples on which the metamodel will be trained
+#' @param outputs_test  The validation output samples on which the metamodel performance will be evaluated
 #' @param threshold The threshold that creates the two classes of maps for the classification
 #' @param list_search A list containing for each hyperparameters to be tested a list of the tested values.
-#' @param nb_folds Number of folds
 #' @param seed An optional random seed
+#' @param ... other parameters of \code{\link{randomForest}} function from \code{randomForest}.
 #' @param density_ratio density_ratio indicates the weight fX/g of each output
 #' @param gamma A set of l prototypes defining the Voronoï cells
 #' @param distance_func  A function computng a distance between two elements in the output spaces.
@@ -50,63 +56,42 @@
 #' - probas_pred_df a dataframe indicating for each combination of hyperparameters values the obtained predicted membership probabilities
 #' - relative_error_df a dataframe indicating for each combination of hyperparameters values the relative error when predicting the membership probabilities
 #' - outputs_pred an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.#' @export
-#'#' @export
 #'
 #' @examples
-rf_proba_k_fold = function(design, outputs, threshold, list_search, nb_folds, density_ratio, gamma, distance_func,return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
-                          coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
-                          nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
-                          parinit = NULL, multistart=1,
-                          kernel=NULL,control = NULL,type = "UK",bias = NULL,...){
+rf_probas_k_fold = function(design_train, design_test, outputs_train, outputs_test,threshold, list_search, density_ratio, gamma, distance_func,return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
+                           coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
+                           nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
+                           parinit = NULL, multistart=1,
+                           kernel=NULL,control = NULL,type = "UK",bias = NULL,...){
   if(is.null(seed)==FALSE){set.seed(seed)}
-  folds = kfold(length(density_ratio), nb_folds)
-  probas_true = get_probas(density_ratio = density_ratio, outputs = outputs, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
+  probas_true = get_probas(density_ratio = density_ratio, outputs = outputs_test, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
   probas_pred_df = data.frame()
   relative_error_df = data.frame()
-  folds = kfold(length(y), nb_folds)
   sum_depth = Vectorize(function(it){sum(Subset(x = outputs_train, along = length(dim(outputs)), indices = it,drop = "selected"))})(1:dim(outputs)[length(dim(outputs))])
   y = as.factor(sum_depth > threshold)
-  list_indexes = lapply(1:length(list_search[[1]]), function(x){data.frame()})
-  model = list()
-  fp = list()
-  for(k in 1:nb_folds){
-    indexes_train = which(folds !=k)
-    indexes_test = which(folds == k)
-    indexes_train_fpca = which(sum_depth[indexes_train] > 0)
-    fp[[k]] = Fpca2d.Wavelets(Subset(x = outputs, along = length(dim(outputs)), indices = indexes_train[indexes_train_fpca],drop = FALSE), wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
-    model[[k]] = km_Fpca2d(formula = formula, design = design[indexes_train[indexes_train_fpca],], response = fp[[k]],  covtype=covtype,
-                           coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
-                           nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
-                           parinit = parinit, multistart=multistart,
-                           kernel=kernel,control = control)
-  }
+  indexes_train_fpca = which(sum_depth > 0)
   outputs_pred = list()
+  fp = Fpca2d.Wavelets(Subset(x = outputs_train, along = length(dim(outputs)), indices = indexes_train_fpca,drop = FALSE), wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
+  model = km_Fpca2d(formula = formula, design = design_train[indexes_train_fpca,], response = fp,  covtype=covtype,
+                    coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
+                    nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
+                    parinit = parinit, multistart=multistart,
+                    kernel=kernel,control = control)
   for(i in 1:length(list_search[[1]])){
     list_cv = list()
     for(v in 1:length(list_search)){
       list_cv[[v]] = list_search[[names(list_search)[v]]][[i]]
     }
     names(list_cv) = names(list_search)
-    outputs_pred_draft = list()
-    for(k in 1:nb_folds){
-      indexes_train = which(folds !=k)
-      indexes_test = which(folds == k)
-      indexes_train_fpca = which(sum_depth[indexes_train] > 0)
-      list_cv_fold = c(list_cv, list("x" = design[folds!=k, ], "y" = y[folds!=k], "xtest" = design[folds==k,],...))
-      rf = do.call(randomForest, list_cv_fold)
-      rf_pred = as.numeric(rf$test$predicted) - 1
-      list_indexes[[i]] = rbind(list_indexes[[i]], cbind(indexes_test[rf_pred == 1],k))
-      pred =  sapply(1:npc, function(g){predict(object = model[[k]][[g]], newdata = design[indexes_test[rf_pred == 1],], type = type, compute = FALSE)$mean})
-
-      outputs_pred_draft[[k]] = inverse_Fpca2d(pred,fp[[k]])
-    }
-
+    list_cv = c(list_cv, list("x" = design_train, "y" = outputs_train, "xtest" = design_test,...))
+    rf = do.call(randomForest, list_cv)
+    rf_pred = as.numeric(rf$test$predicted) - 1
+    pred =  sapply(1:npc, function(g){predict(object = model, newdata = design_test[rf_pred == 1,], type = type, compute = FALSE)$mean})
+    outputs_pred_draft = inverse_Fpca2d(pred,fp)
     outputs_pred[[i]] = array(NA, c(dim(outputs)[-(length(dim(outputs)))],0))
     for(j in 1:dim(outputs)[(length(dim(outputs)))]){
-      if(j %in% list_indexes[[i]][,1]){
-
-        related_fold = list_indexes[[i]][list_indexes[[i]][,1] == j,2]
-        outputs_pred[[i]] = abind(outputs_pred[[i]], Subset(x = outputs_pred_draft[[related_fold]], along = length(dim(outputs)), indices = which(list_indexes[[i]][list_indexes[[i]][,2] == related_fold,1] == j), drop = "selected"), along = length(dim(outputs)))
+      if(j %in% indexes_train_fpca){
+          outputs_pred[[i]] = abind(outputs_pred[[i]], Subset(x = outputs_pred_draft, along = length(dim(outputs)), indices = which(indexes_train_fpca == j), drop = "selected"), along = length(dim(outputs)))
       }
       else{
         outputs_pred[[i]] = abind(outputs_pred[[i]], array(0, dim = dim(outputs)[-length(dim(outputs))]), along = length(dim(outputs)))
@@ -122,4 +107,3 @@ rf_proba_k_fold = function(design, outputs, threshold, list_search, nb_folds, de
   if(return_pred == FALSE){outputs_pred = NULL}
   return(list(list_search = list_search,probas_pred = probas_pred_df, error = relative_error_df, outputs_pred = outputs_pred))
 }
-

@@ -8,9 +8,14 @@
 #' @export
 #'
 #' @examples
+#' g = function(x){prod(sapply(x, function(y){dnorm(y)}))}
+#' f = function(x){1}
+#' inputs = array(rnorm(30), dim = c(10,3))
+#' compute_density_ratio(f,g, inputs)
 compute_density_ratio = function(f, g, inputs){
   f_vec = apply(inputs, 1, f)
   g_vec = apply(inputs, 1, g)
   return(f_vec/g_vec)
 }
+
 
