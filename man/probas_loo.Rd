@@ -110,3 +110,19 @@ A list containing several outputs :
 \description{
 Computing the relatives errors when predicting the membership probabilities by leave one out, for different values of ncoeff and npc
 }
+\examples{
+func2D <- function(X){
+Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
+n<-nrow(X)
+Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+Ymaps<- array(unlist(Y),dim=c(20,20,n))
+return(Ymaps)
+}
+design = data.frame(X = seq(-1,1,l= 20))
+outputs = func2D(design)
+gamma = lapply(c(1,3,6,8,10,14,16,18), function(i){outputs[,,i]})
+density_ratio = rep(1, 20)
+distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
+source.all("R/GpOutput2D-main/GpOutput2D/R/")
+list_probas_loo = probas_loo(outputs = outputs, density_ratio = density_ratio, gamma = gamma, distance_func = distance_func, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design = design, control = list(trace = FALSE))
+}

@@ -9,9 +9,25 @@
 #'
 #' @return A list containing a vector of predicted classes for each combination of tested hyperparameters.
 #' @export
-#'
+#' @import randomForest
+#' @importFrom dismo kfold
 #' @examples
-pred_rf_k_fold = function(x, y, list_search, nb_folds, seed = NULL,...){
+#' set.seed(5)
+#' func2D <- function(X){
+#' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
+#' n<-nrow(X)
+#' Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+#' Ymaps<- array(unlist(Y),dim=c(20,20,n))
+#' return(Ymaps)
+#' }
+#' library(randtoolbox)
+#' x = as.data.frame(sobol(30,2))*2-1
+#' outputs = func2D(x)
+#' y = as.factor(Vectorize(function(i){sum(outputs[,,i])})(1:dim(outputs)[3]) > 5)
+#' list_search = list("nodesize" = as.list(c(1,3,5,7,9,11)))
+#' rf_pred_k_fold(x = x,y = y, list_search = list_search, nb_folds = 4)
+
+rf_pred_k_fold = function(x, y, list_search, nb_folds, seed = NULL,...){
   if(is.null(seed)==FALSE){set.seed(seed)}
   folds = kfold(length(y), nb_folds)
   pred = list()

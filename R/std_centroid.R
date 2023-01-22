@@ -25,6 +25,7 @@
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
 #' list_std_centroid = std_centroid(outputs = outputs, gamma_list = gamma_list, density_ratio = density_ratio, distance_func = distance_func, cells = 1:length(gamma_list[[1]]), nv = 50)
 std_centroid = function(outputs, gamma_list, density_ratio, distance_func, cells, cell_numbers = NULL, nv){
+  
   weighted_map = t(matrix(outputs, nrow = prod(dim(outputs)[-length(dim(outputs))]),ncol = dim(outputs)[length(dim(outputs))]))*density_ratio
   std_ratio_list = list()
   for(it in 1:length(gamma_list)){

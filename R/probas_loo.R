@@ -49,7 +49,7 @@
 #' - outputs_pred an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 #' @export
 #'
-#' @example
+#' @examples
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 #' n<-nrow(X)
@@ -69,7 +69,7 @@ probas_loo = function(outputs, density_ratio, gamma, distance_func, model_tuning
                       nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                       parinit = NULL, multistart=1,
                       kernel=NULL,control = NULL,type = "UK",bias = NULL,...){
-  dimnames(outputs) = NULL
+  
   if(is.null(bias)){bias = rep(0,length(gamma))}
   if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design, covtype=covtype,
                                                                 coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,

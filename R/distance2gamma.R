@@ -4,7 +4,7 @@
 #' @param gamma A set of prototypes
 #' @param distance_func A function computng a distance between two elements in the output spaces
 #'
-#' @return
+#' @return The distance between a point and its nearest centroid
 #' @export
 #'
 #' @examples

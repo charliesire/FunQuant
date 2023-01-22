@@ -52,23 +52,41 @@
 #' - list_search the list containing for each hyperparameters to be tested a list of the tested values.
 #' - outputs_rmse is a list of objects that have the same dimension as an output, obtained for each combination of hyperparameters values. Each element (called pixel here) of the objects is the RMSE computed between the predicted values of the pixel and the true value of the pixel.
 #' - outputs_pred is an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
-#' #' @export
+#' @export
 #'
 #' @examples
-rf_rmse_k_fold = function(design_train, design_test, outputs_train, outputs_test,threshold, list_search,return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
+#'  set.seed(5)
+#'  func2D <- function(X){
+#'  Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
+#'  n<-nrow(X)
+#'  Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+#'  Ymaps<- array(unlist(Y),dim=c(20,20,n))
+#' return(Ymaps)
+#' }
+#' library(randtoolbox)
+#' design = as.data.frame(sobol(300,2))*2-1
+#' outputs = func2D(design)
+#' design_train = design[1:250,]
+#' design_test = design[251:300,]
+#' outputs_train = outputs[,,1:250]
+#' outputs_test = outputs[,,251:300]
+#' df_search = expand.grid(seq(0.1,1,0.3), c(1,5,9,13,17))
+#' list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search), function(i){c(df_search[i,1], 1-df_search[i,1])}))
+#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
+#' list_rf_rmse_train_test = rf_rmse_training_test(design_train = design_train, design_test = design_test, outputs_train = outputs_train, outputs_test = outputs_test, threshold = 2, list_search = list_search, ncoeff = 400, npc = 6, control = list(trace = F))
+
+rf_rmse_training_test = function(design_train, design_test, outputs_train, outputs_test,threshold, list_search,return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
                             coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                             nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                             parinit = NULL, multistart=1,
                             kernel=NULL,control = NULL,type = "UK",...){
   if(is.null(seed)==FALSE){set.seed(seed)}
-  probas_true = get_probas(density_ratio = density_ratio, outputs = outputs_test, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
-  probas_pred_df = data.frame()
-  relative_error_df = data.frame()
-  sum_depth = Vectorize(function(it){sum(Subset(x = outputs_train, along = length(dim(outputs)), indices = it,drop = "selected"))})(1:dim(outputs)[length(dim(outputs))])
+  sum_depth = Vectorize(function(it){sum(asub(x = outputs_train, idx = it, dims = length(dim(outputs_train)), drop = "selected"))})(1:dim(outputs_train)[length(dim(outputs_train))])
   y = as.factor(sum_depth > threshold)
   indexes_train_fpca = which(sum_depth > 0)
   outputs_pred = list()
-  fp = Fpca2d.Wavelets(Subset(x = outputs_train, along = length(dim(outputs)), indices = indexes_train_fpca,drop = FALSE), wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
+  outputs_rmse = list()
+  fp = Fpca2d.Wavelets(asub(x = outputs_train, dims = length(dim(outputs_train)), idx = indexes_train_fpca,drop = FALSE), wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
   model = km_Fpca2d(formula = formula, design = design_train[indexes_train_fpca,], response = fp,  covtype=covtype,
                     coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                     nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
@@ -80,23 +98,19 @@ rf_rmse_k_fold = function(design_train, design_test, outputs_train, outputs_test
       list_cv[[v]] = list_search[[names(list_search)[v]]][[i]]
     }
     names(list_cv) = names(list_search)
-    list_cv = c(list_cv, list("x" = design_train, "y" = outputs_train, "xtest" = design_test,...))
+    list_cv = c(list_cv, list("x" = design_train, "y" = y, "xtest" = design_test,...))
     rf = do.call(randomForest, list_cv)
     rf_pred = as.numeric(rf$test$predicted) - 1
-    pred =  sapply(1:npc, function(g){predict(object = model, newdata = design_test[rf_pred == 1,], type = type, compute = FALSE)$mean})
-    outputs_pred_draft = inverse_Fpca2d(pred,fp)
-    outputs_pred[[i]] = array(NA, c(dim(outputs)[-(length(dim(outputs)))],0))
-    for(j in 1:dim(outputs)[(length(dim(outputs)))]){
-      if(j %in% indexes_train_fpca){
-        outputs_pred[[i]] = abind(outputs_pred[[i]], Subset(x = outputs_pred_draft, along = length(dim(outputs)), indices = which(indexes_train_fpca == j), drop = "selected"), along = length(dim(outputs)))
-      }
-      else{
-        outputs_pred[[i]] = abind(outputs_pred[[i]], array(0, dim = dim(outputs)[-length(dim(outputs))]), along = length(dim(outputs)))
-      }
+    outputs_pred[[i]] = array(0,dim = dim(outputs_test))
+    if(sum(rf_pred == 1)>0){
+      pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test[rf_pred == 1,], type = type, compute = FALSE)$mean}), ncol = npc)
+      outputs_pred_draft = inverse_Fpca2d(pred,fp)
+      dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
+    dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(which(rf_pred == 1)))
+    afill(outputs_pred[[i]]) = outputs_pred_draft
     }
-    dimnames(outputs_pred[[i]]) = NULL
     if(only_positive){outputs_pred[[i]] = (outputs_pred[[i]] > 0)*outputs_pred[[i]]}
-    err = (outputs_pred[[i]] - outputs)^2
+    err = (outputs_pred[[i]] - outputs_test)^2
     outputs_rmse[[i]] = sqrt(apply(err, 1:(length(dim(err))-1), mean))
     if(return_pred == FALSE){outputs_pred = list()}
   }

@@ -14,7 +14,7 @@ distance_to_gamma(x, gamma, distance_func)
 \item{distance_func}{A function computng a distance between two elements in the output spaces}
 }
 \value{
-
+The distance between a point and its nearest centroid
 }
 \description{
 Compute the distance between a point and its nearest centroid, returning this distance and the associated cell number

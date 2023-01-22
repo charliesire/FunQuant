@@ -70,7 +70,7 @@ rmse_training_test = function(outputs_train,outputs_test, model_tuning = NULL, n
                               nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                               parinit = NULL, multistart=1,
                               kernel=NULL,control = NULL,type = "UK", ...){
-  dimnames(outputs_train) = NULL
+  
   if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs_train, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design_train, covtype=covtype,
                                                                 coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                                                                 nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,

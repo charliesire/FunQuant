@@ -48,9 +48,10 @@
 #' @return A list containing several outputs :
 #' - probas_pred_df a dataframe indicating for each pair (npc, ncoeff) the obtained predicted membership probabilities
 #' - relative_error_df a dataframe indicating for each pair (npc, ncoeff) the relative error when predicting the membership probabilities
+#' - probas_true the probabilities computed with the true outputs
 #' - outputs_pred an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 #' @export
-#'
+#' @importFrom dismo kfold
 #' @examples
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
@@ -74,7 +75,6 @@ probas_k_fold = function(outputs, nb_folds, density_ratio, gamma, distance_func,
                          kernel=NULL,control = NULL,type = "UK",seed = NULL, bias = rep(0, length(gamma)),...){
   if(is.null(seed) == FALSE){set.seed(seed)}
   length_dim = length(dim(outputs))
-  dimnames(outputs) = NULL
   grid_cv = expand.grid(ncoeff_vec, npc_vec)
   folds = kfold(length(density_ratio), nb_folds)
   probas_true = get_probas(density_ratio = density_ratio, outputs = outputs, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
@@ -83,23 +83,25 @@ probas_k_fold = function(outputs, nb_folds, density_ratio, gamma, distance_func,
   outputs_pred = list()
   relative_error_df = data.frame()
   for(k in 1:nb_folds){
-    outputs_pred_list[[k]] = probas_training_test(outputs_train = Subset(outputs,along = length(dim(outputs)), indices = which(folds != k)),outputs_test = Subset(outputs,along = length(dim(outputs)), indices = which(folds == k)), density_ratio = density_ratio, gamma = gamma, distance_func = distance_func, ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype,boundary = boundary,J=J,
+    outputs_pred_list[[k]] = probas_training_test(outputs_train = asub(outputs,dims = length(dim(outputs)), idx = which(folds != k)),outputs_test = asub(outputs,dims = length(dim(outputs)), idx = which(folds == k)), density_ratio = density_ratio, gamma = gamma, distance_func = distance_func, ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype,boundary = boundary,J=J,
                                                   coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                                                   nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                                                   parinit = parinit, multistart=multistart,
                                                   kernel=kernel,control = control,type = type,bias = bias,...)$outputs_pred
   }
   for(i in 1:nrow(grid_cv)){
-    outputs_pred[[i]] = array(NA, dim = dim(outputs))
+    outputs_pred[[i]] = array(0, dim = dim(outputs))
+    dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
     for(k in 1:nb_folds){
-      outputs_pred[[i]][,,folds == k] = outputs_pred_list[[k]][[i]]
+      dimnames(outputs_pred_list[[k]][[i]]) = c(lapply(dim(outputs_pred_list[[k]][[i]])[-length(dim(outputs_pred_list[[k]][[i]]))], function(i){1:i}), list(which(folds == k)))
+      afill(outputs_pred[[i]]) = outputs_pred_list[[k]][[i]]
     }
     probas_pred_cv = get_probas(density_ratio = density_ratio, outputs = outputs_pred[[i]], gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
     probas_pred_df = rbind(probas_pred_df, c(as.numeric(grid_cv[i,]), probas_pred_cv))
     relative_error_df = rbind(relative_error_df, c(as.numeric(grid_cv[i,]), abs(probas_pred_cv - probas_true)/probas_true))
   }
   if(return_pred == FALSE){outputs_pred = NULL}
-  return(list(probas_pred = probas_pred_df, error = relative_error_df, outputs_pred = outputs_pred))
+  return(list(probas_pred = probas_pred_df, error = relative_error_df, probas_true = probas_true, outputs_pred = outputs_pred))
 }
 
 

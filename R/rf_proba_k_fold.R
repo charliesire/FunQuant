@@ -50,10 +50,26 @@
 #' - probas_pred_df a dataframe indicating for each combination of hyperparameters values the obtained predicted membership probabilities
 #' - relative_error_df a dataframe indicating for each combination of hyperparameters values the relative error when predicting the membership probabilities
 #' - outputs_pred an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.#' @export
-#'#' @export
-#'
+#' @export
 #' @examples
-rf_proba_k_fold = function(design, outputs, threshold, list_search, nb_folds, density_ratio, gamma, distance_func,return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
+#' set.seed(5)
+#' func2D <- function(X){
+#' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
+#' n<-nrow(X)
+#' Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+#' Ymaps<- array(unlist(Y),dim=c(20,20,n))
+#' return(Ymaps)
+#' }
+#' library(randtoolbox)
+#' design = as.data.frame(sobol(100,2))*2-1
+#' outputs = func2D(design)
+#' list_search = list("nodesize" = as.list(c(1,3,5,7,9,11)))
+#' density_ratio = rep(1,100)
+#' gamma = lapply(c(2,3,51,7), function(i){outputs[,,i]})
+#' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
+#' rf_probas_k_fold(design = design,outputs = outputs, threshold = 2, list_search = list_search, nb_folds = 10,density_ratio = density_ratio, gamma = gamma, distance_func= distance_func, ncoeff = 400, npc = 6, control = list(trace = F))
+
+rf_probas_k_fold = function(design, outputs, threshold, list_search, nb_folds, density_ratio, gamma, distance_func,return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
                           coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                           nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                           parinit = NULL, multistart=1,
@@ -63,17 +79,16 @@ rf_proba_k_fold = function(design, outputs, threshold, list_search, nb_folds, de
   probas_true = get_probas(density_ratio = density_ratio, outputs = outputs, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
   probas_pred_df = data.frame()
   relative_error_df = data.frame()
-  folds = kfold(length(y), nb_folds)
-  sum_depth = Vectorize(function(it){sum(Subset(x = outputs_train, along = length(dim(outputs)), indices = it,drop = "selected"))})(1:dim(outputs)[length(dim(outputs))])
+  sum_depth = Vectorize(function(it){sum(asub(x = outputs, dims = length(dim(outputs)), idx = it,drop = "selected"))})(1:dim(outputs)[length(dim(outputs))])
   y = as.factor(sum_depth > threshold)
-  list_indexes = lapply(1:length(list_search[[1]]), function(x){data.frame()})
+  folds = kfold(length(y), nb_folds)
   model = list()
   fp = list()
   for(k in 1:nb_folds){
     indexes_train = which(folds !=k)
     indexes_test = which(folds == k)
     indexes_train_fpca = which(sum_depth[indexes_train] > 0)
-    fp[[k]] = Fpca2d.Wavelets(Subset(x = outputs, along = length(dim(outputs)), indices = indexes_train[indexes_train_fpca],drop = FALSE), wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
+    fp[[k]] = Fpca2d.Wavelets(asub(x = outputs, dims = length(dim(outputs)), idx = indexes_train[indexes_train_fpca],drop = FALSE), wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
     model[[k]] = km_Fpca2d(formula = formula, design = design[indexes_train[indexes_train_fpca],], response = fp[[k]],  covtype=covtype,
                            coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                            nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
@@ -82,12 +97,13 @@ rf_proba_k_fold = function(design, outputs, threshold, list_search, nb_folds, de
   }
   outputs_pred = list()
   for(i in 1:length(list_search[[1]])){
+    outputs_pred[[i]] = array(0,dim = dim(outputs))
+    dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
     list_cv = list()
     for(v in 1:length(list_search)){
       list_cv[[v]] = list_search[[names(list_search)[v]]][[i]]
     }
     names(list_cv) = names(list_search)
-    outputs_pred_draft = list()
     for(k in 1:nb_folds){
       indexes_train = which(folds !=k)
       indexes_test = which(folds == k)
@@ -95,24 +111,13 @@ rf_proba_k_fold = function(design, outputs, threshold, list_search, nb_folds, de
       list_cv_fold = c(list_cv, list("x" = design[folds!=k, ], "y" = y[folds!=k], "xtest" = design[folds==k,],...))
       rf = do.call(randomForest, list_cv_fold)
       rf_pred = as.numeric(rf$test$predicted) - 1
-      list_indexes[[i]] = rbind(list_indexes[[i]], cbind(indexes_test[rf_pred == 1],k))
-      pred =  sapply(1:npc, function(g){predict(object = model[[k]][[g]], newdata = design[indexes_test[rf_pred == 1],], type = type, compute = FALSE)$mean})
-
-      outputs_pred_draft[[k]] = inverse_Fpca2d(pred,fp[[k]])
-    }
-
-    outputs_pred[[i]] = array(NA, c(dim(outputs)[-(length(dim(outputs)))],0))
-    for(j in 1:dim(outputs)[(length(dim(outputs)))]){
-      if(j %in% list_indexes[[i]][,1]){
-
-        related_fold = list_indexes[[i]][list_indexes[[i]][,1] == j,2]
-        outputs_pred[[i]] = abind(outputs_pred[[i]], Subset(x = outputs_pred_draft[[related_fold]], along = length(dim(outputs)), indices = which(list_indexes[[i]][list_indexes[[i]][,2] == related_fold,1] == j), drop = "selected"), along = length(dim(outputs)))
-      }
-      else{
-        outputs_pred[[i]] = abind(outputs_pred[[i]], array(0, dim = dim(outputs)[-length(dim(outputs))]), along = length(dim(outputs)))
+      if(sum(rf_pred == 1)>0){
+        pred =  matrix(sapply(1:npc, function(g){predict(object = model[[k]][[g]], newdata = design[indexes_test[rf_pred == 1],], type = type, compute = FALSE, checkNames = FALSE)$mean}), ncol = npc)
+        outputs_pred_draft = inverse_Fpca2d(pred,fp[[k]])
+        dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(indexes_test[rf_pred == 1]))
+        afill(outputs_pred[[i]]) = outputs_pred_draft
       }
     }
-    dimnames(outputs_pred[[i]]) = NULL
     if(only_positive){outputs_pred[[i]] = (outputs_pred[[i]] > 0)*outputs_pred[[i]]}
     probas_pred_cv = get_probas(density_ratio = density_ratio, outputs = outputs_pred[[i]], gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
     probas_pred_df = rbind(probas_pred_df,probas_pred_cv)

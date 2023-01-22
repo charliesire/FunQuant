@@ -1,7 +1,7 @@
 
 #' @title The prototype maps algorithm. Providing prototype outputs and their probability masses.
 
-#' @param gamma
+#' @param gamma A set of initial prototypes
 #' @param outputs The output samples that need to be quantized
 #' @param method_IS The method of Importance Sampling : "unique" means there is a unique biased density involved, "percell" means there is one biased density (and then one biased sample) for each cell. Default is "unique".
 #' @param density_ratio A vector indicating the weight fX/g of each output. Default is a vector of 1.
@@ -31,7 +31,7 @@
 
 proto_map_algo = function(gamma, outputs, method_IS = "unique", density_ratio = rep(1, dim(outputs)[length(dim(outputs))]), budget = 10^3, threshold = 0, distance_func, print_progress = FALSE, trace = FALSE, bias = rep(0,length(gamma))){
   if(is.null(dim(outputs))){outputs = t(as.matrix(outputs))}
-  dimnames(outputs) = NULL
+  
   gamma = oned_to_matrix(gamma)
   gamma = sort_gamma(gamma)
   n = dim(outputs)[length(dim(outputs))]

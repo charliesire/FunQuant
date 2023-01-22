@@ -62,7 +62,7 @@ rmse_loo = function(outputs, model_tuning = NULL, ncoeff_vec,npc_vec, return_pre
                     nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                     parinit = NULL, multistart=1,
                     kernel=NULL,control = NULL,type = "UK",...){
-  dimnames(outputs) = NULL
+  
   if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design, covtype=covtype,
                                                                 coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                                                                 nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,

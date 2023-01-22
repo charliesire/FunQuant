@@ -15,7 +15,7 @@
 #' cell = 3
 #' estim_num_centroid(outputs = outputs,cell_numbers = cell_numbers, density_ratio = density_ratio, cell = cell)
 estim_num_centroid = function(outputs, cell_numbers, density_ratio, cell){
-  outputs_cell = Subset(x = outputs, along = length(dim(outputs)), indices = which(cell_numbers == cell))
+  outputs_cell = asub(x = outputs, dims = length(dim(outputs)), idx = which(cell_numbers == cell))
   outputs_cell = matrix(outputs_cell, nrow = prod(dim(outputs)[1:(length(dim(outputs))-1)]))
   outputs_cell = t(outputs_cell)
   res = outputs_cell*density_ratio[cell_numbers == cell]

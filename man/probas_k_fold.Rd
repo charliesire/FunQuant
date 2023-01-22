@@ -108,6 +108,7 @@ for each principal component. At this stage, the parameters must be provided as 
 A list containing several outputs :
 - probas_pred_df a dataframe indicating for each pair (npc, ncoeff) the obtained predicted membership probabilities
 - relative_error_df a dataframe indicating for each pair (npc, ncoeff) the relative error when predicting the membership probabilities
+- probas_true the probabilities computed with the true outputs
 - outputs_pred an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 }
 \description{

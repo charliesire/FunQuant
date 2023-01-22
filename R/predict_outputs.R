@@ -50,35 +50,66 @@
 #' @export
 #'
 #' @examples
+#'  set.seed(5)
+#'  func2D <- function(X){
+#'  Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
+#'  n<-nrow(X)
+#'  Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+#'  Ymaps<- array(unlist(Y),dim=c(20,20,n))
+#' return(Ymaps)
+#' }
+#' library(randtoolbox)
+#' design = as.data.frame(sobol(300,2))*2-1
+#' outputs = func2D(design)
+#' design_train = design[1:250,]
+#' design_test = design[251:300,]
+#' outputs_train = outputs[,,1:250]
+#' outputs_test = outputs[,,251:300]
+#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
+#' outputs_pred = predict_outputs(design_train = design_train, design_test = design_test, outputs_train = outputs_train, ncoeff = 400, npc = 6, control = list(trace = F), classification = TRUE, control_classification = list(nodesize = 4), threshold = 2)
+
 predict_outputs = function(design_train, design_test, outputs_train, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
                            coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                            nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                            parinit = NULL, multistart=1,
                            kernel=NULL,control = NULL,type = "UK", classification = FALSE, control_classification = NULL,threshold = NULL,...){
-  if(classification){
-    sum_depth = Vectorize(function(it){sum(Subset(x = outputs_train, along = length(dim(outputs)), indices = it,drop = "selected"))})(1:dim(outputs)[length(dim(outputs))])
+    pred_fpca = TRUE
+    if(classification){
+    sum_depth = Vectorize(function(it){sum(asub(x = outputs_train, idx = it, dims = length(dim(outputs_train)), drop = "selected"))})(1:dim(outputs_train)[length(dim(outputs_train))])
     y = as.factor(sum_depth > threshold)
     indexes_train_fpca = which(sum_depth > 0)
-    control_classification = c(control_classification, list("x" = design_train, "y" = outputs_train, "xtest" = design_test))
-    rf = do.call(randomForest, list_cv)
-    outputs_train_fpca = Subset(x = outputs_train, along = length(dim(outputs)), indices = indexes_train_fpca,drop = FALSE)
+    control_classification = c(control_classification, list("x" = design_train, "y" = y, "xtest" = design_test))
+    rf = do.call(randomForest, control_classification)
+    outputs_train_fpca = asub(x = outputs_train, dims = length(dim(outputs_train)), idx = indexes_train_fpca,drop = FALSE)
     design_train_fpca = design_train[indexes_train_fpca,]
     rf_pred = as.numeric(rf$test$predicted) - 1
     design_test_fpca = design_test[rf_pred == 1,]
-  }
+    if(sum(rf_pred) == 0){pred_fpca = FALSE}
+    }
   else{
     outputs_train_fpca = outputs_train
     design_train_fpca = design_train
     design_test_fpca = design_test
   }
+
+  if(pred_fpca){
   fp = Fpca2d.Wavelets(outputs_train_fpca, wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
   model = km_Fpca2d(formula = formula, design = design_train_fpca, response = fp,  covtype=covtype,
                     coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                     nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                     parinit = parinit, multistart=multistart,
                     kernel=kernel,control = control)
-  pred =  sapply(1:npc, function(g){predict(object = model, newdata = design_test_fpca, type = type, compute = FALSE)$mean})
-  outputs_pred = inverse_Fpca2d(pred,fp)
+  pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test_fpca, type = type, compute = FALSE)$mean}), ncol = npc)
+  outputs_pred_draft = inverse_Fpca2d(pred,fp)
+  }
+  outputs_pred = array(0,dim = c(dim(outputs_train)[-length(dim(outputs_train))], nrow(design_test)))
+  if(classification == F){outputs_pred = outputs_pred_draft}
+  else if(pred_fpca){
+    outputs_pred = array(0,dim = c(dim(outputs_train)[-length(dim(outputs_train))], nrow(design_test)))
+    dimnames(outputs_pred) = lapply(dim(outputs_pred), function(i){1:i})
+    dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(which(rf_pred == 1)))
+    afill(outputs_pred) = outputs_pred_draft
+  }
   if(only_positive){outputs_pred = (outputs_pred > 0)*outputs_pred}
   return(outputs_pred)
 }

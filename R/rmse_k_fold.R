@@ -67,7 +67,7 @@ rmse_k_fold = function(outputs, nb_folds, model_tuning = NULL, ncoeff_vec,npc_ve
                          kernel=NULL,control = NULL,type = "UK",seed = NULL,...){
   if(is.null(seed)==FALSE){set.seed(seed)}
   length_dim = length(dim(outputs))
-  dimnames(outputs) = NULL
+  
   grid_cv = expand.grid(ncoeff_vec, npc_vec)
   folds = kfold(dim(outputs)[length(dim(outputs))], nb_folds)
   outputs_rmse = list()
@@ -75,16 +75,18 @@ rmse_k_fold = function(outputs, nb_folds, model_tuning = NULL, ncoeff_vec,npc_ve
   outputs_pred = list()
   relative_error_df = data.frame()
   for(k in 1:nb_folds){
-    outputs_pred_list[[k]] = rmse_training_test(outputs_train = Subset(outputs,along = length(dim(outputs)), indices = which(folds != k)),outputs_test = Subset(outputs,along = length(dim(outputs)), indices = which(folds == k)), ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype,boundary = boundary,J=J,
+    outputs_pred_list[[k]] = rmse_training_test(outputs_train = asub(outputs,dims = length(dim(outputs)), idx = which(folds != k)),outputs_test = asub(outputs,dims = length(dim(outputs)), idx = which(folds == k)), ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype,boundary = boundary,J=J,
                                                 coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                                                 nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                                                 parinit = parinit, multistart=multistart,
                                                 kernel=kernel,control = control,type = type)$outputs_pred
   }
   for(i in 1:nrow(grid_cv)){
-    outputs_pred[[i]] = array(NA, dim = dim(outputs))
+    outputs_pred[[i]] = array(0, dim = dim(outputs))
+    dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
     for(k in 1:nb_folds){
-      outputs_pred[[i]][,,folds == k] = outputs_pred_list[[k]][[i]]
+      dimnames(outputs_pred_list[[k]][[i]]) = c(lapply(dim(outputs_pred_list[[k]][[i]])[-length(dim(outputs_pred_list[[k]][[i]]))], function(i){1:i}), list(which(folds == k)))
+      afill(outputs_pred[[i]]) = outputs_pred_list[[k]][[i]]
     }
     err = (outputs_pred[[i]] - outputs)^2
     outputs_rmse[[i]] = sqrt(apply(err, 1:(length(dim(err))-1), mean))

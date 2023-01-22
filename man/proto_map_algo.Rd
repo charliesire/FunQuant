@@ -18,6 +18,8 @@ proto_map_algo(
 )
 }
 \arguments{
+\item{gamma}{A set of initial prototypes}
+
 \item{outputs}{The output samples that need to be quantized}
 
 \item{method_IS}{The method of Importance Sampling : "unique" means there is a unique biased density involved, "percell" means there is one biased density (and then one biased sample) for each cell. Default is "unique".}

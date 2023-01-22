@@ -17,7 +17,7 @@
 get_cell_numbers = function(outputs, gamma, distance_func){
   drop = "selected"
   if(sum(dim(gamma[[1]]) == 1) == length(dim(gamma[[1]]))){drop = F}
-  return(Vectorize(function(it){distance_to_gamma(x = Subset(x = outputs, along = length(dim(outputs)), indices = it,drop = drop), gamma = gamma, distance_func = distance_func)$cellule})(1:dim(outputs)[length(dim(outputs))]))
+  return(Vectorize(function(it){distance_to_gamma(x = asub(x = outputs, dims = length(dim(outputs)), idx = it,drop = drop), gamma = gamma, distance_func = distance_func)$cellule})(1:dim(outputs)[length(dim(outputs))]))
 }
 
 

@@ -18,6 +18,6 @@
 quanti_error = function(outputs, gamma, density_ratio, distance_func){
   drop = "selected"
   if(sum(dim(gamma[[1]]) == 1) == length(dim(gamma[[1]]))){drop = F}
-  distances = Vectorize(function(it){distance_to_gamma(x = Subset(x = outputs, along = length(dim(outputs)), indices = it,drop = drop), gamma = gamma, distance_func = distance_func)$dist})(1:dim(outputs)[length(dim(outputs))])
+  distances = Vectorize(function(it){distance_to_gamma(x = asub(x = outputs, dims = length(dim(outputs)), idx = it,drop = drop), gamma = gamma, distance_func = distance_func)$dist})(1:dim(outputs)[length(dim(outputs))])
   return(sqrt(mean(distances^2*density_ratio)))
 }

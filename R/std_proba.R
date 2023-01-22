@@ -26,6 +26,7 @@
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
 #' list_std_proba = std_proba(outputs = outputs, gamma_list = gamma_list, density_ratio = density_ratio, distance_func = distance_func, cells = 1:length(gamma_list[[1]]), nv = 50)
 std_proba = function(outputs, gamma_list, density_ratio, distance_func, cells, cell_numbers = NULL, nv){
+  
   std_list = list()
   for(it in 1:length(gamma_list)){ #for all Gamma in (Gamma^r)
 
