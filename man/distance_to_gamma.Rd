@@ -4,14 +4,20 @@
 \alias{distance_to_gamma}
 \title{Compute the distance between a point and its nearest centroid, returning this distance and the associated cell number}
 \usage{
-distance_to_gamma(x, gamma, distance_func)
+distance_to_gamma(
+  x,
+  gamma,
+  distance_func = function(A1, A2) {
+     return(sqrt(sum((A1 - A2)^2)))
+ }
+)
 }
 \arguments{
 \item{x}{A point in the output space}
 
 \item{gamma}{A set of prototypes}
 
-\item{distance_func}{A function computng a distance between two elements in the output spaces}
+\item{distance_func}{A function computing a distance between two elements in the output spaces}
 }
 \value{
 The distance between a point and its nearest centroid
@@ -20,5 +26,7 @@ The distance between a point and its nearest centroid
 Compute the distance between a point and its nearest centroid, returning this distance and the associated cell number
 }
 \examples{
-distance_to_gamma(array(1:9, dim = c(3,3)), list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3,3))), distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))})
+distance_to_gamma(array(1:9, dim = c(3,3)), list(array(10, dim = c(3,3)),
+array(5, dim = c(3,3)), array(6, dim = c(3,3))),
+distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))})
 }

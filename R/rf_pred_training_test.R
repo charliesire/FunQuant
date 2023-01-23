@@ -8,13 +8,15 @@
 #'
 #' @return A list containing a vector of predicted classes for each combination of tested hyperparameters.
 #' @export
-#'
+#' @importFrom randomForest randomForest
 #' @examples
 #' set.seed(5)
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 #' n<-nrow(X)
-#' Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+#' Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*
+#' exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*
+#' (Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
 #' Ymaps<- array(unlist(Y),dim=c(20,20,n))
 #' return(Ymaps)
 #' }
@@ -25,8 +27,10 @@
 #' ytrain = as.factor(Vectorize(function(i){sum(func2D(xtrain)[,,i])})(1:nrow(xtrain)) > 2)
 #' ytest = as.factor(Vectorize(function(i){sum(func2D(xtest)[,,i])})(1:nrow(xtest)) > 2)
 #' df_search = expand.grid(seq(0.1,1,0.3), c(1,5,9,13,17))
-#' list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search), function(i){c(df_search[i,1], 1-df_search[i,1])}))
-#' list_rf_train_test = rf_pred_training_test(xtrain = xtrain, xtest = xtest, ytrain = ytrain, list_search = list_search)
+#' list_search = list("nodesize" = as.list(df_search[,2]), "classwt" =
+#' lapply(1:nrow(df_search), function(i){c(df_search[i,1], 1-df_search[i,1])}))
+#' list_rf_train_test = rf_pred_training_test(xtrain = xtrain, xtest = xtest,
+#' ytrain = ytrain, list_search = list_search)
 
 rf_pred_training_test = function(xtrain, xtest, ytrain, list_search,...){
   pred = list()

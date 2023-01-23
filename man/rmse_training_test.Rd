@@ -110,7 +110,8 @@ Computation of the Root Mean Square Error at each pixel of the outputs on a vali
 func2D <- function(X){
 Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 n<-nrow(X)
-Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2
+-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
 Ymaps<- array(unlist(Y),dim=c(20,20,n))
 return(Ymaps)
 }
@@ -118,6 +119,8 @@ design_train = data.frame(X = seq(-1,1,l= 8))
 outputs_train = func2D(design_train)
 design_test = data.frame(X = seq(-0.99,0.99,l=50))
 outputs_test = func2D(design_test)
-source.all("R/GpOutput2D-main/GpOutput2D/R/")
-list_rmse_train_test = rmse_training_test(return_pred = T, outputs_train = outputs_train, outputs_test = outputs_test, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design_train = design_train, design_test = design_test, control = list(trace = FALSE))
+list_rmse_train_test = rmse_training_test(return_pred = TRUE,
+outputs_train = outputs_train, outputs_test = outputs_test,
+ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design_train =
+design_train, design_test = design_test, control = list(trace = FALSE))
 }

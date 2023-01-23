@@ -3,7 +3,7 @@
 #' @param outputs The training output samples on which the metamodel will be trained
 #' @param density_ratio density_ratio indicates the weight fX/g of each output
 #' @param gamma A set of l prototypes defining the Voronoï cells
-#' @param distance_func  A function computng a distance between two elements in the output spaces.
+#' @param distance_func  A function computing a distance between two elements in the output spaces.
 #' @param model_tuning An optional list of models created for each ncoeff values.
 #' @param ncoeff_vec A vector providing the different values of ncoeff to be tested. ncoeff fixes the number of coefficients used for PCA.
 #' @param npc_vec A vector providing the different numbers of principal components to be tested.
@@ -48,12 +48,17 @@
 #' - relative_error_df a dataframe indicating for each pair (npc, ncoeff) the relative error when predicting the membership probabilities
 #' - outputs_pred an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 #' @export
-#'
+#' @import waveslim
+#' @import foreach
+#' @import DiceKriging
+#' @import abind
 #' @examples
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 #' n<-nrow(X)
-#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*
+#' Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*
+#' (Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
 #' Ymaps<- array(unlist(Y),dim=c(20,20,n))
 #' return(Ymaps)
 #' }
@@ -62,14 +67,16 @@
 #' gamma = lapply(c(1,3,6,8,10,14,16,18), function(i){outputs[,,i]})
 #' density_ratio = rep(1, 20)
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
-#' list_probas_loo = probas_loo(outputs = outputs, density_ratio = density_ratio, gamma = gamma, distance_func = distance_func, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design = design, control = list(trace = FALSE))
-probas_loo = function(outputs, density_ratio, gamma, distance_func, model_tuning = NULL, ncoeff_vec,npc_vec,return_pred = FALSE, formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
+
+#' list_probas_loo = probas_loo(outputs = outputs, density_ratio = density_ratio,
+#'  gamma = gamma, distance_func = distance_func, ncoeff_vec = c(50,100,200,400),
+#'   npc_vec = 2:4, design = design, control = list(trace = FALSE))
+probas_loo = function(outputs, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},model_tuning = NULL, ncoeff_vec,npc_vec,return_pred = FALSE, formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
                       coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                       nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                       parinit = NULL, multistart=1,
                       kernel=NULL,control = NULL,type = "UK",bias = NULL,...){
-  
+
   if(is.null(bias)){bias = rep(0,length(gamma))}
   if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design, covtype=covtype,
                                                                 coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,

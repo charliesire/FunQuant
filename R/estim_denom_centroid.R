@@ -7,7 +7,7 @@
 #'
 #' @return A real number which is the denominator of the centroid estimation
 #' @export
-#'
+#' @import abind
 #' @examples
 #' density_ratio = rep(1,20)
 #' cell_numbers = c(1,3,2,1,2,1,1,2,3,3,2,2,2,2,2,3,1,1,3,3)

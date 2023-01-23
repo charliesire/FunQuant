@@ -30,7 +30,9 @@ set.seed(5)
 func2D <- function(X){
 Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 n<-nrow(X)
-Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*
+exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*
+(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
 Ymaps<- array(unlist(Y),dim=c(20,20,n))
 return(Ymaps)
 }

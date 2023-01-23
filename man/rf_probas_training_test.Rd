@@ -13,7 +13,9 @@ rf_probas_training_test(
   list_search,
   density_ratio,
   gamma,
-  distance_func,
+  distance_func = function(A1, A2) {
+     return(sqrt(sum((A1 - A2)^2)))
+ },
   return_pred = FALSE,
   only_positive = FALSE,
   seed = NULL,
@@ -60,7 +62,7 @@ to the ith evaluation.}
 
 \item{gamma}{A set of l prototypes defining the Voronoï cells}
 
-\item{distance_func}{A function computng a distance between two elements in the output spaces.}
+\item{distance_func}{A function computing a distance between two elements in the output spaces.}
 
 \item{return_pred}{A boolean indicating whether the predicted outputs should be returned or not}
 
@@ -133,7 +135,9 @@ Computing the relative errors when predicting the membership probabilities of a 
  func2D <- function(X){
  Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
  n<-nrow(X)
- Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+ Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*
+ Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(
+ Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
  Ymaps<- array(unlist(Y),dim=c(20,20,n))
 return(Ymaps)
 }
@@ -145,10 +149,14 @@ design_test = design[251:300,]
 outputs_train = outputs[,,1:250]
 outputs_test = outputs[,,251:300]
 df_search = expand.grid(seq(0.1,1,0.3), c(1,5,9,13,17))
-list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search), function(i){c(df_search[i,1], 1-df_search[i,1])}))
+list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search),
+function(i){c(df_search[i,1], 1-df_search[i,1])}))
 density_ratio = rep(1,50)
 gamma = lapply(c(2,3,51,7), function(i){outputs[,,i]})
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-source.all("R/GpOutput2D-main/GpOutput2D/R/")
-list_rf_prob_train_test = rf_probas_training_test(design_train = design_train, design_test = design_test, outputs_train = outputs_train, outputs_test = outputs_test, threshold = 2, list_search = list_search,density_ratio = density_ratio, gamma = gamma, distance_func= distance_func, ncoeff = 400, npc = 6, control = list(trace = F))
+list_rf_prob_train_test = rf_probas_training_test(design_train = design_train,
+design_test = design_test, outputs_train = outputs_train,
+outputs_test = outputs_test, threshold = 2, list_search = list_search,
+density_ratio = density_ratio, gamma = gamma, distance_func= distance_func,
+ncoeff = 400, npc = 6, control = list(trace = FALSE))
 }

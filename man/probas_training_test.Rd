@@ -9,7 +9,9 @@ probas_training_test(
   outputs_test,
   density_ratio,
   gamma,
-  distance_func,
+  distance_func = function(A1, A2) {
+     return(sqrt(sum((A1 - A2)^2)))
+ },
   model_tuning = NULL,
   ncoeff_vec,
   npc_vec,
@@ -45,7 +47,7 @@ probas_training_test(
 
 \item{gamma}{A set of l prototypes defining the Voronoï cells}
 
-\item{distance_func}{A function computng a distance between two elements in the output spaces.}
+\item{distance_func}{A function computing a distance between two elements in the output spaces.}
 
 \item{model_tuning}{An optional list of models created for each ncoeff values.}
 
@@ -122,7 +124,8 @@ Computing the relatives errors when predicting the membership probabilities on a
 func2D <- function(X){
 Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 n<-nrow(X)
-Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2
+-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
 Ymaps<- array(unlist(Y),dim=c(20,20,n))
 return(Ymaps)
 }
@@ -133,6 +136,9 @@ outputs_test = func2D(design_test)
 gamma = lapply(c(10,20,30,40,50), function(i){outputs_test[,,i]})
 density_ratio = rep(1, 50)
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-source.all("R/GpOutput2D-main/GpOutput2D/R/")
-list_probas_train_test = probas_training_test(gamma = gamma, density_ratio = density_ratio, distance_func = distance_func, return_pred = T, outputs_train = outputs_train, outputs_test = outputs_test, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design_train = design_train, design_test = design_test, control = list(trace = FALSE))
+list_probas_train_test = probas_training_test(gamma = gamma,
+density_ratio = density_ratio, distance_func = distance_func, return_pred = TRUE,
+ outputs_train = outputs_train, outputs_test = outputs_test,
+ ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design_train = design_train,
+design_test = design_test, control = list(trace = FALSE))
 }

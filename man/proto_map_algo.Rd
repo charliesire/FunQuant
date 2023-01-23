@@ -11,7 +11,9 @@ proto_map_algo(
   density_ratio = rep(1, dim(outputs)[length(dim(outputs))]),
   budget = 10^3,
   threshold = 0,
-  distance_func,
+  distance_func = function(A1, A2) {
+     return(sqrt(sum((A1 - A2)^2)))
+ },
   print_progress = FALSE,
   trace = FALSE,
   bias = rep(0, length(gamma))
@@ -30,7 +32,7 @@ proto_map_algo(
 
 \item{threshold}{A real positive number. When the distance between the new centroids and the previous ones is lower than this value, then we stop the algorithm.}
 
-\item{distance_func}{A function computng a distance between two elements in the output spaces.}
+\item{distance_func}{A function computing a distance between two elements in the output spaces.}
 
 \item{print_progress}{A boolean indicating whether to print the iterations or not. Default is FALSE.}
 
@@ -50,6 +52,7 @@ A list containing :
 The prototype maps algorithm. Providing prototype outputs and their probability masses.
 }
 \examples{
+set.seed(10)
 gamma = list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3,3)))
 outputs = array(runif(9*20)*15, dim = c(3,3,20))
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}

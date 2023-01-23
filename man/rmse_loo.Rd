@@ -102,12 +102,14 @@ Computation of the Root Mean Square Error at each pixel of the outputs by leave 
 func2D <- function(X){
 Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 n<-nrow(X)
-Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2
+-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
 Ymaps<- array(unlist(Y),dim=c(20,20,n))
 return(Ymaps)
 }
 design = data.frame(X = seq(-1,1,l= 8))
 outputs = func2D(design)
-source.all("R/GpOutput2D-main/GpOutput2D/R/")
-list_rmse_loo = rmse_loo(outputs = outputs, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design = design, control = list(trace = FALSE))
+list_rmse_loo = rmse_loo(outputs = outputs, ncoeff_vec =
+c(50,100,200,400), npc_vec = 2:4, design = design, control =
+list(trace = FALSE))
 }

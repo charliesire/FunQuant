@@ -14,7 +14,7 @@
 #' @param ... other parameters of \code{\link{randomForest}} function from \code{randomForest}.
 #' @param density_ratio density_ratio indicates the weight fX/g of each output
 #' @param gamma A set of l prototypes defining the Voronoï cells
-#' @param distance_func  A function computng a distance between two elements in the output spaces.
+#' @param distance_func  A function computing a distance between two elements in the output spaces.
 #' @param return_pred A boolean indicating whether the predicted outputs should be returned or not
 #' @param only_positive A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.
 #' @param ncoeff The number of coefficients used for PCA
@@ -57,12 +57,18 @@
 #' - relative_error_df a dataframe indicating for each combination of hyperparameters values the relative error when predicting the membership probabilities
 #' - outputs_pred an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.#' @export
 #' @export
+#' @import waveslim
+#' @import foreach
+#' @import DiceKriging
+#' @import abind
 #' @examples
 #'  set.seed(5)
 #'  func2D <- function(X){
 #'  Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 #'  n<-nrow(X)
-#'  Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+#'  Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*
+#'  Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(
+#'  Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
 #'  Ymaps<- array(unlist(Y),dim=c(20,20,n))
 #' return(Ymaps)
 #' }
@@ -74,14 +80,19 @@
 #' outputs_train = outputs[,,1:250]
 #' outputs_test = outputs[,,251:300]
 #' df_search = expand.grid(seq(0.1,1,0.3), c(1,5,9,13,17))
-#' list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search), function(i){c(df_search[i,1], 1-df_search[i,1])}))
+#' list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search),
+#' function(i){c(df_search[i,1], 1-df_search[i,1])}))
 #' density_ratio = rep(1,50)
 #' gamma = lapply(c(2,3,51,7), function(i){outputs[,,i]})
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
-#' list_rf_prob_train_test = rf_probas_training_test(design_train = design_train, design_test = design_test, outputs_train = outputs_train, outputs_test = outputs_test, threshold = 2, list_search = list_search,density_ratio = density_ratio, gamma = gamma, distance_func= distance_func, ncoeff = 400, npc = 6, control = list(trace = F))
 
-rf_probas_training_test = function(design_train, design_test, outputs_train, outputs_test,threshold, list_search, density_ratio, gamma, distance_func,return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
+#' list_rf_prob_train_test = rf_probas_training_test(design_train = design_train,
+#' design_test = design_test, outputs_train = outputs_train,
+#' outputs_test = outputs_test, threshold = 2, list_search = list_search,
+#' density_ratio = density_ratio, gamma = gamma, distance_func= distance_func,
+#' ncoeff = 400, npc = 6, control = list(trace = FALSE))
+
+rf_probas_training_test = function(design_train, design_test, outputs_train, outputs_test,threshold, list_search, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
                            coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                            nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                            parinit = NULL, multistart=1,

@@ -8,12 +8,13 @@
 
 #' @return The centroid and the probability mass of each probability cell
 #' @export
-#'
+#' @import abind
 #' @examples
 #' outputs = array(runif(9*20)*15, dim = c(3,3,20))
 #' cell_numbers = c(1,3,2,1,2,1,1,2,3,3,2,2,2,2,2,3,1,1,3,3)
 #' density_ratio = rep(1,20)
-#' compute_centroids_and_proba(outputs = outputs,cell_numbers = cell_numbers, density_ratio = density_ratio)
+#' compute_centroids_and_proba(outputs = outputs,cell_numbers = cell_numbers,
+#' density_ratio = density_ratio)
 
 compute_centroids_and_proba = function(outputs, cell_numbers, method_IS = "unique", density_ratio, bias = rep(0,length(unique(unlist(cell_numbers))))){
   n = length(cell_numbers)#nb of outputs

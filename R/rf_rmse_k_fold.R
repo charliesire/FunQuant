@@ -47,13 +47,20 @@
 #' - outputs_rmse is a list of objects that have the same dimension as an output, obtained for each combination of hyperparameters values. Each element (called pixel here) of the objects is the RMSE computed between the predicted values of the pixel and the true value of the pixel.
 #' - outputs_pred is an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 #' @export
-
+#' @import waveslim
+#' @import foreach
+#' @import DiceKriging
+#' @import abind
+#' @importFrom randomForest randomForest
+#' @importFrom dismo kfold
 #' @examples
 #' set.seed(5)
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 #' n<-nrow(X)
-#' Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+#' Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*
+#' exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*
+#' (Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
 #' Ymaps<- array(unlist(Y),dim=c(20,20,n))
 #' return(Ymaps)
 #' }
@@ -61,7 +68,9 @@
 #' design = as.data.frame(sobol(100,2))*2-1
 #' outputs = func2D(design)
 #' list_search = list("nodesize" = as.list(c(1,3,5,7,9,11)))
-#' list_rf_rmse_k_fold = rf_rmse_k_fold(design = design,outputs = outputs, threshold = 2, list_search = list_search, nb_folds = 10, ncoeff = 400, npc = 6, control = list(trace = F))
+#' list_rf_rmse_k_fold = rf_rmse_k_fold(design = design,outputs = outputs,
+#'  threshold = 2, list_search = list_search, nb_folds = 10, ncoeff = 400,
+#'   npc = 6, control = list(trace = FALSE))
 
 rf_rmse_k_fold = function(design, outputs, threshold, list_search, nb_folds, return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
                           coef.trend = NULL, coef.cov = NULL, coef.var = NULL,

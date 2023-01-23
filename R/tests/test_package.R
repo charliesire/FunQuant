@@ -1,11 +1,10 @@
 
-library(miceadds) #sourceall
+library(miceadds)
 library(waveslim)
 library(abind)
 library(DiceKriging)
 library(foreach)
 library(dismo)
-library(ClimProjDiags)
 library(randomForest)
 library(ggplot2)
 library(evd)
@@ -36,10 +35,10 @@ distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
 
 outputs = func2D(design)
 
-## Proto map algo sans métamodèle
+## Proto map algo sans m?tamod?le
 sum_depth = Vectorize(function(i){sum(outputs[,,i])})(1:dim(outputs)[3])
 gamma = lapply(1:5, function(i){outputs[,,which.min(abs(as.numeric(quantile(sum_depth,c(0,0.6,0.7,0.8,0.9))[i]) - sum_depth))[1]]})
-res_proto = proto_map_algo(gamma = gamma, outputs, density_ratio = density_ratio, distance_func = distance_func, trace = T)
+res_proto = proto_map_algo(gamma = gamma, outputs, density_ratio = density_ratio, distance_func = distance_func, trace = TRUE)
 gamma_star_apriori = res_proto$gamma
 
 ## K fold with rmse
@@ -59,21 +58,21 @@ list_probas_k_fold = probas_k_fold(outputs = outputs[,, sum_depth > 0], design =
 
 df_search = expand.grid(seq(0.1,0.9,0.2), c(1,3,5,7))
 list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search), function(i){c(df_search[i,1], 1-df_search[i,1])}))
-list_rf_rmse_k_fold = rf_rmse_k_fold(design = design,outputs = outputs, threshold = 0, list_search = list_search, nb_folds = 10, ncoeff = 250, npc = 4, control = list(trace = F), seed = 10)
+list_rf_rmse_k_fold = rf_rmse_k_fold(design = design,outputs = outputs, threshold = 0, list_search = list_search, nb_folds = 10, ncoeff = 250, npc = 4, control = list(trace = FALSE), seed = 10)
 quantile_90 = sapply(list_rf_rmse_k_fold$outputs_rmse, function(x){quantile(x, 0.9)})
 
 best_params_rf = df_search[quantile_90 == min(quantile_90),]
 
 ## Random forest probas
 
-list_rf_probas_k_fold = rf_probas_k_fold(design = design,outputs = outputs, density_ratio = density_ratio, gamma = gamma_star_apriori, distance_func = distance_func,threshold = 0, list_search = list_search, nb_folds = 10, ncoeff = 250, npc = 4, control = list(trace = F), seed = 10)
+list_rf_probas_k_fold = rf_probas_k_fold(design = design,outputs = outputs, density_ratio = density_ratio, gamma = gamma_star_apriori, distance_func = distance_func,threshold = 0, list_search = list_search, nb_folds = 10, ncoeff = 250, npc = 4, control = list(trace = FALSE), seed = 10)
 
 ## Predict
 
 set.seed(10)
 design_test = as.data.frame(matrix(runif(2*10^4), ncol=2)*2-1)
 outputs_test = func2D(design_test)
-outputs_pred = predict_outputs(design_train = design, design_test = design_test, outputs_train = outputs, seed = 10, ncoeff = 250, npc = 4, control = list(trace = F), classification = T, threshold = 0)
+outputs_pred = predict_outputs(design_train = design, design_test = design_test, outputs_train = outputs, seed = 10, ncoeff = 250, npc = 4, control = list(trace = FALSE), classification = TRUE, threshold = 0)
 density_ratio_pred = compute_density_ratio(fX,g,design_test)
 
 res_proto_pred = proto_map_algo(gamma = gamma_star_apriori, outputs_pred, density_ratio = density_ratio_pred, distance_func = distance_func, trace = FALSE, print_progress = TRUE)

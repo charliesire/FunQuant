@@ -40,13 +40,16 @@
 #' @import waveslim
 #' @import foreach
 #' @import DiceKriging
+#' @import GpOutput2D
 #' @export
 #'
 #' @examples
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 #' n<-nrow(X)
-#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*
+#' Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*
+#' (Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
 #' Ymaps<- array(unlist(Y),dim=c(20,20,n))
 #' return(Ymaps)
 #' }
@@ -54,8 +57,8 @@
 #' outputs = func2D(design)
 #' ncoeff_vec = c(50,100,200,400)
 #' npc = 4
-#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
-#' models = create_models_tuning(outputs = outputs, ncoeff_vec = ncoeff_vec, npc = 4, design = design, control = list(trace = FALSE))
+#' models = create_models_tuning(outputs = outputs, ncoeff_vec = ncoeff_vec,
+#' npc = 4, design = design, control = list(trace = FALSE))
 create_models_tuning = function(outputs, ncoeff_vec, npc, formula = ~1,design, covtype="matern5_2", boundary = "periodic",J=1,
                                 coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                                 nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,

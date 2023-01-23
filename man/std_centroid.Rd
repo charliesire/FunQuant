@@ -8,7 +8,9 @@ std_centroid(
   outputs,
   gamma_list,
   density_ratio,
-  distance_func,
+  distance_func = function(A1, A2) {
+     return(sqrt(sum((A1 - A2)^2)))
+ },
   cells,
   cell_numbers = NULL,
   nv
@@ -21,7 +23,7 @@ std_centroid(
 
 \item{density_ratio}{density_ratio indicates the weight fX/g of each output.}
 
-\item{distance_func}{A function computng a distance between two elements in the output spaces.}
+\item{distance_func}{A function computing a distance between two elements in the output spaces.}
 
 \item{cells}{The Voronoï cell numbers that we are investigating.}
 
@@ -39,7 +41,8 @@ Computation of the IS centroid standard deviation for different sets of prototyp
 func2D <- function(X){
 Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 n<-nrow(X)
-Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-
+10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
 Ymaps<- array(unlist(Y),dim=c(20,20,n))
 return(Ymaps)
 }
@@ -48,5 +51,7 @@ outputs = func2D(design)
 gamma_list = list(lapply(c(1,3,10,14,18), function(i){outputs[,,i]}))
 density_ratio = rep(1, 50)
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-list_std_centroid = std_centroid(outputs = outputs, gamma_list = gamma_list, density_ratio = density_ratio, distance_func = distance_func, cells = 1:length(gamma_list[[1]]), nv = 50)
+list_std_centroid = std_centroid(outputs = outputs, gamma_list =
+gamma_list, density_ratio = density_ratio, distance_func = distance_func
+, cells = 1:length(gamma_list[[1]]), nv = 50)
 }

@@ -4,14 +4,20 @@
 \alias{get_cell_numbers}
 \title{Provide the Voronoï cell number associated to each sample}
 \usage{
-get_cell_numbers(outputs, gamma, distance_func)
+get_cell_numbers(
+  outputs,
+  gamma,
+  distance_func = function(A1, A2) {
+     return(sqrt(sum((A1 - A2)^2)))
+ }
+)
 }
 \arguments{
 \item{outputs}{The output samples that need to be quantized. Useful only if cell_numbers == NULL.}
 
 \item{gamma}{A set of prototypes. Useful only if cell_numbers == NULL.}
 
-\item{distance_func}{A function computng a distance between two elements in the output spaces. Useful only if cell_numbers == NULL.}
+\item{distance_func}{A function computing a distance between two elements in the output spaces. Useful only if cell_numbers == NULL.}
 }
 \value{
 A vector providing the Voronoï cell number associated to each sample.

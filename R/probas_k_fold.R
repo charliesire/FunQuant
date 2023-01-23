@@ -4,7 +4,7 @@
 #' @param nb_folds Number of folds
 #' @param density_ratio density_ratio indicates the weight fX/g of each output
 #' @param gamma A set of l prototypes defining the Voronoï cells
-#' @param distance_func  A function computng a distance between two elements in the output spaces.
+#' @param distance_func  A function computing a distance between two elements in the output spaces.
 #' @param ncoeff_vec A vector providing the different values of ncoeff to be tested. ncoeff fixes the number of coefficients used for PCA.
 #' @param npc_vec A vector providing the different numbers of principal components to be tested.
 #' @param return_pred A boolean indicating whether the predicted outputs should be returned or not
@@ -56,7 +56,9 @@
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 #' n<-nrow(X)
-#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1
+#' +0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*
+#' (Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
 #' Ymaps<- array(unlist(Y),dim=c(20,20,n))
 #' return(Ymaps)
 #' }
@@ -65,10 +67,13 @@
 #' gamma = lapply(c(1,5,10,15,20), function(i){outputs[,,i]})
 #' density_ratio = rep(1, 20)
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
-#' list_probas_k_fold = probas_k_fold(outputs = outputs, nb_folds = 5, density_ratio = density_ratio, gamma = gamma, distance_func = distance_func, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design = design, control = list(trace = FALSE))
 
-probas_k_fold = function(outputs, nb_folds, density_ratio, gamma, distance_func, ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
+#' list_probas_k_fold = probas_k_fold(outputs = outputs, nb_folds = 5,
+#' density_ratio = density_ratio, gamma = gamma, distance_func = distance_func
+#' , ncoeff_vec = c(50,100,200,400), npc_vec = 2:4,
+#' design = design, control = list(trace = FALSE))
+
+probas_k_fold = function(outputs, nb_folds, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
                          coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                          nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                          parinit = NULL, multistart=1,

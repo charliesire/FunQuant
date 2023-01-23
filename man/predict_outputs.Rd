@@ -114,7 +114,9 @@ Predict outputs at new inputs, based on a training database.
  func2D <- function(X){
  Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
  n<-nrow(X)
- Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+ Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*
+ exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**
+ 2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
  Ymaps<- array(unlist(Y),dim=c(20,20,n))
 return(Ymaps)
 }
@@ -125,6 +127,8 @@ design_train = design[1:250,]
 design_test = design[251:300,]
 outputs_train = outputs[,,1:250]
 outputs_test = outputs[,,251:300]
-source.all("R/GpOutput2D-main/GpOutput2D/R/")
-outputs_pred = predict_outputs(design_train = design_train, design_test = design_test, outputs_train = outputs_train, ncoeff = 400, npc = 6, control = list(trace = F), classification = TRUE, control_classification = list(nodesize = 4), threshold = 2)
+outputs_pred = predict_outputs(design_train = design_train,
+design_test = design_test, outputs_train = outputs_train,
+ncoeff = 400, npc = 6, control = list(trace = FALSE), classification = TRUE,
+control_classification = list(nodesize = 4), threshold = 2)
 }

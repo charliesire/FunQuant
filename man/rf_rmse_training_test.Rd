@@ -105,8 +105,6 @@ for each principal component. At this stage, the parameters must be provided as 
 \item{type}{A character string corresponding to the kriging family, to be chosen between simple kriging ("SK"), or universal kriging ("UK"). Default is "UK.}
 
 \item{...}{other parameters of \code{\link{randomForest}} function from \code{randomForest}.}
-
-\item{bias}{A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoï cell.}
 }
 \value{
 A list containing several outputs :
@@ -122,7 +120,9 @@ Computation of the Root Mean Square Error at each pixel of the outputs on a vali
  func2D <- function(X){
  Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
  n<-nrow(X)
- Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+ Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*
+ exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*
+ (Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
  Ymaps<- array(unlist(Y),dim=c(20,20,n))
 return(Ymaps)
 }
@@ -134,7 +134,11 @@ design_test = design[251:300,]
 outputs_train = outputs[,,1:250]
 outputs_test = outputs[,,251:300]
 df_search = expand.grid(seq(0.1,1,0.3), c(1,5,9,13,17))
-list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search), function(i){c(df_search[i,1], 1-df_search[i,1])}))
-source.all("R/GpOutput2D-main/GpOutput2D/R/")
-list_rf_rmse_train_test = rf_rmse_training_test(design_train = design_train, design_test = design_test, outputs_train = outputs_train, outputs_test = outputs_test, threshold = 2, list_search = list_search, ncoeff = 400, npc = 6, control = list(trace = F))
+list_search = list("nodesize" = as.list(df_search[,2]),
+"classwt" = lapply(1:nrow(df_search), function(i){c(
+df_search[i,1], 1-df_search[i,1])}))
+list_rf_rmse_train_test = rf_rmse_training_test(design_train = design_train,
+ design_test = design_test, outputs_train = outputs_train, outputs_test =
+ outputs_test, threshold = 2, list_search = list_search, ncoeff = 400,
+ npc = 6, control = list(trace = FALSE))
 }

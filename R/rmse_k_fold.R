@@ -46,28 +46,36 @@
 #' - outputs_rmse is a list of objects that have the same dimension as an output, obtained for each pair (npc, ncoeff). Each element (called pixel here) of the objects is the RMSE computed between the predicted values of the pixel and the true value of the pixel.
 #' - outputs_pred is an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 #' @export
+#' @import waveslim
+#' @import foreach
+#' @import DiceKriging
+#' @import abind
+#' @importFrom randomForest randomForest
 #' @importFrom dismo kfold
 #' @examples
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 #' n<-nrow(X)
-#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2
+#' -10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
 #' Ymaps<- array(unlist(Y),dim=c(20,20,n))
 #' return(Ymaps)
 #' }
 #' design = data.frame(X = seq(-1,1,l= 20))
 #' outputs = func2D(design)
-#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
-#' list_rmse_k_fold = rmse_k_fold(outputs = outputs, nb_folds = 5, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design = design, control = list(trace = FALSE))
 
-rmse_k_fold = function(outputs, nb_folds, model_tuning = NULL, ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
+#' list_rmse_k_fold = rmse_k_fold(outputs = outputs, nb_folds = 5,
+#' ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design = design,
+#' control = list(trace = FALSE))
+
+rmse_k_fold = function(outputs, nb_folds, ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
                          coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                          nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                          parinit = NULL, multistart=1,
                          kernel=NULL,control = NULL,type = "UK",seed = NULL,...){
   if(is.null(seed)==FALSE){set.seed(seed)}
   length_dim = length(dim(outputs))
-  
+
   grid_cv = expand.grid(ncoeff_vec, npc_vec)
   folds = kfold(dim(outputs)[length(dim(outputs))], nb_folds)
   outputs_rmse = list()

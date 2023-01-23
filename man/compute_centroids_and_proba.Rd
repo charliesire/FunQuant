@@ -33,5 +33,6 @@ Compute the centroid and the probability mass of the Voronoï cells
 outputs = array(runif(9*20)*15, dim = c(3,3,20))
 cell_numbers = c(1,3,2,1,2,1,1,2,3,3,2,2,2,2,2,3,1,1,3,3)
 density_ratio = rep(1,20)
-compute_centroids_and_proba(outputs = outputs,cell_numbers = cell_numbers, density_ratio = density_ratio)
+compute_centroids_and_proba(outputs = outputs,cell_numbers = cell_numbers,
+density_ratio = density_ratio)
 }

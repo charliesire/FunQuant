@@ -12,7 +12,9 @@ rf_probas_k_fold(
   nb_folds,
   density_ratio,
   gamma,
-  distance_func,
+  distance_func = function(A1, A2) {
+     return(sqrt(sum((A1 - A2)^2)))
+ },
   return_pred = FALSE,
   only_positive = FALSE,
   seed = NULL,
@@ -53,7 +55,7 @@ rf_probas_k_fold(
 
 \item{gamma}{A set of l prototypes defining the Voronoï cells}
 
-\item{distance_func}{A function computng a distance between two elements in the output spaces.}
+\item{distance_func}{A function computing a distance between two elements in the output spaces.}
 
 \item{return_pred}{A boolean indicating whether the predicted outputs should be returned or not}
 
@@ -126,7 +128,9 @@ set.seed(5)
 func2D <- function(X){
 Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 n<-nrow(X)
-Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
+Y <- lapply(1:n, function(i){(X[i,2] > 0)*X[i,2]*X[i,1]*
+exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,1])**2)/(60*X[i,1]**2))*
+(Zgrid$z1-Zgrid$z2)*cos(X[i,1]*4)^2*sin(X[i,2]*4)^2})
 Ymaps<- array(unlist(Y),dim=c(20,20,n))
 return(Ymaps)
 }
@@ -137,5 +141,8 @@ list_search = list("nodesize" = as.list(c(1,3,5,7,9,11)))
 density_ratio = rep(1,100)
 gamma = lapply(c(2,3,51,7), function(i){outputs[,,i]})
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-rf_probas_k_fold(design = design,outputs = outputs, threshold = 2, list_search = list_search, nb_folds = 10,density_ratio = density_ratio, gamma = gamma, distance_func= distance_func, ncoeff = 400, npc = 6, control = list(trace = F))
+rf_probas_k_fold(design = design,outputs = outputs, threshold = 2,
+ list_search = list_search, nb_folds = 10,density_ratio =
+ density_ratio, gamma = gamma, distance_func= distance_func, ncoeff = 400,
+  npc = 6, control = list(trace = FALSE))
 }

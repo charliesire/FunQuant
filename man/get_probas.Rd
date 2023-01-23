@@ -10,7 +10,9 @@ get_probas(
   cell_numbers = NULL,
   outputs = NULL,
   gamma = NULL,
-  distance_func,
+  distance_func = function(A1, A2) {
+     return(sqrt(sum((A1 - A2)^2)))
+ },
   cells = NULL,
   bias = NULL
 )
@@ -26,7 +28,7 @@ get_probas(
 
 \item{gamma}{A set of prototypes. Useful only if cell_numbers == NULL. If NULL, "cells" must be provided.}
 
-\item{distance_func}{A function computng a distance between two elements in the output spaces. Useful only if cell_numbers == NULL.}
+\item{distance_func}{A function computing a distance between two elements in the output spaces. Useful only if cell_numbers == NULL.}
 
 \item{cells}{The cell numbers that are investigated}
 
@@ -43,5 +45,6 @@ gamma = list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3
 outputs = array(runif(9*20)*20, dim = c(3,3,20))
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
 density_ratio = rep(1,20)
-get_probas(density_ratio = density_ratio, outputs = outputs, gamma = gamma, distance_func = distance_func)
+get_probas(density_ratio = density_ratio, outputs = outputs,
+gamma = gamma, distance_func = distance_func)
 }

@@ -44,25 +44,31 @@
 #' - outputs_pred is an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 
 #' @export
-#'
+#' @import waveslim
+#' @import foreach
+#' @import DiceKriging
+#' @import abind
 #' @examples
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
 #' n<-nrow(X)
-#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2-10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
+#' Y <- lapply(1:n, function(i){X[i,]*exp(-((0.8*Zgrid$z1+0.2*Zgrid$z2
+#' -10*X[i,])**2)/(60*X[i,]**2))*(Zgrid$z1-Zgrid$z2)*cos(X[i,]*4)})
 #' Ymaps<- array(unlist(Y),dim=c(20,20,n))
 #' return(Ymaps)
 #' }
 #' design = data.frame(X = seq(-1,1,l= 8))
 #' outputs = func2D(design)
-#' source.all("R/GpOutput2D-main/GpOutput2D/R/")
-#' list_rmse_loo = rmse_loo(outputs = outputs, ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design = design, control = list(trace = FALSE))
+
+#' list_rmse_loo = rmse_loo(outputs = outputs, ncoeff_vec =
+#' c(50,100,200,400), npc_vec = 2:4, design = design, control =
+#' list(trace = FALSE))
 rmse_loo = function(outputs, model_tuning = NULL, ncoeff_vec,npc_vec, return_pred = FALSE, formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
                     coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                     nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                     parinit = NULL, multistart=1,
                     kernel=NULL,control = NULL,type = "UK",...){
-  
+
   if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design, covtype=covtype,
                                                                 coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                                                                 nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
