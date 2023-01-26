@@ -76,7 +76,7 @@ rmse_k_fold = function(outputs, nb_folds, ncoeff_vec,npc_vec, return_pred = FALS
   if(is.null(seed)==FALSE){set.seed(seed)}
   length_dim = length(dim(outputs))
 
-  grid_cv = expand.grid(ncoeff_vec, npc_vec)
+  grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
   folds = kfold(dim(outputs)[length(dim(outputs))], nb_folds)
   outputs_rmse = list()
   outputs_pred_list = list()

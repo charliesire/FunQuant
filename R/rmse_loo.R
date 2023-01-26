@@ -74,7 +74,7 @@ rmse_loo = function(outputs, model_tuning = NULL, ncoeff_vec,npc_vec, return_pre
                                                                 nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                                                                 parinit = parinit, multistart=multistart,
                                                                 kernel=kernel,control = control,...)}
-  grid_cv = expand.grid(ncoeff_vec, npc_vec)
+  grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
   outputs_rmse = list()
   outputs_loo_list = list()
   for(i in 1:nrow(grid_cv)){

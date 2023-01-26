@@ -8,18 +8,18 @@ compute_centroids_and_proba(
   outputs,
   cell_numbers,
   method_IS = "unique",
-  density_ratio,
+  density_ratio = rep(1, dim(outputs)[length(dim(outputs))]),
   bias = rep(0, length(unique(unlist(cell_numbers))))
 )
 }
 \arguments{
-\item{outputs}{The output samples that need to be quantized}
+\item{outputs}{The output samples that need to be quantized. If method = "percell", a list of output samples must be provided, of length equal to the number of Voronoï cells.}
 
 \item{cell_numbers}{The voronoi cell number of every output}
 
 \item{method_IS}{The method of Importance Sampling : "unique" means there is a unique biased density involved, "percell" means there is one biased density (and then one biased sample) for each cell.}
 
-\item{density_ratio}{density_ratio indicates the weight fX/g of each output}
+\item{density_ratio}{A vector indicating the weight fX/g of each output. Default is a vector of 1. If method = "percell", a list of density_ratio must be provided, of length equal to the number of Voronoï cells.}
 
 \item{bias}{A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default is 0 for all Voronoi cells.}
 }

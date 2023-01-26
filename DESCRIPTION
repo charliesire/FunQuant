@@ -8,7 +8,13 @@ Description: Perform Lloyd's algorithm with importance sampling weights. Build a
 License: GPL-2
 Encoding: UTF-8
 LazyData: true
-Suggests: randtoolbox
+Suggests: 
+    knitr,
+    randtoolbox,
+    rmarkdown,
+    ggplot2,
+    evd
 Imports: abind, waveslim, DiceKriging, foreach, dismo, randomForest, GpOutput2D
 Remotes: tranvivielodie/GpOutput2D/GpOutput2D
 RoxygenNote: 7.2.3
+VignetteBuilder: knitr

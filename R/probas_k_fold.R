@@ -80,7 +80,7 @@ probas_k_fold = function(outputs, nb_folds, density_ratio, gamma, distance_func 
                          kernel=NULL,control = NULL,type = "UK",seed = NULL, bias = rep(0, length(gamma)),...){
   if(is.null(seed) == FALSE){set.seed(seed)}
   length_dim = length(dim(outputs))
-  grid_cv = expand.grid(ncoeff_vec, npc_vec)
+  grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
   folds = kfold(length(density_ratio), nb_folds)
   probas_true = get_probas(density_ratio = density_ratio, outputs = outputs, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
   probas_pred_df = data.frame()

@@ -1,9 +1,9 @@
 #' @title Compute the centroid and the probability mass of the Voronoï cells
 #'
-#' @param outputs The output samples that need to be quantized
+#' @param outputs The output samples that need to be quantized. If method = "percell", a list of output samples must be provided, of length equal to the number of Voronoï cells.
 #' @param cell_numbers The voronoi cell number of every output
 #' @param method_IS The method of Importance Sampling : "unique" means there is a unique biased density involved, "percell" means there is one biased density (and then one biased sample) for each cell.
-#' @param density_ratio density_ratio indicates the weight fX/g of each output
+#' @param density_ratio A vector indicating the weight fX/g of each output. Default is a vector of 1. If method = "percell", a list of density_ratio must be provided, of length equal to the number of Voronoï cells.
 #' @param bias A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default is 0 for all Voronoi cells.
 
 #' @return The centroid and the probability mass of each probability cell
@@ -16,7 +16,7 @@
 #' compute_centroids_and_proba(outputs = outputs,cell_numbers = cell_numbers,
 #' density_ratio = density_ratio)
 
-compute_centroids_and_proba = function(outputs, cell_numbers, method_IS = "unique", density_ratio, bias = rep(0,length(unique(unlist(cell_numbers))))){
+compute_centroids_and_proba = function(outputs, cell_numbers, method_IS = "unique", density_ratio = rep(1, dim(outputs)[length(dim(outputs))]), bias = rep(0,length(unique(unlist(cell_numbers))))){
   n = length(cell_numbers)#nb of outputs
   nb_cells = length(unique(unlist(cell_numbers)))
   centroids = list()

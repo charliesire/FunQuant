@@ -83,7 +83,7 @@ probas_loo = function(outputs, density_ratio, gamma, distance_func = function(A1
                                                                 nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                                                                 parinit = parinit, multistart=multistart,
                                                                 kernel=kernel,control = control,...)}
-  grid_cv = expand.grid(ncoeff_vec, npc_vec)
+  grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
   probas_true = get_probas(density_ratio = density_ratio, outputs = outputs, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
   probas_pred_df = data.frame()
   relative_error_df = data.frame()

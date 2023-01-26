@@ -83,7 +83,7 @@ rmse_training_test = function(outputs_train,outputs_test, model_tuning = NULL, n
                                                                 nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                                                                 parinit = parinit, multistart=multistart,
                                                                 kernel=kernel,control = control,...)}
-  grid_cv = expand.grid(ncoeff_vec, npc_vec)
+  grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
   relative_error_df = data.frame()
   outputs_pred_list = list()
   outputs_rmse = list()
