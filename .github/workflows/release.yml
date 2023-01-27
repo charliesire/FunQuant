@@ -29,19 +29,19 @@ jobs:
       - uses: r-lib/actions/setup-r-dependencies@v2
 
       - run: |
-          cd ..; R CMD INSTALL --build FunQuant 
-          mkdir FunQuant/R-${{ matrix.R }}
-          mv FunQuant_*.* FunQuant/R-${{ matrix.R }}/.
+          cd ..; R CMD INSTALL --build FunQuant
+          NAME=`ls FunQuant_*.*`
+          mv $NAME FunQuant/R_${{ matrix.R }}-$NAME
         shell: bash
         name: R CMD INSTALL
         
       - uses: actions/upload-artifact@v2
         with:
-          path: ./R-*
+          path: ./R_*
 
       - uses: softprops/action-gh-release@v1
         if: startsWith(github.ref, 'refs/tags/')
         with:
-          files: ./R-${{ matrix.R }}/*
+          files: ./R_*
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
