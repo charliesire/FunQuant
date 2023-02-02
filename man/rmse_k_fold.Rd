@@ -13,6 +13,7 @@ rmse_k_fold(
   formula = ~1,
   design,
   covtype = "matern5_2",
+  wf = "d4",
   boundary = "periodic",
   J = 1,
   coef.trend = NULL,
@@ -56,6 +57,8 @@ to the ith evaluation.}
 specifying the covariance structure to be used on each modeled principal component
 (see \code{\link{km}} for possible inputs of \code{covtype}).
 If a vector, the length should be equal to the number of modeled principal components.}
+
+\item{wf}{name of the wavelet filter to use in the decomposition}
 
 \item{boundary}{a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).}
 

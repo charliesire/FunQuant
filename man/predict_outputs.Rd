@@ -5,6 +5,7 @@
 \title{Predict outputs at new inputs, based on a training database.}
 \usage{
 predict_outputs(
+  metamodel_fitted = NULL,
   design_train,
   design_test,
   outputs_train,
@@ -14,6 +15,7 @@ predict_outputs(
   npc,
   formula = ~1,
   covtype = "matern5_2",
+  wf = "d4",
   boundary = "periodic",
   J = 1,
   coef.trend = NULL,
@@ -30,11 +32,14 @@ predict_outputs(
   type = "UK",
   classification = FALSE,
   control_classification = NULL,
-  threshold = NULL,
+  threshold_classification = NULL,
+  threshold_fpca = NULL,
   ...
 )
 }
 \arguments{
+\item{metamodel_fitted}{Optional list containing the different metamodel steps fitted on the training data. It contains a classifier, a Fpca2d object, and a list of km objects. Can be obtained with the function fit_metamodel.}
+
 \item{design_train}{a data frame representing the design of experiments of the training part.
 The ith row contains the values of the d input variables corresponding
 to the ith evaluation.}
@@ -63,6 +68,8 @@ specifying the linear trend of the kriging model (see \code{\link{lm}}) on each 
 specifying the covariance structure to be used on each modeled principal component
 (see \code{\link{km}} for possible inputs of \code{covtype}).
 If a vector, the length should be equal to the number of modeled principal components.}
+
+\item{wf}{name of the wavelet filter to use in the decomposition}
 
 \item{boundary}{a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).}
 
@@ -99,7 +106,9 @@ for each principal component. At this stage, the parameters must be provided as 
 
 \item{control_classification}{The list of hyperparameters of the classification function. Required only if classfification is TRUE.}
 
-\item{threshold}{The threshold that creates the two classes of maps for the classification. Required only if classification is TRUE.}
+\item{threshold_classification}{The threshold that creates the two classes of maps for the classification}
+
+\item{threshold_fpca}{The threshold used for the training of the FPCA. Only the maps for which the sum of the pixel is above this threshold are used for the training. If NULL, this threshold takes the value of threshold_classification.}
 
 \item{...}{other parameters of \code{\link{km}} function from \code{DiceKriging}.}
 }
@@ -130,5 +139,5 @@ outputs_test = outputs[,,251:300]
 outputs_pred = predict_outputs(design_train = design_train,
 design_test = design_test, outputs_train = outputs_train,
 ncoeff = 400, npc = 6, control = list(trace = FALSE), classification = TRUE,
-control_classification = list(nodesize = 4), threshold = 2)
+control_classification = list(nodesize = 4), threshold_classification = 2)
 }

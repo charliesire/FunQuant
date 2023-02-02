@@ -20,6 +20,8 @@
 #' specifying the covariance structure to be used on each modeled principal component
 #' (see \code{\link{km}} for possible inputs of \code{covtype}).
 #' If a vector, the length should be equal to the number of modeled principal components.
+#' @param wf name of the wavelet filter to use in the decomposition
+
 #' @param boundary a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).
 #' @param J depth of the wavelet decomposition, must be a number less than or equal to log(min(M,N),2). Default is 1.
 #' @param coef.trend,coef.cov,coef.var optional vectors or matrices containing
@@ -71,7 +73,7 @@
 #' list_probas_loo = probas_loo(outputs = outputs, density_ratio = density_ratio,
 #'  gamma = gamma, distance_func = distance_func, ncoeff_vec = c(50,100,200,400),
 #'   npc_vec = 2:4, design = design, control = list(trace = FALSE))
-probas_loo = function(outputs, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},model_tuning = NULL, ncoeff_vec,npc_vec,return_pred = FALSE, formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
+probas_loo = function(outputs, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},model_tuning = NULL, ncoeff_vec,npc_vec,return_pred = FALSE, formula = ~1,design, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                       coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                       nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                       parinit = NULL, multistart=1,
@@ -92,7 +94,7 @@ probas_loo = function(outputs, density_ratio, gamma, distance_func = function(A1
     ncoeff = grid_cv[i,1]
     npc = grid_cv[i,2]
     indice_coeff = which(ncoeff_vec == ncoeff)
-    fp = Fpca2d.Wavelets(outputs, wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
+    fp = Fpca2d.Wavelets(outputs, wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
     model = lapply(1:npc, function(k){model_tuning[[indice_coeff]][[k]]})
     pred = sapply(1:npc, function(i){leaveOneOut.km(model[[i]], type=type)$mean})
     outputs_loo = inverse_Fpca2d(pred,fp)

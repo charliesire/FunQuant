@@ -20,6 +20,7 @@
 #' specifying the covariance structure to be used on each modeled principal component
 #' (see \code{\link{km}} for possible inputs of \code{covtype}).
 #' If a vector, the length should be equal to the number of modeled principal components.
+#' @param wf name of the wavelet filter to use in the decomposition
 #' @param boundary a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).
 #' @param J depth of the wavelet decomposition, must be a number less than or equal to log(min(M,N),2). Default is 1.
 #' @param coef.trend,coef.cov,coef.var optional vectors or matrices containing
@@ -73,7 +74,7 @@
 #' , ncoeff_vec = c(50,100,200,400), npc_vec = 2:4,
 #' design = design, control = list(trace = FALSE))
 
-probas_k_fold = function(outputs, nb_folds, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design, covtype="matern5_2",boundary = "periodic",J=1,
+probas_k_fold = function(outputs, nb_folds, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                          coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                          nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                          parinit = NULL, multistart=1,
@@ -88,7 +89,7 @@ probas_k_fold = function(outputs, nb_folds, density_ratio, gamma, distance_func 
   outputs_pred = list()
   relative_error_df = data.frame()
   for(k in 1:nb_folds){
-    outputs_pred_list[[k]] = probas_training_test(outputs_train = asub(outputs,dims = length(dim(outputs)), idx = which(folds != k)),outputs_test = asub(outputs,dims = length(dim(outputs)), idx = which(folds == k)), density_ratio = density_ratio, gamma = gamma, distance_func = distance_func, ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype,boundary = boundary,J=J,
+    outputs_pred_list[[k]] = probas_training_test(outputs_train = asub(outputs,dims = length(dim(outputs)), idx = which(folds != k)),outputs_test = asub(outputs,dims = length(dim(outputs)), idx = which(folds == k)), density_ratio = density_ratio, gamma = gamma, distance_func = distance_func, ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype, wf = wf, boundary = boundary,J=J,
                                                   coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                                                   nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                                                   parinit = parinit, multistart=multistart,

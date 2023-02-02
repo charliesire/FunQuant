@@ -10,7 +10,7 @@
 #' sort_gamma(gamma = list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3,3))))
 sort_gamma = function(gamma){
   gamma_sorted = gamma
-  sums = Vectorize(function(k){sum(abs(gamma[[k]]))})(1:length(gamma))
+  sums = Vectorize(function(k){sum(gamma[[k]])})(1:length(gamma))
   for(k in 1:length(gamma)){gamma_sorted[[rank(sums)[k]]] = gamma[[k]]}
   return(gamma_sorted)
 }

@@ -10,7 +10,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width=8, 
+  fig.height=6
 )
 ```
 
@@ -20,7 +22,11 @@ library(FunQuant)
 library(randtoolbox)
 library(ggplot2)
 library(evd)
+library(gridExtra)
+```
 
+```{r}
+set.seed(14)
 ```
 
 We define the spatial function we investigate here, taking as inputs a vector in $\mathbb{R}^2$, and returning a map 20x20.
@@ -84,10 +90,12 @@ outputs = func2D(design)
 We plot example of the maps
 
 ```{r}
-plot_map(outputs[,,2])
-plot_map(outputs[,,241])
+
+plot_list_examples = list(plot_map(outputs[,,2]), plot_map(outputs[,,241]))
+
+do.call("grid.arrange", c(plot_list_examples, ncol=2))
 ```
-We can note that 171 of the 400 outputs are maps with only 0 values
+We can note that 182 of the 400 outputs are maps with only 0 values
 
 ```{r}
 sum(Vectorize(function(i){abs(sum(outputs[,,i]))})(1:dim(outputs)[3]) == 0)
@@ -109,7 +117,7 @@ We perform the quantization without metamodel, only with the 400 computed maps
 sum_depth = Vectorize(function(i){sum(outputs[,,i])})(1:dim(outputs)[3])
 gamma = lapply(1:5, function(i){outputs[,,which.min(abs(as.numeric(quantile(sum_depth,c(0,0.6,0.7,0.8,0.9))[i]) - sum_depth))[1]]}) #gamma will be the starting set of prototypes of the quantization. We choose an maps of only 0, and the maps with increasing sum of pixels
 
-res_proto = proto_map_algo(gamma = gamma, outputs, density_ratio = density_ratio, distance_func = distance_func) 
+res_proto = proto_map_algo(gamma = gamma, outputs = outputs, density_ratio = density_ratio, distance_func = distance_func) 
 gamma_star_apriori = res_proto$gamma #This is the optimal set of prototype maps obtained with the 400 maps without metamodel
 
 ```
@@ -148,7 +156,7 @@ Here we choose to tune the hyperparameters "nodesize" and "classwt", and we use 
 ```{r}
 df_search = expand.grid(classwt1 = seq(0.2,0.8,0.3), nodesize = c(1,3,5))
 list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search), function(i){c(df_search[i,1], 1-df_search[i,1])}))
-list_rf_rmse_k_fold = rf_rmse_k_fold(design = design,outputs = outputs, threshold = 0, list_search = list_search, nb_folds = 10, ncoeff = 200, npc = 2, control = list(trace = FALSE), seed = 10)
+list_rf_rmse_k_fold = rf_rmse_k_fold(design = design,outputs = outputs, threshold_classification = 0, list_search = list_search, nb_folds = 10, ncoeff = 200, npc = 2, control = list(trace = FALSE), seed = 10)
 quantile_90_rf = sapply(list_rf_rmse_k_fold$outputs_rmse, function(x){quantile(x, 0.9)})
 
 best_params_rf = df_search[quantile_90_rf == min(quantile_90_rf),]
@@ -160,7 +168,7 @@ plot_map(list_rf_rmse_k_fold$outputs_rmse[[1]])
 Likewise, rf_probas_k_fold does the same as probas_k_fold but integrates the random forests classifier, focusing on the classifier hyperparameters.
 
 ```{r}
-list_rf_probas_k_fold = rf_probas_k_fold(design = design,outputs = outputs, density_ratio = density_ratio, gamma = gamma_star_apriori, distance_func = distance_func,threshold = 0, list_search = list_search, nb_folds = 10, ncoeff = 200, npc = 2, control = list(trace = FALSE), seed = 10)
+list_rf_probas_k_fold = rf_probas_k_fold(design = design,outputs = outputs, density_ratio = density_ratio, gamma = gamma_star_apriori, distance_func = distance_func,threshold_classification = 0, list_search = list_search, nb_folds = 10, ncoeff = 200, npc = 2, control = list(trace = FALSE), seed = 10)
 
 ```
 
@@ -172,7 +180,7 @@ design_test = as.data.frame(matrix(runif(2*10^4), ncol=2)*2-1)
 #We compute the true outputs
 outputs_test = func2D(design_test)
 #We predict the outputs
-outputs_pred = predict_outputs(design_train = design, design_test = design_test, outputs_train = outputs, seed = 10, ncoeff = 200, npc = 2, control = list(trace = FALSE), classification = TRUE, control_classification = list("nodesize" = 1, classwt = c(0.5,0.5)), threshold = 0)
+outputs_pred = predict_outputs(design_train = design, design_test = design_test, outputs_train = outputs, seed = 10, ncoeff = 200, npc = 2, control = list(trace = FALSE), classification = TRUE, control_classification = list("nodesize" = 1, classwt = c(0.5,0.5)), threshold_classification = 0)
 #We compute the importance sampling weights
 density_ratio_pred = compute_density_ratio(fX,g,design_test)
 
@@ -181,19 +189,19 @@ density_ratio_pred = compute_density_ratio(fX,g,design_test)
 And we can perform the quantization on our $10^4$ predicted maps.
 
 ```{r}
-#we compute the importance sampling weights
-density_ratio_pred = compute_density_ratio(fX,g,design_test)
 
 # We perform quantization
-res_proto_pred = proto_map_algo(gamma = gamma_star_apriori, outputs_pred, density_ratio = density_ratio_pred, distance_func = distance_func, trace = FALSE)
+res_proto_pred = proto_map_algo(gamma = gamma_star_apriori, outputs = outputs_pred, density_ratio = density_ratio_pred, distance_func = distance_func, trace = FALSE)
 
 ```
 We plot the obtained prototype maps
 
 ```{r}
+list_plots_pred = list()
 for(i in 1:length(res_proto_pred$gamma)){
-  print(plot_map(res_proto_pred$gamma[[i]]))
+  list_plots_pred[[i]] = plot_map(res_proto_pred$gamma[[i]])
 }
+do.call("grid.arrange", c(list_plots_pred, ncol=2))
 ```
 
 
@@ -213,9 +221,13 @@ res_std_centroid = std_centroid(outputs = outputs_pred, gamma_list = list(res_pr
 #Then we compute the quantile 90% of each of these standard deviation maps
 quantiles_90_std = sapply(res_std_centroid[[1]], function(x){quantile(x, 0.9)})
 
+list_plots_std = list()
 for(i in 1:length(res_proto_pred$gamma)){
-  print(plot_map(res_std_centroid[[1]][[i]]))
+  list_plots_std[[i]] = plot_map(res_std_centroid[[1]][[i]])
 }
+do.call("grid.arrange", c(list_plots_std, ncol=2))
+
+
 ```
 
 We now confirm the precision of the metamodel by comparing the probabilities obtained with the true maps and the predicted maps for the optimal prototypes
@@ -231,7 +243,7 @@ probas_pred
 We also check that the quantization error obtained with the predicted maps is close to the one obtained with the true maps
 
 ```{r}
-res_proto_test = proto_map_algo(gamma = gamma_star_apriori, outputs_test, density_ratio = density_ratio_pred, distance_func = distance_func, trace = FALSE)
+res_proto_test = proto_map_algo(gamma = gamma_star_apriori, outputs = outputs_test, density_ratio = density_ratio_pred, distance_func = distance_func, trace = FALSE)
 quanti_error_test = quanti_error(outputs = outputs_test, gamma = res_proto_test$gamma, density_ratio = density_ratio_pred, distance_func = distance_func)
 quanti_error_pred = quanti_error(outputs = outputs_test, gamma = res_proto_pred$gamma, density_ratio = density_ratio_pred, distance_func = distance_func)
 

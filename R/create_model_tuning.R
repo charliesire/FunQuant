@@ -15,6 +15,7 @@
 #' specifying the covariance structure to be used on each modeled principal component
 #' (see \code{\link{km}} for possible inputs of \code{covtype}).
 #' If a vector, the length should be equal to the number of modeled principal components.
+#' @param wf name of the wavelet filter to use in the decomposition
 #' @param boundary a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).
 #' @param J depth of the wavelet decomposition, must be a number less than or equal to log(min(M,N),2). Default is 1.
 #' @param coef.trend,coef.cov,coef.var optional vectors or matrices containing
@@ -59,7 +60,7 @@
 #' npc = 4
 #' models = create_models_tuning(outputs = outputs, ncoeff_vec = ncoeff_vec,
 #' npc = 4, design = design, control = list(trace = FALSE))
-create_models_tuning = function(outputs, ncoeff_vec, npc, formula = ~1,design, covtype="matern5_2", boundary = "periodic",J=1,
+create_models_tuning = function(outputs, ncoeff_vec, npc, formula = ~1,design, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                                 coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                                 nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                                 parinit = NULL, multistart=1,
@@ -68,7 +69,7 @@ create_models_tuning = function(outputs, ncoeff_vec, npc, formula = ~1,design, c
   for(i in 1:length(ncoeff_vec)){
     set.seed(1)
     ncoeff = ncoeff_vec[i]
-    fp = Fpca2d.Wavelets(outputs, wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
+    fp = Fpca2d.Wavelets(outputs, wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
     model_tuning[[i]] = km_Fpca2d(formula = formula, design = design, response = fp, covtype = covtype, coef.trend = coef.trend, coef.var = coef.var, coef.cov = coef.cov, control = control, nugget = nugget, multistart=multistart, lower = lower,...)
   }
   return(model_tuning)

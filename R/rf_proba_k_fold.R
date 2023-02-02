@@ -2,7 +2,8 @@
 #'
 #' @param design A dataframe of inputs
 #' @param outputs The output samples on which the metamodel will be trained and tested by kfold cross validation
-#' @param threshold The threshold that creates the two classes of maps for the classification
+#' @param threshold_classification The threshold that creates the two classes of maps for the classification
+#' @param threshold_fpca The threshold used for the training of the FPCA. Only the maps for which the sum of the pixel is above this threshold are used for the training. If NULL, this threshold takes the value of threshold_classification.
 #' @param list_search A list containing for each hyperparameters to be tested a list of the tested values.
 #' @param nb_folds Number of folds
 #' @param seed An optional random seed
@@ -22,6 +23,7 @@
 #' specifying the covariance structure to be used on each modeled principal component
 #' (see \code{\link{km}} for possible inputs of \code{covtype}).
 #' If a vector, the length should be equal to the number of modeled principal components.
+#' @param wf name of the wavelet filter to use in the decomposition
 #' @param boundary a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).
 #' @param J depth of the wavelet decomposition, must be a number less than or equal to log(min(M,N),2). Default is 1.
 #' @param coef.trend,coef.cov,coef.var optional vectors or matrices containing
@@ -75,31 +77,32 @@
 #' density_ratio = rep(1,100)
 #' gamma = lapply(c(2,3,51,7), function(i){outputs[,,i]})
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-#' rf_probas_k_fold(design = design,outputs = outputs, threshold = 2,
+#' rf_probas_k_fold(design = design,outputs = outputs, threshold_classification = 2, threshold_fpca = 0,
 #'  list_search = list_search, nb_folds = 10,density_ratio =
 #'  density_ratio, gamma = gamma, distance_func= distance_func, ncoeff = 400,
 #'   npc = 6, control = list(trace = FALSE))
 
-rf_probas_k_fold = function(design, outputs, threshold, list_search, nb_folds, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",boundary = "periodic",J=1,
+rf_probas_k_fold = function(design, outputs, threshold_classification, threshold_fpca = NULL, list_search, nb_folds, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                           coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                           nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                           parinit = NULL, multistart=1,
                           kernel=NULL,control = NULL,type = "UK",bias = NULL,...){
   if(is.null(seed)==FALSE){set.seed(seed)}
+  if(is.null(threshold_fpca)){threshold_fpca = threshold_classification}
   folds = kfold(length(density_ratio), nb_folds)
   probas_true = get_probas(density_ratio = density_ratio, outputs = outputs, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
   probas_pred_df = data.frame()
   relative_error_df = data.frame()
   sum_depth = Vectorize(function(it){sum(asub(x = outputs, dims = length(dim(outputs)), idx = it,drop = "selected"))})(1:dim(outputs)[length(dim(outputs))])
-  y = as.factor(sum_depth > threshold)
+  y = as.factor(sum_depth > threshold_classification)
   folds = kfold(length(y), nb_folds)
   model = list()
   fp = list()
   for(k in 1:nb_folds){
     indexes_train = which(folds !=k)
     indexes_test = which(folds == k)
-    indexes_train_fpca = which(sum_depth[indexes_train] > 0)
-    fp[[k]] = Fpca2d.Wavelets(asub(x = outputs, dims = length(dim(outputs)), idx = indexes_train[indexes_train_fpca],drop = FALSE), wf = "d4", boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
+    indexes_train_fpca = which(sum_depth[indexes_train] > threshold_fpca)
+    fp[[k]] = Fpca2d.Wavelets(asub(x = outputs, dims = length(dim(outputs)), idx = indexes_train[indexes_train_fpca],drop = FALSE), wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
     model[[k]] = km_Fpca2d(formula = formula, design = design[indexes_train[indexes_train_fpca],], response = fp[[k]],  covtype=covtype,
                            coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                            nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,

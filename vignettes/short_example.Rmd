@@ -10,7 +10,9 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = "#>",
+  fig.width=8, 
+  fig.height=6
 )
 ```
 
@@ -20,6 +22,7 @@ library(FunQuant)
 library(randtoolbox)
 library(ggplot2)
 library(evd)
+library(gridExtra)
 ```
 
 The main asset of the package is to perform probabilistic quantization of random outputs of any dimension. 
@@ -56,19 +59,20 @@ design = as.data.frame(halton(400,2))*2-1
 outputs = func2D(design)
 ```
 
-We can first perform quantization without considering the probabilistic distribution of the inputs.
+We can first perform quantization without considering the probabilistic distribution of the inputs. This is classical K-means quantization.
 
 ```{r}
 sum_depth = Vectorize(function(i){sum(outputs[,,i])})(1:dim(outputs)[3])
 gamma = lapply(1:5, function(i){outputs[,,which.min(abs(as.numeric(quantile(sum_depth,c(0,0.6,0.7,0.8,0.9))[i]) - sum_depth))[1]]}) #gamma will be the starting set of prototypes of the quantization. We choose an maps of only 0, and the maps with increasing sum of pixels
 
-res_proto_1 = proto_map_algo(gamma = gamma, outputs) 
+res_proto_1 = proto_map_algo(gamma = gamma, outputs = outputs) 
 
+list_plots_1 = list()
 for(i in 1:length(res_proto_1$gamma)){
-  print(plot_map(res_proto_1$gamma[[i]]))
+  list_plots_1[[i]] = plot_map(res_proto_1$gamma[[i]])
 }
+do.call("grid.arrange", c(list_plots_1, ncol=2))
 
-print(res_proto_1$probas)
 ```
 
 We can also consider the probabilistic distribution of the inputs. 
@@ -100,11 +104,13 @@ Then we can perform a probabilistic quantization
 
 ```{r}
 density_ratio = compute_density_ratio(f = fX, g = g, inputs = design)
-res_proto_2 = proto_map_algo(gamma = gamma, outputs, density_ratio = density_ratio) 
+res_proto_2 = proto_map_algo(gamma = gamma, outputs = outputs, density_ratio = density_ratio) 
 
+list_plots_2 = list()
 for(i in 1:length(res_proto_2$gamma)){
-  print(plot_map(res_proto_2$gamma[[i]]))
+  list_plots_2[[i]] = plot_map(res_proto_2$gamma[[i]])
 }
+do.call("grid.arrange", c(list_plots_2, ncol=2))
 
 print(res_proto_2$probas)
 ```

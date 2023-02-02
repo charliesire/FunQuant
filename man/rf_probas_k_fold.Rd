@@ -7,7 +7,8 @@
 rf_probas_k_fold(
   design,
   outputs,
-  threshold,
+  threshold_classification,
+  threshold_fpca = NULL,
   list_search,
   nb_folds,
   density_ratio,
@@ -22,6 +23,7 @@ rf_probas_k_fold(
   npc,
   formula = ~1,
   covtype = "matern5_2",
+  wf = "d4",
   boundary = "periodic",
   J = 1,
   coef.trend = NULL,
@@ -45,7 +47,9 @@ rf_probas_k_fold(
 
 \item{outputs}{The output samples on which the metamodel will be trained and tested by kfold cross validation}
 
-\item{threshold}{The threshold that creates the two classes of maps for the classification}
+\item{threshold_classification}{The threshold that creates the two classes of maps for the classification}
+
+\item{threshold_fpca}{The threshold used for the training of the FPCA. Only the maps for which the sum of the pixel is above this threshold are used for the training. If NULL, this threshold takes the value of threshold_classification.}
 
 \item{list_search}{A list containing for each hyperparameters to be tested a list of the tested values.}
 
@@ -77,6 +81,8 @@ specifying the linear trend of the kriging model (see \code{\link{lm}}) on each 
 specifying the covariance structure to be used on each modeled principal component
 (see \code{\link{km}} for possible inputs of \code{covtype}).
 If a vector, the length should be equal to the number of modeled principal components.}
+
+\item{wf}{name of the wavelet filter to use in the decomposition}
 
 \item{boundary}{a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).}
 
@@ -141,7 +147,7 @@ list_search = list("nodesize" = as.list(c(1,3,5,7,9,11)))
 density_ratio = rep(1,100)
 gamma = lapply(c(2,3,51,7), function(i){outputs[,,i]})
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-rf_probas_k_fold(design = design,outputs = outputs, threshold = 2,
+rf_probas_k_fold(design = design,outputs = outputs, threshold_classification = 2, threshold_fpca = 0,
  list_search = list_search, nb_folds = 10,density_ratio =
  density_ratio, gamma = gamma, distance_func= distance_func, ncoeff = 400,
   npc = 6, control = list(trace = FALSE))

@@ -1,14 +1,9 @@
-#' @title Predict outputs at new inputs, based on a training database.
+#' @title Train the different metamodel steps
 #'
-#' @param metamodel_fitted Optional list containing the different metamodel steps fitted on the training data. It contains a classifier, a Fpca2d object, and a list of km objects. Can be obtained with the function fit_metamodel.
 #' @param design_train a data frame representing the design of experiments of the training part.
 #' The ith row contains the values of the d input variables corresponding
 #' to the ith evaluation.
-#' @param design_test a data frame representing the design of experiments on which we want to predict outputs.
-#' The ith row contains the values of the d input variables corresponding
-#' to the ith evaluation.
 #' @param outputs_train The training output samples on which the metamodel will be trained
-#' @param only_positive A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.
 #' @param seed An optional random seed
 #' @param ncoeff The number of coefficients used for PCA
 #' @param npc The number of principal components
@@ -46,8 +41,11 @@
 #' @param control_classification The list of hyperparameters of the classification function. Required only if classfification is TRUE.
 #' @param threshold_classification The threshold that creates the two classes of maps for the classification
 #' @param threshold_fpca The threshold used for the training of the FPCA. Only the maps for which the sum of the pixel is above this threshold are used for the training. If NULL, this threshold takes the value of threshold_classification.
-#' @param ... other parameters of \code{\link{km}} function from \code{DiceKriging}.
-#' @return An array containing the predicted outputs.
+#' #' @param ... other parameters of \code{\link{km}} function from \code{DiceKriging}.
+#' @return An list containing :
+#' - a trained randomForest object
+#' - a trained Fpca2d object
+#' - a list of trained km object
 #' @export
 #' @import waveslim
 #' @import foreach
@@ -64,53 +62,39 @@
 #' return(Ymaps)
 #' }
 #' library(randtoolbox)
-#' design = as.data.frame(sobol(300,2))*2-1
+#' design = as.data.frame(sobol(250,2))*2-1
 #' outputs = func2D(design)
-#' design_train = design[1:250,]
-#' design_test = design[251:300,]
-#' outputs_train = outputs[,,1:250]
-#' outputs_test = outputs[,,251:300]
-#' outputs_pred = predict_outputs(design_train = design_train,
-#' design_test = design_test, outputs_train = outputs_train,
+#' fit_metamodel = predict_outputs(design_train = design, outputs_train = outputs_train,
 #' ncoeff = 400, npc = 6, control = list(trace = FALSE), classification = TRUE,
 #' control_classification = list(nodesize = 4), threshold_classification = 2)
 
-predict_outputs = function(metamodel_fitted = NULL, design_train, design_test, outputs_train, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",wf = "d4", boundary = "periodic",J=1,
+fit_metamodel = function(design_train, outputs_train, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                            coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                            nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                            parinit = NULL, multistart=1,
                            kernel=NULL,control = NULL,type = "UK", classification = FALSE, control_classification = NULL,threshold_classification = NULL,threshold_fpca = NULL,...){
-  if(is.null(metamodel_fitted)){
-    metamodel_fitted = fit_metamodel(design_train = design_train, outputs_train = outputs_train, seed = seed, ncoeff = ncoeff, npc = npc,
-                                     formula = formula, covtype = covtype, wf = wf, boundary = boundary, J=J,  coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
-                                     nugget = nugget, noise.var=noise.var, lower = lower, upper = upper, parinit = parinit, multistart=multistart,
-                                     kernel=kernel,control = control,type = type, classification = classification, control_classification = control_classification,threshold_classification = threshold_classification,threshold_fpca = threshold_fpca,...)
-  }
-  rf = metamodel_fitted$classifier
-  fp = metamodel_fitted$fp
-  model = metamodel_fitted$model
+  if(is.null(threshold_fpca)){threshold_fpca = threshold_classification}
   pred_fpca = TRUE
   if(classification){
-    rf_pred = as.numeric(predict(rf, design_test)) - 1
-    design_test_fpca = design_test[rf_pred == 1,]
-    if(sum(rf_pred) == 0){pred_fpca = FALSE}
-    }
+    sum_depth = Vectorize(function(it){sum(asub(x = outputs_train, idx = it, dims = length(dim(outputs_train)), drop = "selected"))})(1:dim(outputs_train)[length(dim(outputs_train))])
+    y = as.factor(sum_depth > threshold_classification)
+    indexes_train_fpca = which(sum_depth > threshold_fpca)
+    control_classification = c(control_classification, list("x" = design_train, "y" = y))
+    rf = do.call(randomForest, control_classification)
+    outputs_train_fpca = asub(x = outputs_train, dims = length(dim(outputs_train)), idx = indexes_train_fpca,drop = FALSE)
+    design_train_fpca = design_train[indexes_train_fpca,]
+  }
   else{
-    design_test_fpca = design_test
+    outputs_train_fpca = outputs_train
+    design_train_fpca = design_train
+    rf = NULL
   }
+  fp = Fpca2d.Wavelets(outputs_train_fpca, wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
+  model = km_Fpca2d(formula = formula, design = design_train_fpca, response = fp,  covtype=covtype,
+                      coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
+                      nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
+                      parinit = parinit, multistart=multistart,
+                      kernel=kernel,control = control)
 
-  if(pred_fpca){
-    pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test_fpca, type = type, compute = FALSE)$mean}), ncol = npc)
-    outputs_pred_draft = inverse_Fpca2d(pred,fp)
-  }
-  outputs_pred = array(0,dim = c(dim(outputs_train)[-length(dim(outputs_train))], nrow(design_test)))
-  if(classification == FALSE){outputs_pred = outputs_pred_draft}
-  else if(pred_fpca){
-    outputs_pred = array(0,dim = c(dim(outputs_train)[-length(dim(outputs_train))], nrow(design_test)))
-    dimnames(outputs_pred) = lapply(dim(outputs_pred), function(i){1:i})
-    dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(which(rf_pred == 1)))
-    afill(outputs_pred) = outputs_pred_draft
-  }
-  if(only_positive){outputs_pred = (outputs_pred > 0)*outputs_pred}
-  return(outputs_pred)
+  return(list(classifier = rf, fp = fp, model = model))
 }

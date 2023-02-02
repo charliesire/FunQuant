@@ -9,7 +9,8 @@ rf_rmse_training_test(
   design_test,
   outputs_train,
   outputs_test,
-  threshold,
+  threshold_classification,
+  threshold_fpca = NULL,
   list_search,
   return_pred = FALSE,
   only_positive = FALSE,
@@ -18,6 +19,7 @@ rf_rmse_training_test(
   npc,
   formula = ~1,
   covtype = "matern5_2",
+  wf = "d4",
   boundary = "periodic",
   J = 1,
   coef.trend = NULL,
@@ -48,7 +50,9 @@ to the ith evaluation.}
 
 \item{outputs_test}{The validation output samples on which the metamodel performance will be evaluated}
 
-\item{threshold}{The threshold that creates the two classes of maps for the classification}
+\item{threshold_classification}{The threshold that creates the two classes of maps for the classification}
+
+\item{threshold_fpca}{The threshold used for the training of the FPCA. Only the maps for which the sum of the pixel is above this threshold are used for the training. If NULL, this threshold takes the value of threshold_classification.}
 
 \item{list_search}{A list containing for each hyperparameters to be tested a list of the tested values.}
 
@@ -72,6 +76,8 @@ specifying the linear trend of the kriging model (see \code{\link{lm}}) on each 
 specifying the covariance structure to be used on each modeled principal component
 (see \code{\link{km}} for possible inputs of \code{covtype}).
 If a vector, the length should be equal to the number of modeled principal components.}
+
+\item{wf}{name of the wavelet filter to use in the decomposition}
 
 \item{boundary}{a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).}
 
@@ -139,6 +145,6 @@ list_search = list("nodesize" = as.list(df_search[,2]),
 df_search[i,1], 1-df_search[i,1])}))
 list_rf_rmse_train_test = rf_rmse_training_test(design_train = design_train,
  design_test = design_test, outputs_train = outputs_train, outputs_test =
- outputs_test, threshold = 2, list_search = list_search, ncoeff = 400,
+ outputs_test, threshold_classification = 2, threshold_fpca = 0, list_search = list_search, ncoeff = 400,
  npc = 6, control = list(trace = FALSE))
 }

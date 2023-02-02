@@ -13,7 +13,8 @@ Suggests:
     randtoolbox,
     rmarkdown,
     ggplot2,
-    evd
+    evd,
+    gridExtra
 Imports: abind, waveslim, DiceKriging, foreach, dismo, randomForest, GpOutput2D
 Remotes: tranvivielodie/GpOutput2D/GpOutput2D
 RoxygenNote: 7.2.3
