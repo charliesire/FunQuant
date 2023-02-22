@@ -6,13 +6,13 @@
 \usage{
 predict_outputs(
   metamodel_fitted = NULL,
-  design_train,
+  design_train = NULL,
   design_test,
-  outputs_train,
+  outputs_train = NULL,
   only_positive = FALSE,
   seed = NULL,
-  ncoeff,
-  npc,
+  ncoeff = NULL,
+  npc = NULL,
   formula = ~1,
   covtype = "matern5_2",
   wf = "d4",

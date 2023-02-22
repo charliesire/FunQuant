@@ -73,5 +73,5 @@ gamma_list[[1]] = list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6,
 gamma_list[[2]] = list(array(1:9, dim = c(3,3)), array(5:13, dim = c(3,3)), array(7:15, dim = c(3,3)))
 outputs = array(runif(9*20)*15, dim = c(3,3,20))
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-proto_map_algo_multistart(gamma_list = gamma, outputs = outputs, distance_func = distance_func)
+proto_map_algo(gamma_list = gamma, outputs = outputs, distance_func = distance_func)
 }

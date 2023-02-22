@@ -34,7 +34,7 @@
 #' gamma_list[[2]] = list(array(1:9, dim = c(3,3)), array(5:13, dim = c(3,3)), array(7:15, dim = c(3,3)))
 #' outputs = array(runif(9*20)*15, dim = c(3,3,20))
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-#' proto_map_algo_multistart(gamma_list = gamma, outputs = outputs, distance_func = distance_func)
+#' proto_map_algo(gamma_list = gamma, outputs = outputs, distance_func = distance_func)
 
 proto_map_algo = function(gamma = NULL, nb_cells = NULL, outputs, multistart = 1, method_IS = "unique", density_ratio = rep(1, dim(outputs)[length(dim(outputs))]), budget = 10^3, threshold = 0, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},print_progress = FALSE, trace = FALSE, all_starts = FALSE,bias = NULL, index_sampling_error = NULL, seed = NULL){
   if(is.null(dim(outputs))){outputs = t(as.matrix(outputs))}

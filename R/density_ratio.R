@@ -13,9 +13,10 @@
 #' inputs = array(rnorm(30), dim = c(10,3))
 #' compute_density_ratio(f,g, inputs)
 compute_density_ratio = function(f, g, inputs){
-  f_vec = apply(inputs, 1, f)
-  g_vec = apply(inputs, 1, g)
-  return(f_vec/g_vec)
+  res = foreach(i = 1:nrow(inputs), .combine = 'c')%dopar%{
+    as.numeric(f(inputs[i,])/g(inputs[i,]))
+    }
+  return(res)
 }
 
 

@@ -75,7 +75,7 @@
 #' ncoeff = 400, npc = 6, control = list(trace = FALSE), classification = TRUE,
 #' control_classification = list(nodesize = 4), threshold_classification = 2)
 
-predict_outputs = function(metamodel_fitted = NULL, design_train, design_test, outputs_train, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2",wf = "d4", boundary = "periodic",J=1,
+predict_outputs = function(metamodel_fitted = NULL, design_train = NULL, design_test, outputs_train = NULL, only_positive = FALSE, seed = NULL, ncoeff = NULL,npc = NULL, formula = ~1, covtype="matern5_2",wf = "d4", boundary = "periodic",J=1,
                            coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                            nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                            parinit = NULL, multistart=1,
@@ -100,13 +100,13 @@ predict_outputs = function(metamodel_fitted = NULL, design_train, design_test, o
   }
 
   if(pred_fpca){
-    pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test_fpca, type = type, compute = FALSE)$mean}), ncol = npc)
+    pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test_fpca, type = type, compute = FALSE, checkNames = FALSE)$mean}), ncol = npc)
     outputs_pred_draft = inverse_Fpca2d(pred,fp)
   }
-  outputs_pred = array(0,dim = c(dim(outputs_train)[-length(dim(outputs_train))], nrow(design_test)))
+  outputs_pred = array(0,dim = c(dim(fp$EigFct)[-length(dim(fp$EigFct))], nrow(design_test)))
   if(classification == FALSE){outputs_pred = outputs_pred_draft}
   else if(pred_fpca){
-    outputs_pred = array(0,dim = c(dim(outputs_train)[-length(dim(outputs_train))], nrow(design_test)))
+    outputs_pred = array(0,dim = c(dim(fp$EigFct)[-length(dim(fp$EigFct))], nrow(design_test)))
     dimnames(outputs_pred) = lapply(dim(outputs_pred), function(i){1:i})
     dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(which(rf_pred == 1)))
     afill(outputs_pred) = outputs_pred_draft

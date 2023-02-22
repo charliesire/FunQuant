@@ -123,7 +123,7 @@ return(Ymaps)
 library(randtoolbox)
 design = as.data.frame(sobol(250,2))*2-1
 outputs = func2D(design)
-fit_metamodel = predict_outputs(design_train = design, outputs_train = outputs_train,
+fit_metamodel = fit_metamodel(design_train = design, outputs_train = outputs_train,
 ncoeff = 400, npc = 6, control = list(trace = FALSE), classification = TRUE,
 control_classification = list(nodesize = 4), threshold_classification = 2)
 }
