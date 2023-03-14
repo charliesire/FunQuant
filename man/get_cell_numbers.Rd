@@ -5,19 +5,19 @@
 \title{Provide the Voronoï cell number associated to each sample}
 \usage{
 get_cell_numbers(
-  outputs,
-  gamma,
+  data,
+  prototypes,
   distance_func = function(A1, A2) {
      return(sqrt(sum((A1 - A2)^2)))
  }
 )
 }
 \arguments{
-\item{outputs}{The output samples that need to be quantized. Useful only if cell_numbers == NULL.}
+\item{data}{The data that needs to be quantized. Useful only if cell_numbers == NULL.}
 
-\item{gamma}{A set of prototypes. Useful only if cell_numbers == NULL.}
+\item{prototypes}{A set of prototypes. Useful only if cell_numbers == NULL.}
 
-\item{distance_func}{A function computing a distance between two elements in the output spaces. Useful only if cell_numbers == NULL.}
+\item{distance_func}{A function computing a distance between two data elements. Useful only if cell_numbers == NULL.}
 }
 \value{
 A vector providing the Voronoï cell number associated to each sample.
@@ -26,8 +26,8 @@ A vector providing the Voronoï cell number associated to each sample.
 Provide the Voronoï cell number associated to each sample
 }
 \examples{
-gamma = list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3,3)))
-outputs = array(runif(9*20)*20, dim = c(3,3,20))
+prototypes = list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3,3)))
+data = array(runif(9*20)*20, dim = c(3,3,20))
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-get_cell_numbers(outputs = outputs, gamma = gamma, distance_func = distance_func)
+get_cell_numbers(data = data, prototypes = prototypes, distance_func = distance_func)
 }

@@ -8,7 +8,7 @@ probas_training_test(
   outputs_train,
   outputs_test,
   density_ratio,
-  gamma,
+  prototypes,
   distance_func = function(A1, A2) {
      return(sqrt(sum((A1 - A2)^2)))
  },
@@ -35,7 +35,7 @@ probas_training_test(
   kernel = NULL,
   control = NULL,
   type = "UK",
-  bias = rep(0, length(gamma)),
+  bias = rep(0, length(prototypes)),
   ...
 )
 }
@@ -46,7 +46,7 @@ probas_training_test(
 
 \item{density_ratio}{density_ratio indicates the weight fX/g of each output}
 
-\item{gamma}{A set of l prototypes defining the Voronoï cells}
+\item{prototypes}{A set of l prototypes defining the Voronoï cells}
 
 \item{distance_func}{A function computing a distance between two elements in the output spaces.}
 
@@ -136,10 +136,10 @@ design_train = data.frame(X = seq(-1,1,l= 8))
 outputs_train = func2D(design_train)
 design_test = data.frame(X = seq(-0.99,0.99,l=50))
 outputs_test = func2D(design_test)
-gamma = lapply(c(10,20,30,40,50), function(i){outputs_test[,,i]})
+prototypes = lapply(c(10,20,30,40,50), function(i){outputs_test[,,i]})
 density_ratio = rep(1, 50)
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-list_probas_train_test = probas_training_test(gamma = gamma,
+list_probas_train_test = probas_training_test(prototypes = prototypes,
 density_ratio = density_ratio, distance_func = distance_func, return_pred = TRUE,
  outputs_train = outputs_train, outputs_test = outputs_test,
  ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design_train = design_train,

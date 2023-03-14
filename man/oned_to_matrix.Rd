@@ -4,10 +4,10 @@
 \alias{oned_to_matrix}
 \title{Transform every 1D prototype into a column matrix}
 \usage{
-oned_to_matrix(gamma)
+oned_to_matrix(prototypes)
 }
 \arguments{
-\item{gamma}{a list of prototypes}
+\item{prototypes}{a list of prototypes}
 }
 \value{
 A list of matrices prototypes

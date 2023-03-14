@@ -97,8 +97,9 @@ for each principal component. At this stage, the parameters must be provided as 
 
 \item{threshold_classification}{The threshold that creates the two classes of maps for the classification}
 
-\item{threshold_fpca}{The threshold used for the training of the FPCA. Only the maps for which the sum of the pixel is above this threshold are used for the training. If NULL, this threshold takes the value of threshold_classification.
-#' @param ... other parameters of \code{\link{km}} function from \code{DiceKriging}.}
+\item{threshold_fpca}{The threshold used for the training of the FPCA. Only the maps for which the sum of the pixel is above this threshold are used for the training. If NULL, this threshold takes the value of threshold_classification.}
+
+\item{...}{other parameters of \code{\link{km}} function from \code{DiceKriging}.}
 }
 \value{
 An list containing :
@@ -123,7 +124,7 @@ return(Ymaps)
 library(randtoolbox)
 design = as.data.frame(sobol(250,2))*2-1
 outputs = func2D(design)
-fit_metamodel = fit_metamodel(design_train = design, outputs_train = outputs_train,
+fit_metamodel = fit_metamodel(design_train = design, outputs_train = outputs,
 ncoeff = 400, npc = 6, control = list(trace = FALSE), classification = TRUE,
 control_classification = list(nodesize = 4), threshold_classification = 2)
 }

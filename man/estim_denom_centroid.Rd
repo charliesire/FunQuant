@@ -7,9 +7,9 @@
 estim_denom_centroid(density_ratio, cell_numbers, cell, bias = 0)
 }
 \arguments{
-\item{density_ratio}{density_ratio indicates the weight fX/g of each output}
+\item{density_ratio}{density_ratio indicates the weight fX/g of each data element}
 
-\item{cell_numbers}{The output samples that need to be quantized}
+\item{cell_numbers}{The voronoi cell number of every data element.}
 
 \item{cell}{The cell number of the computed centroid}
 

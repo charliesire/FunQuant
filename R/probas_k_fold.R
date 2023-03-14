@@ -3,7 +3,7 @@
 #' @param outputs The output samples on which the metamodel will be trained and tested by kfold cross validation
 #' @param nb_folds Number of folds
 #' @param density_ratio density_ratio indicates the weight fX/g of each output
-#' @param gamma A set of l prototypes defining the Voronoï cells
+#' @param prototypes A set of l prototypes defining the Voronoï cells
 #' @param distance_func  A function computing a distance between two elements in the output spaces.
 #' @param ncoeff_vec A vector providing the different values of ncoeff to be tested. ncoeff fixes the number of coefficients used for PCA.
 #' @param npc_vec A vector providing the different numbers of principal components to be tested.
@@ -65,31 +65,31 @@
 #' }
 #' design = data.frame(X = seq(-1,1,l= 20))
 #' outputs = func2D(design)
-#' gamma = lapply(c(1,5,10,15,20), function(i){outputs[,,i]})
+#' prototypes = lapply(c(1,5,10,15,20), function(i){outputs[,,i]})
 #' density_ratio = rep(1, 20)
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
 
 #' list_probas_k_fold = probas_k_fold(outputs = outputs, nb_folds = 5,
-#' density_ratio = density_ratio, gamma = gamma, distance_func = distance_func
+#' density_ratio = density_ratio, prototypes = prototypes, distance_func = distance_func
 #' , ncoeff_vec = c(50,100,200,400), npc_vec = 2:4,
 #' design = design, control = list(trace = FALSE))
 
-probas_k_fold = function(outputs, nb_folds, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
+probas_k_fold = function(outputs, nb_folds, density_ratio, prototypes, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                          coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                          nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                          parinit = NULL, multistart=1,
-                         kernel=NULL,control = NULL,type = "UK",seed = NULL, bias = rep(0, length(gamma)),...){
+                         kernel=NULL,control = NULL,type = "UK",seed = NULL, bias = rep(0, length(prototypes)),...){
   if(is.null(seed) == FALSE){set.seed(seed)}
   length_dim = length(dim(outputs))
   grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
   folds = kfold(length(density_ratio), nb_folds)
-  probas_true = get_probas(density_ratio = density_ratio, outputs = outputs, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
+  probas_true = get_probas(density_ratio = density_ratio, data = outputs, prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
   probas_pred_df = data.frame()
   outputs_pred_list = list()
   outputs_pred = list()
   relative_error_df = data.frame()
   for(k in 1:nb_folds){
-    outputs_pred_list[[k]] = probas_training_test(outputs_train = asub(outputs,dims = length(dim(outputs)), idx = which(folds != k)),outputs_test = asub(outputs,dims = length(dim(outputs)), idx = which(folds == k)), density_ratio = density_ratio, gamma = gamma, distance_func = distance_func, ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype, wf = wf, boundary = boundary,J=J,
+    outputs_pred_list[[k]] = probas_training_test(outputs_train = asub(outputs,dims = length(dim(outputs)), idx = which(folds != k)),outputs_test = asub(outputs,dims = length(dim(outputs)), idx = which(folds == k)), density_ratio = density_ratio, prototypes = prototypes, distance_func = distance_func, ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype, wf = wf, boundary = boundary,J=J,
                                                   coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                                                   nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                                                   parinit = parinit, multistart=multistart,
@@ -102,7 +102,7 @@ probas_k_fold = function(outputs, nb_folds, density_ratio, gamma, distance_func 
       dimnames(outputs_pred_list[[k]][[i]]) = c(lapply(dim(outputs_pred_list[[k]][[i]])[-length(dim(outputs_pred_list[[k]][[i]]))], function(i){1:i}), list(which(folds == k)))
       afill(outputs_pred[[i]]) = outputs_pred_list[[k]][[i]]
     }
-    probas_pred_cv = get_probas(density_ratio = density_ratio, outputs = outputs_pred[[i]], gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
+    probas_pred_cv = get_probas(density_ratio = density_ratio, data = outputs_pred[[i]], prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
     probas_pred_df = rbind(probas_pred_df, c(as.numeric(grid_cv[i,]), probas_pred_cv))
     relative_error_df = rbind(relative_error_df, c(as.numeric(grid_cv[i,]), abs(probas_pred_cv - probas_true)/probas_true))
   }

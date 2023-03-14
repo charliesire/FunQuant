@@ -81,9 +81,12 @@
 #' "classwt" = lapply(1:nrow(df_search), function(i){c(
 #' df_search[i,1], 1-df_search[i,1])}))
 
-#' list_rf_rmse_train_test = rf_rmse_training_test(design_train = design_train,
-#'  design_test = design_test, outputs_train = outputs_train, outputs_test =
-#'  outputs_test, threshold_classification = 2, threshold_fpca = 0, list_search = list_search, ncoeff = 400,
+#' list_rf_rmse_train_test = rf_rmse_training_test(design_train =
+#' design_train,
+#'  design_test = design_test, outputs_train = outputs_train,
+#'   outputs_test =
+#'  outputs_test, threshold_classification = 2,
+#'  threshold_fpca = 0, list_search = list_search, ncoeff = 400,
 #'  npc = 6, control = list(trace = FALSE))
 
 rf_rmse_training_test = function(design_train, design_test, outputs_train, outputs_test,threshold_classification, threshold_fpca = NULL, list_search,return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,

@@ -5,22 +5,25 @@
 \title{Compututation of the empirical quantization error}
 \usage{
 quanti_error(
-  outputs,
-  gamma,
+  data,
+  prototypes,
   density_ratio,
+  batch = FALSE,
   distance_func = function(A1, A2) {
      return(sqrt(sum((A1 - A2)^2)))
  }
 )
 }
 \arguments{
-\item{outputs}{The output samples that need to be quantized. Useful only if cell_numbers == NULL.}
+\item{data}{The data that needs to be quantized. Useful only if cell_numbers == NULL.}
 
-\item{gamma}{A set of prototypes. Useful only if cell_numbers == NULL.}
+\item{prototypes}{A set of prototypes. Useful only if cell_numbers == NULL.}
 
-\item{density_ratio}{density_ratio indicates the weight fX/g of each output}
+\item{density_ratio}{density_ratio indicates the weight fX/g of each data element.}
 
-\item{distance_func}{A function computing a distance between two elements in the output spaces. Useful only if cell_numbers == NULL.}
+\item{batch}{A boolean indicating whether the computations must be performed by batch or not. If TRUE, data, cell_numbers and density_ratio must be lists. Default is False.}
+
+\item{distance_func}{A function computing a distance between two data elements. Useful only if cell_numbers == NULL.}
 }
 \value{
 An estimation of the quantization error
@@ -29,10 +32,10 @@ An estimation of the quantization error
 Compututation of the empirical quantization error
 }
 \examples{
-gamma = list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3,3)))
-outputs = array(runif(9*20)*20, dim = c(3,3,20))
+prototypes = list(array(10, dim = c(3,3)), array(5, dim = c(3,3)), array(6, dim = c(3,3)))
+data = array(runif(9*20)*20, dim = c(3,3,20))
 density_ratio = rep(1,20)
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-quanti_error(outputs = outputs, gamma = gamma, density_ratio = density_ratio,
+quanti_error(data = data, prototypes = prototypes, density_ratio = density_ratio,
 distance_func = distance_func)
 }

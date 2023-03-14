@@ -12,7 +12,7 @@ rf_probas_k_fold(
   list_search,
   nb_folds,
   density_ratio,
-  gamma,
+  prototypes,
   distance_func = function(A1, A2) {
      return(sqrt(sum((A1 - A2)^2)))
  },
@@ -57,7 +57,7 @@ rf_probas_k_fold(
 
 \item{density_ratio}{density_ratio indicates the weight fX/g of each output}
 
-\item{gamma}{A set of l prototypes defining the Voronoï cells}
+\item{prototypes}{A set of l prototypes defining the Voronoï cells}
 
 \item{distance_func}{A function computing a distance between two elements in the output spaces.}
 
@@ -145,10 +145,12 @@ design = as.data.frame(sobol(100,2))*2-1
 outputs = func2D(design)
 list_search = list("nodesize" = as.list(c(1,3,5,7,9,11)))
 density_ratio = rep(1,100)
-gamma = lapply(c(2,3,51,7), function(i){outputs[,,i]})
+prototypes = lapply(c(2,3,51,7), function(i){outputs[,,i]})
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-rf_probas_k_fold(design = design,outputs = outputs, threshold_classification = 2, threshold_fpca = 0,
- list_search = list_search, nb_folds = 10,density_ratio =
- density_ratio, gamma = gamma, distance_func= distance_func, ncoeff = 400,
-  npc = 6, control = list(trace = FALSE))
+rf_probas_k_fold(design = design,outputs = outputs,
+threshold_classification = 2, threshold_fpca = 0,
+list_search = list_search, nb_folds = 10,
+density_ratio = density_ratio, prototypes = prototypes,
+distance_func= distance_func, ncoeff = 400,
+npc = 6, control = list(trace = FALSE))
 }

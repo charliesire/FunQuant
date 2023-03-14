@@ -14,7 +14,7 @@
 #' @param seed An optional random seed
 #' @param ... other parameters of \code{\link{randomForest}} function from \code{randomForest}.
 #' @param density_ratio density_ratio indicates the weight fX/g of each output
-#' @param gamma A set of l prototypes defining the Voronoï cells
+#' @param prototypes A set of l prototypes defining the Voronoï cells
 #' @param distance_func  A function computing a distance between two elements in the output spaces.
 #' @param return_pred A boolean indicating whether the predicted outputs should be returned or not
 #' @param only_positive A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.
@@ -85,23 +85,26 @@
 #' list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search),
 #' function(i){c(df_search[i,1], 1-df_search[i,1])}))
 #' density_ratio = rep(1,50)
-#' gamma = lapply(c(2,3,51,7), function(i){outputs[,,i]})
+#' prototypes = lapply(c(2,3,51,7), function(i){outputs[,,i]})
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
 
-#' list_rf_prob_train_test = rf_probas_training_test(design_train = design_train,
+#' list_rf_prob_train_test = rf_probas_training_test(design_train =
+#' design_train,
 #' design_test = design_test, outputs_train = outputs_train,
-#' outputs_test = outputs_test, threshold_classification = 2, threshold_fpca = 0, list_search = list_search,
-#' density_ratio = density_ratio, gamma = gamma, distance_func= distance_func,
+#' outputs_test = outputs_test, threshold_classification = 2,
+#'  threshold_fpca = 0, list_search = list_search,
+#' density_ratio = density_ratio, prototypes = prototypes,
+#' distance_func= distance_func,
 #' ncoeff = 400, npc = 6, control = list(trace = FALSE))
 
-rf_probas_training_test = function(design_train, design_test, outputs_train, outputs_test,threshold_classification, threshold_fpca = NULL, list_search, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
+rf_probas_training_test = function(design_train, design_test, outputs_train, outputs_test,threshold_classification, threshold_fpca = NULL, list_search, density_ratio, prototypes, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                            coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                            nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                            parinit = NULL, multistart=1,
                            kernel=NULL,control = NULL,type = "UK",bias = NULL,...){
   if(is.null(seed)==FALSE){set.seed(seed)}
   if(is.null(threshold_fpca)){threshold_fpca = threshold_classification}
-  probas_true = get_probas(density_ratio = density_ratio, outputs = outputs_test, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
+  probas_true = get_probas(density_ratio = density_ratio, data = outputs_test, prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
   probas_pred_df = data.frame()
   relative_error_df = data.frame()
   sum_depth = Vectorize(function(it){sum(asub(x = outputs_train, idx = it, dims = length(dim(outputs_train)), drop = "selected"))})(1:dim(outputs_train)[length(dim(outputs_train))])
@@ -136,7 +139,7 @@ rf_probas_training_test = function(design_train, design_test, outputs_train, out
       afill(outputs_pred[[i]]) = outputs_pred_draft
     }
     if(only_positive){outputs_pred[[i]] = (outputs_pred[[i]] > 0)*outputs_pred[[i]]}
-    probas_pred_cv = get_probas(density_ratio = density_ratio, outputs = outputs_pred[[i]], gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
+    probas_pred_cv = get_probas(density_ratio = density_ratio, data = outputs_pred[[i]], prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
     probas_pred_df = rbind(probas_pred_df,probas_pred_cv)
     relative_error = abs(probas_pred_cv - probas_true)/probas_true
     relative_error[probas_pred_cv == 0 & probas_true == 0] = 0

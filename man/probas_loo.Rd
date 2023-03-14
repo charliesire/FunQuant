@@ -7,7 +7,7 @@
 probas_loo(
   outputs,
   density_ratio,
-  gamma,
+  prototypes,
   distance_func = function(A1, A2) {
      return(sqrt(sum((A1 - A2)^2)))
  },
@@ -42,7 +42,7 @@ probas_loo(
 
 \item{density_ratio}{density_ratio indicates the weight fX/g of each output}
 
-\item{gamma}{A set of l prototypes defining the Voronoï cells}
+\item{prototypes}{A set of l prototypes defining the Voronoï cells}
 
 \item{distance_func}{A function computing a distance between two elements in the output spaces.}
 
@@ -127,10 +127,10 @@ return(Ymaps)
 }
 design = data.frame(X = seq(-1,1,l= 20))
 outputs = func2D(design)
-gamma = lapply(c(1,3,6,8,10,14,16,18), function(i){outputs[,,i]})
+prototypes = lapply(c(1,3,6,8,10,14,16,18), function(i){outputs[,,i]})
 density_ratio = rep(1, 20)
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
 list_probas_loo = probas_loo(outputs = outputs, density_ratio = density_ratio,
- gamma = gamma, distance_func = distance_func, ncoeff_vec = c(50,100,200,400),
+ prototypes = prototypes, distance_func = distance_func, ncoeff_vec = c(50,100,200,400),
   npc_vec = 2:4, design = design, control = list(trace = FALSE))
 }

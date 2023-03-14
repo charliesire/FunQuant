@@ -1,12 +1,12 @@
 #' @title Computation of the IS centroid standard deviation for different sets of prototypes.
 #'
-#' @param outputs The output samples that need to be quantized. Useful only if cell_numbers == NULL.
-#' @param gamma_list A list of gamma on which we want to evaluate the IS centroid standard deviation. Each gamma is a set of prototypes.
-#' @param density_ratio density_ratio indicates the weight fX/g of each output.
-#' @param distance_func  A function computing a distance between two elements in the output spaces.
+#' @param data The data samples that need to be quantized. Useful only if cell_numbers == NULL.
+#' @param prototypes_list A list of set of prototypes on which we want to evaluate the IS centroid standard deviation. Each element is a list of prototypes.
+#' @param density_ratio density_ratio indicates the weight fX/g of each data element.
+#' @param distance_func  A function computing a distance between two data elements.
 #' @param cells The Voronoï cell numbers that we are investigating.
 #' @param nv The size of the sample for which we want to estimate the IS centroid standard deviation.
-#' @param cell_numbers An optional list providing for each set of prototypes the voronoi cell number of every output.
+#' @param cell_numbers An optional list providing for each set of prototypes the voronoi cell number of every data element.
 #' @return A list providing for each set of prototypes a list the IS centroid standard deviation for each voronoi cell
 #' @export
 #' @import abind
@@ -21,21 +21,21 @@
 #' return(Ymaps)
 #' }
 #' design = data.frame(X = seq(-1,1,l= 50))
-#' outputs = func2D(design)
-#' gamma_list = list(lapply(c(1,3,10,14,18), function(i){outputs[,,i]}))
+#' data = func2D(design)
+#' prototypes_list = list(lapply(c(1,3,10,14,18), function(i){data[,,i]}))
 #' density_ratio = rep(1, 50)
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-#' list_std_centroid = std_centroid(outputs = outputs, gamma_list =
-#' gamma_list, density_ratio = density_ratio, distance_func = distance_func
-#' , cells = 1:length(gamma_list[[1]]), nv = 50)
-std_centroid = function(outputs, gamma_list, density_ratio, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},cells, cell_numbers = NULL, nv){
+#' list_std_centroid = std_centroid(data = data, prototypes_list =
+#' prototypes_list, density_ratio = density_ratio, distance_func = distance_func
+#' , cells = 1:length(prototypes_list[[1]]), nv = 50)
+std_centroid = function(data, prototypes_list, density_ratio, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},cells, cell_numbers = NULL, nv){
 
-  weighted_map = t(matrix(outputs, nrow = prod(dim(outputs)[-length(dim(outputs))]),ncol = dim(outputs)[length(dim(outputs))]))*density_ratio
+  weighted_map = t(matrix(data, nrow = prod(dim(data)[-length(dim(data))]),ncol = dim(data)[length(dim(data))]))*density_ratio
   std_ratio_list = list()
-  for(it in 1:length(gamma_list)){
-    gamma = gamma_list[[it]]#for all Gamma
+  for(it in 1:length(prototypes_list)){
+    prototypes = prototypes_list[[it]]
     std_ratio_list[[it]] = as.list(rep(0,length(cells)))
-    if(is.null(cell_numbers)){cell_numbers_it = get_cell_numbers(outputs = outputs, gamma = gamma, distance_func = distance_func)}
+    if(is.null(cell_numbers)){cell_numbers_it = get_cell_numbers(data = data, prototypes = prototypes, distance_func = distance_func)}
     else{cell_numbers_it = cell_numbers[[it]]}
     for(j in cells){#for all voronoi cells
       map_loop = weighted_map #weighted map is the set of maps multiplied by the weights f_{x}/mu

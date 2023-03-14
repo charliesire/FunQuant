@@ -5,6 +5,7 @@
 #' @param inputs The value of the sampled inputs
 #'
 #' @return A vector with the weights fX/g of the inputs
+#' @import foreach
 #' @export
 #'
 #' @examples
@@ -13,8 +14,8 @@
 #' inputs = array(rnorm(30), dim = c(10,3))
 #' compute_density_ratio(f,g, inputs)
 compute_density_ratio = function(f, g, inputs){
-  res = foreach(i = 1:nrow(inputs), .combine = 'c')%dopar%{
-    as.numeric(f(inputs[i,])/g(inputs[i,]))
+  res = foreach(it = 1:nrow(inputs), .combine = 'c')%dopar%{
+    as.numeric(f(inputs[it,])/g(inputs[it,]))
     }
   return(res)
 }

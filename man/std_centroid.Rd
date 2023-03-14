@@ -5,8 +5,8 @@
 \title{Computation of the IS centroid standard deviation for different sets of prototypes.}
 \usage{
 std_centroid(
-  outputs,
-  gamma_list,
+  data,
+  prototypes_list,
   density_ratio,
   distance_func = function(A1, A2) {
      return(sqrt(sum((A1 - A2)^2)))
@@ -17,17 +17,17 @@ std_centroid(
 )
 }
 \arguments{
-\item{outputs}{The output samples that need to be quantized. Useful only if cell_numbers == NULL.}
+\item{data}{The data samples that need to be quantized. Useful only if cell_numbers == NULL.}
 
-\item{gamma_list}{A list of gamma on which we want to evaluate the IS centroid standard deviation. Each gamma is a set of prototypes.}
+\item{prototypes_list}{A list of set of prototypes on which we want to evaluate the IS centroid standard deviation. Each element is a list of prototypes.}
 
-\item{density_ratio}{density_ratio indicates the weight fX/g of each output.}
+\item{density_ratio}{density_ratio indicates the weight fX/g of each data element.}
 
-\item{distance_func}{A function computing a distance between two elements in the output spaces.}
+\item{distance_func}{A function computing a distance between two data elements.}
 
 \item{cells}{The Voronoï cell numbers that we are investigating.}
 
-\item{cell_numbers}{An optional list providing for each set of prototypes the voronoi cell number of every output.}
+\item{cell_numbers}{An optional list providing for each set of prototypes the voronoi cell number of every data element.}
 
 \item{nv}{The size of the sample for which we want to estimate the IS centroid standard deviation.}
 }
@@ -47,11 +47,11 @@ Ymaps<- array(unlist(Y),dim=c(20,20,n))
 return(Ymaps)
 }
 design = data.frame(X = seq(-1,1,l= 50))
-outputs = func2D(design)
-gamma_list = list(lapply(c(1,3,10,14,18), function(i){outputs[,,i]}))
+data = func2D(design)
+prototypes_list = list(lapply(c(1,3,10,14,18), function(i){data[,,i]}))
 density_ratio = rep(1, 50)
 distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
-list_std_centroid = std_centroid(outputs = outputs, gamma_list =
-gamma_list, density_ratio = density_ratio, distance_func = distance_func
-, cells = 1:length(gamma_list[[1]]), nv = 50)
+list_std_centroid = std_centroid(data = data, prototypes_list =
+prototypes_list, density_ratio = density_ratio, distance_func = distance_func
+, cells = 1:length(prototypes_list[[1]]), nv = 50)
 }

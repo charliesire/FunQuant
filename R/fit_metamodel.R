@@ -41,7 +41,7 @@
 #' @param control_classification The list of hyperparameters of the classification function. Required only if classfification is TRUE.
 #' @param threshold_classification The threshold that creates the two classes of maps for the classification
 #' @param threshold_fpca The threshold used for the training of the FPCA. Only the maps for which the sum of the pixel is above this threshold are used for the training. If NULL, this threshold takes the value of threshold_classification.
-#' #' @param ... other parameters of \code{\link{km}} function from \code{DiceKriging}.
+#' @param ... other parameters of \code{\link{km}} function from \code{DiceKriging}.
 #' @return An list containing :
 #' - a trained randomForest object
 #' - a trained Fpca2d object
@@ -64,7 +64,7 @@
 #' library(randtoolbox)
 #' design = as.data.frame(sobol(250,2))*2-1
 #' outputs = func2D(design)
-#' fit_metamodel = fit_metamodel(design_train = design, outputs_train = outputs_train,
+#' fit_metamodel = fit_metamodel(design_train = design, outputs_train = outputs,
 #' ncoeff = 400, npc = 6, control = list(trace = FALSE), classification = TRUE,
 #' control_classification = list(nodesize = 4), threshold_classification = 2)
 
@@ -94,7 +94,7 @@ fit_metamodel = function(design_train, outputs_train, seed = NULL, ncoeff,npc, f
                       coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                       nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                       parinit = parinit, multistart=multistart,
-                      kernel=kernel,control = control)
+                      kernel=kernel,control = control,...)
 
   return(list(classifier = rf, fp = fp, model = model))
 }

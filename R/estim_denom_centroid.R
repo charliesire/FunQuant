@@ -1,7 +1,7 @@
 #' Title Compute the estimator which is the denominator of the centroid estimation
 #'
-#' @param density_ratio density_ratio indicates the weight fX/g of each output
-#' @param cell_numbers The output samples that need to be quantized
+#' @param density_ratio density_ratio indicates the weight fX/g of each data element
+#' @param cell_numbers The voronoi cell number of every data element.
 #' @param cell The cell number of the computed centroid
 #' @param bias A number indicating the bias that came out when computing the importance sampling estimators of the membership probabilities of the Voronoi cell. Default is 0.
 #'

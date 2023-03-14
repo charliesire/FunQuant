@@ -71,7 +71,8 @@
 #' outputs = func2D(design)
 #' list_search = list("nodesize" = as.list(c(1,3,5,7,9,11)))
 #' list_rf_rmse_k_fold = rf_rmse_k_fold(design = design,outputs = outputs,
-#'  threshold_classification = 2, threshold_fpca = 0, list_search = list_search, nb_folds = 10, ncoeff = 400,
+#'  threshold_classification = 2, threshold_fpca = 0,
+#'  list_search = list_search, nb_folds = 10, ncoeff = 400,
 #'   npc = 6, control = list(trace = FALSE))
 
 rf_rmse_k_fold = function(design, outputs, threshold_classification, threshold_fpca = NULL, list_search, nb_folds, return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,

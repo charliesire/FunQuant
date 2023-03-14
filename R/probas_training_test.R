@@ -3,7 +3,7 @@
 #' @param outputs_train The training output samples on which the metamodel will be trained
 #' @param outputs_test  The validation output samples on which the metamodel performance will be evaluated
 #' @param density_ratio density_ratio indicates the weight fX/g of each output
-#' @param gamma A set of l prototypes defining the Voronoï cells
+#' @param prototypes A set of l prototypes defining the Voronoï cells
 #' @param distance_func  A function computing a distance between two elements in the output spaces.
 #' @param model_tuning An optional list of models created for each ncoeff values.
 #' @param ncoeff_vec A vector providing the different values of ncoeff to be tested. ncoeff fixes the number of coefficients used for PCA.
@@ -70,21 +70,21 @@
 #' outputs_train = func2D(design_train)
 #' design_test = data.frame(X = seq(-0.99,0.99,l=50))
 #' outputs_test = func2D(design_test)
-#' gamma = lapply(c(10,20,30,40,50), function(i){outputs_test[,,i]})
+#' prototypes = lapply(c(10,20,30,40,50), function(i){outputs_test[,,i]})
 #' density_ratio = rep(1, 50)
 #' distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))}
 
-#' list_probas_train_test = probas_training_test(gamma = gamma,
+#' list_probas_train_test = probas_training_test(prototypes = prototypes,
 #' density_ratio = density_ratio, distance_func = distance_func, return_pred = TRUE,
 #'  outputs_train = outputs_train, outputs_test = outputs_test,
 #'  ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design_train = design_train,
 #' design_test = design_test, control = list(trace = FALSE))
 
-probas_training_test = function(outputs_train,outputs_test, density_ratio, gamma, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},model_tuning = NULL, ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design_train, design_test, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
+probas_training_test = function(outputs_train,outputs_test, density_ratio, prototypes, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},model_tuning = NULL, ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design_train, design_test, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                                 coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                                 nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                                 parinit = NULL, multistart=1,
-                                kernel=NULL,control = NULL,type = "UK",bias = rep(0, length(gamma)), ...){
+                                kernel=NULL,control = NULL,type = "UK",bias = rep(0, length(prototypes)), ...){
 
   if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs_train, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design_train, covtype=covtype,
                                                                 coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
@@ -92,7 +92,7 @@ probas_training_test = function(outputs_train,outputs_test, density_ratio, gamma
                                                                 parinit = parinit, multistart=multistart,
                                                                 kernel=kernel,control = control,...)}
   grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
-  probas_true = get_probas(density_ratio = density_ratio, outputs = outputs_test, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
+  probas_true = get_probas(density_ratio = density_ratio, data = outputs_test, prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
   probas_pred_df = data.frame()
   relative_error_df = data.frame()
   outputs_pred_list = list()
@@ -105,7 +105,7 @@ probas_training_test = function(outputs_train,outputs_test, density_ratio, gamma
     pred =  sapply(1:npc, function(k){predict(object = model[[k]], newdata = design_test, type = type, compute = FALSE, checkNames = FALSE)$mean})
     outputs_pred = inverse_Fpca2d(pred,fp)
     if(return_pred){outputs_pred_list[[i]] = outputs_pred}
-    probas_pred_cv = get_probas(density_ratio = density_ratio, outputs = outputs_pred, gamma = gamma, distance_func = distance_func, cells = 1:length(gamma), bias = bias)
+    probas_pred_cv = get_probas(density_ratio = density_ratio, data = outputs_pred, prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
     probas_pred_df = rbind(probas_pred_df, c(as.numeric(grid_cv[i,]), probas_pred_cv))
     relative_error_df = rbind(relative_error_df, c(as.numeric(grid_cv[i,]), abs(probas_pred_cv - probas_true)/probas_true))
   }

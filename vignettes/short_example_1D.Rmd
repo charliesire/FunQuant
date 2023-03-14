@@ -35,7 +35,7 @@ We can first perform quantization without considering the probabilistic distribu
 
 ```{r}
 
-res_proto = proto_map_algo(nb_cells = 4, outputs = outputs, multistart = 6) 
+res_proto = find_prototypes(nb_cells = 4, data = outputs, multistart = 6) 
 
 res_proto
 ```
@@ -68,7 +68,7 @@ Then we can perform a probabilistic quantization
 
 ```{r}
 density_ratio = compute_density_ratio(f = fX, g = g, inputs = design)
-res_proto_2 = proto_map_algo(nb_cells = 4, outputs = outputs, multistart = 6,density_ratio = density_ratio) 
+res_proto_2 = find_prototypes(nb_cells = 4, data = outputs, multistart = 6,density_ratio = density_ratio) 
 
 
 res_proto_2
