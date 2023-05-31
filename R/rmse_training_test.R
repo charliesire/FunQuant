@@ -6,6 +6,8 @@
 #' @param ncoeff_vec A vector providing the different values of ncoeff to be tested. ncoeff fixes the number of coefficients used for PCA.
 #' @param npc_vec A vector providing the different numbers of principal components to be tested.
 #' @param return_pred A boolean indicating whether the predicted outputs should be returned or not
+#' @param outputs_pred A list of the predicted outputs already obtained with the same parameters. Default is NULL. 
+#' @param only_positive A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.
 #' @param formula  an object of class "formula"
 #' (or a list of "formula" which the length is equal to the number of modeled principal components)
 #' specifying the linear trend of the kriging model (see \code{\link{lm}}) on each principal component.
@@ -73,31 +75,37 @@
 #' ncoeff_vec = c(50,100,200,400), npc_vec = 2:4, design_train =
 #' design_train, design_test = design_test, control = list(trace = FALSE))
 
-rmse_training_test = function(outputs_train,outputs_test, model_tuning = NULL, ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design_train, design_test, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
+rmse_training_test = function(outputs_train,outputs_test, model_tuning = NULL, ncoeff_vec,npc_vec, return_pred = FALSE,outputs_pred = NULL, only_positive = FALSE,formula = ~1,design_train, design_test, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                               coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                               nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                               parinit = NULL, multistart=1,
                               kernel=NULL,control = NULL,type = "UK", ...){
-
-  if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs_train, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design_train, covtype=covtype,
+   
+  grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
+  relative_error_df = data.frame()
+  outputs_rmse = list()
+  outputs_pred_list = list()
+  if(is.null(outputs_pred)){
+    if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs_train, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design_train, covtype=covtype,
                                                                 coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                                                                 nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                                                                 parinit = parinit, multistart=multistart,
                                                                 kernel=kernel,control = control,...)}
-  grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
-  relative_error_df = data.frame()
-  outputs_pred_list = list()
-  outputs_rmse = list()
+  }
   for(i in 1:nrow(grid_cv)){
-    ncoeff = grid_cv[i,1]
-    npc = grid_cv[i,2]
-    indice_coeff = which(ncoeff_vec == ncoeff)
-    fp = Fpca2d.Wavelets(outputs_train, wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
-    model = lapply(1:npc, function(k){model_tuning[[indice_coeff]][[k]]})
-    pred =  sapply(1:npc, function(k){predict(object = model[[k]], newdata = design_test, type = type, compute = FALSE, checkNames = FALSE)$mean})
-    outputs_pred = inverse_Fpca2d(pred,fp)
-    if(return_pred){outputs_pred_list[[i]] = outputs_pred}
-    err = (outputs_pred - outputs_test)^2
+    if(is.null(outputs_pred)){
+      ncoeff = grid_cv[i,1]
+      npc = grid_cv[i,2]
+      indice_coeff = which(ncoeff_vec == ncoeff)
+      fp = Fpca2d.Wavelets(outputs_train, wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
+      model = lapply(1:npc, function(k){model_tuning[[indice_coeff]][[k]]})
+      pred =  sapply(1:npc, function(k){predict(object = model[[k]], newdata = design_test, type = type, compute = FALSE, checkNames = FALSE)$mean})
+      outputs_pred_i = inverse_Fpca2d(pred,fp)
+      if(only_positive){outputs_pred_i = (outputs_pred_i > 0)*outputs_pred_i}
+    }
+    else{outputs_pred_i = outputs_pred[[i]]}
+    if(return_pred){outputs_pred_list[[i]] = outputs_pred_i}
+    err = (outputs_pred_i - outputs_test)^2
     outputs_rmse[[i]] = sqrt(apply(err, 1:(length(dim(err))-1), mean))
   }
   return(list(grid_cv = grid_cv, outputs_rmse = outputs_rmse, outputs_pred = outputs_pred_list))

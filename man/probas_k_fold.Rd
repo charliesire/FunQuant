@@ -6,17 +6,19 @@
 \usage{
 probas_k_fold(
   outputs,
-  nb_folds,
+  nb_folds = NULL,
   density_ratio,
   prototypes,
+  outputs_pred = NULL,
   distance_func = function(A1, A2) {
      return(sqrt(sum((A1 - A2)^2)))
  },
   ncoeff_vec,
   npc_vec,
   return_pred = FALSE,
+  only_positive = FALSE,
   formula = ~1,
-  design,
+  design = NULL,
   covtype = "matern5_2",
   wf = "d4",
   boundary = "periodic",
@@ -47,6 +49,8 @@ probas_k_fold(
 
 \item{prototypes}{A set of l prototypes defining the Voronoï cells}
 
+\item{outputs_pred}{A list of the predicted outputs already obtained with the same parameters. Default is NULL.}
+
 \item{distance_func}{A function computing a distance between two elements in the output spaces.}
 
 \item{ncoeff_vec}{A vector providing the different values of ncoeff to be tested. ncoeff fixes the number of coefficients used for PCA.}
@@ -54,6 +58,8 @@ probas_k_fold(
 \item{npc_vec}{A vector providing the different numbers of principal components to be tested.}
 
 \item{return_pred}{A boolean indicating whether the predicted outputs should be returned or not}
+
+\item{only_positive}{A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.}
 
 \item{formula}{an object of class "formula"
 (or a list of "formula" which the length is equal to the number of modeled principal components)

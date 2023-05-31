@@ -8,6 +8,8 @@
 #' @param ncoeff_vec A vector providing the different values of ncoeff to be tested. ncoeff fixes the number of coefficients used for PCA.
 #' @param npc_vec A vector providing the different numbers of principal components to be tested.
 #' @param return_pred A boolean indicating whether the predicted outputs should be returned or not
+#' @param outputs_pred A list of the predicted outputs already obtained with the same parameters. Default is NULL.
+#' @param only_positive A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.
 #' @param formula  an object of class "formula"
 #' (or a list of "formula" which the length is equal to the number of modeled principal components)
 #' specifying the linear trend of the kriging model (see \code{\link{lm}}) on each principal component.
@@ -53,6 +55,7 @@
 #' - outputs_pred an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 #' @export
 #' @importFrom dismo kfold
+#' @import foreach
 #' @examples
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
@@ -74,33 +77,38 @@
 #' , ncoeff_vec = c(50,100,200,400), npc_vec = 2:4,
 #' design = design, control = list(trace = FALSE))
 
-probas_k_fold = function(outputs, nb_folds, density_ratio, prototypes, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},ncoeff_vec,npc_vec, return_pred = FALSE,formula = ~1,design, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
+probas_k_fold = function(outputs, nb_folds = NULL, density_ratio, prototypes, outputs_pred = NULL, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},ncoeff_vec,npc_vec, return_pred = FALSE, only_positive = FALSE,formula = ~1,design = NULL, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                          coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                          nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                          parinit = NULL, multistart=1,
                          kernel=NULL,control = NULL,type = "UK",seed = NULL, bias = rep(0, length(prototypes)),...){
   if(is.null(seed) == FALSE){set.seed(seed)}
+  bool_outputs_pred = outputs_pred
   length_dim = length(dim(outputs))
   grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
-  folds = kfold(length(density_ratio), nb_folds)
   probas_true = get_probas(density_ratio = density_ratio, data = outputs, prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
-  probas_pred_df = data.frame()
-  outputs_pred_list = list()
-  outputs_pred = list()
   relative_error_df = data.frame()
-  for(k in 1:nb_folds){
-    outputs_pred_list[[k]] = probas_training_test(outputs_train = asub(outputs,dims = length(dim(outputs)), idx = which(folds != k)),outputs_test = asub(outputs,dims = length(dim(outputs)), idx = which(folds == k)), density_ratio = density_ratio, prototypes = prototypes, distance_func = distance_func, ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE,formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype, wf = wf, boundary = boundary,J=J,
-                                                  coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
-                                                  nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
-                                                  parinit = parinit, multistart=multistart,
-                                                  kernel=kernel,control = control,type = type,bias = bias,...)$outputs_pred
+  probas_pred_df = data.frame()
+  if(is.null(bool_outputs_pred)){
+    outputs_pred = list()
+    folds = kfold(length(density_ratio), nb_folds)
+    outputs_pred_list = foreach(k = 1:nb_folds)%do%{
+      rmse_training_test(outputs_train = asub(outputs,dims = length(dim(outputs)), idx = which(folds != k)),outputs_test = asub(outputs,dims = length(dim(outputs)), idx = which(folds == k)), ncoeff_vec = ncoeff_vec,npc_vec = npc_vec, return_pred = TRUE, only_positive = only_positive, formula = formula,design_train = as.data.frame(design[folds !=k,]), design_test = as.data.frame(design[folds == k,]), covtype=covtype, wf = wf, boundary = boundary,J=J,
+                                                    coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
+                                                    nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
+                                                    parinit = parinit, multistart=multistart,
+                                                    kernel=kernel,control = control,type = type,...)$outputs_pred
+    }
+
   }
   for(i in 1:nrow(grid_cv)){
-    outputs_pred[[i]] = array(0, dim = dim(outputs))
-    dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
-    for(k in 1:nb_folds){
-      dimnames(outputs_pred_list[[k]][[i]]) = c(lapply(dim(outputs_pred_list[[k]][[i]])[-length(dim(outputs_pred_list[[k]][[i]]))], function(i){1:i}), list(which(folds == k)))
-      afill(outputs_pred[[i]]) = outputs_pred_list[[k]][[i]]
+    if(is.null(bool_outputs_pred)){
+      outputs_pred[[i]] = array(0, dim = dim(outputs))
+      dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
+      for(k in 1:nb_folds){
+        dimnames(outputs_pred_list[[k]][[i]]) = c(lapply(dim(outputs_pred_list[[k]][[i]])[-length(dim(outputs_pred_list[[k]][[i]]))], function(i){1:i}), list(which(folds == k)))
+        afill(outputs_pred[[i]]) = outputs_pred_list[[k]][[i]]
+      }
     }
     probas_pred_cv = get_probas(density_ratio = density_ratio, data = outputs_pred[[i]], prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
     probas_pred_df = rbind(probas_pred_df, c(as.numeric(grid_cv[i,]), probas_pred_cv))

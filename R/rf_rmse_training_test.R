@@ -14,6 +14,7 @@
 #' @param seed An optional random seed
 #' @param ... other parameters of \code{\link{randomForest}} function from \code{randomForest}.
 #' @param return_pred A boolean indicating whether the predicted outputs should be returned or not
+#' @param outputs_pred A list of the predicted outputs already obtained with the same parameters. Default is NULL.
 #' @param only_positive A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.
 #' @param ncoeff The number of coefficients used for PCA
 #' @param npc The number of principal components
@@ -89,45 +90,49 @@
 #'  threshold_fpca = 0, list_search = list_search, ncoeff = 400,
 #'  npc = 6, control = list(trace = FALSE))
 
-rf_rmse_training_test = function(design_train, design_test, outputs_train, outputs_test,threshold_classification, threshold_fpca = NULL, list_search,return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
+rf_rmse_training_test = function(design_train, design_test, outputs_train, outputs_test,threshold_classification, threshold_fpca = NULL, list_search,return_pred = FALSE, outputs_pred = NULL, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                             coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                             nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                             parinit = NULL, multistart=1,
                             kernel=NULL,control = NULL,type = "UK",...){
   if(is.null(seed)==FALSE){set.seed(seed)}
   if(is.null(threshold_fpca)){threshold_fpca = threshold_classification}
+  bool_outputs_pred = outputs_pred
   sum_depth = Vectorize(function(it){sum(asub(x = outputs_train, idx = it, dims = length(dim(outputs_train)), drop = "selected"))})(1:dim(outputs_train)[length(dim(outputs_train))])
   y = as.factor(sum_depth > threshold_classification)
   indexes_train_fpca = which(sum_depth > threshold_fpca)
-  outputs_pred = list()
   outputs_rmse = list()
-  fp = Fpca2d.Wavelets(asub(x = outputs_train, dims = length(dim(outputs_train)), idx = indexes_train_fpca,drop = FALSE), wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
-  model = km_Fpca2d(formula = formula, design = design_train[indexes_train_fpca,], response = fp,  covtype=covtype,
-                    coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
-                    nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
-                    parinit = parinit, multistart=multistart,
-                    kernel=kernel,control = control)
+  if(is.null(bool_outputs_pred)){
+    outputs_pred = list()
+    fp = Fpca2d.Wavelets(asub(x = outputs_train, dims = length(dim(outputs_train)), idx = indexes_train_fpca,drop = FALSE), wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
+    model = km_Fpca2d(formula = formula, design = design_train[indexes_train_fpca,], response = fp,  covtype=covtype,
+                      coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
+                      nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
+                      parinit = parinit, multistart=multistart,
+                      kernel=kernel,control = control)
+  }
   for(i in 1:length(list_search[[1]])){
-    list_cv = list()
-    for(v in 1:length(list_search)){
-      list_cv[[v]] = list_search[[names(list_search)[v]]][[i]]
-    }
-    names(list_cv) = names(list_search)
-    list_cv = c(list_cv, list("x" = design_train, "y" = y, "xtest" = design_test,...))
-    rf = do.call(randomForest, list_cv)
-    rf_pred = as.numeric(rf$test$predicted) - 1
-    outputs_pred[[i]] = array(0,dim = dim(outputs_test))
-    if(sum(rf_pred == 1)>0){
-      pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test[rf_pred == 1,], type = type, compute = FALSE)$mean}), ncol = npc)
-      outputs_pred_draft = inverse_Fpca2d(pred,fp)
-      dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
-    dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(which(rf_pred == 1)))
-    afill(outputs_pred[[i]]) = outputs_pred_draft
-    }
-    if(only_positive){outputs_pred[[i]] = (outputs_pred[[i]] > 0)*outputs_pred[[i]]}
+    if(is.null(bool_outputs_pred)){
+      list_cv = list()
+      for(v in 1:length(list_search)){
+        list_cv[[v]] = list_search[[names(list_search)[v]]][[i]]
+      }
+      names(list_cv) = names(list_search)
+      list_cv = c(list_cv, list("x" = design_train, "y" = y, "xtest" = design_test,...))
+      rf = do.call(randomForest, list_cv)
+      rf_pred = as.numeric(rf$test$predicted) - 1
+      outputs_pred[[i]] = array(0,dim = dim(outputs_test))
+      if(sum(rf_pred == 1)>0){
+        pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test[rf_pred == 1,], type = type, compute = FALSE)$mean}), ncol = npc)
+        outputs_pred_draft = inverse_Fpca2d(pred,fp)
+        dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
+      dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(which(rf_pred == 1)))
+      afill(outputs_pred[[i]]) = outputs_pred_draft
+      }
+      if(only_positive){outputs_pred[[i]] = (outputs_pred[[i]] > 0)*outputs_pred[[i]]}
+      }
     err = (outputs_pred[[i]] - outputs_test)^2
     outputs_rmse[[i]] = sqrt(apply(err, 1:(length(dim(err))-1), mean))
-    if(return_pred == FALSE){outputs_pred = list()}
   }
   if(return_pred == FALSE){outputs_pred = NULL}
   return(list(list_search = list_search, outputs_rmse = outputs_rmse, outputs_pred = outputs_pred))

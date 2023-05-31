@@ -10,6 +10,8 @@ rmse_loo(
   ncoeff_vec,
   npc_vec,
   return_pred = FALSE,
+  outputs_pred = NULL,
+  only_positive = FALSE,
   formula = ~1,
   design,
   covtype = "matern5_2",
@@ -41,6 +43,10 @@ rmse_loo(
 \item{npc_vec}{A vector providing the different numbers of principal components to be tested.}
 
 \item{return_pred}{A boolean indicating whether the predicted outputs should be returned or not}
+
+\item{outputs_pred}{A list of the predicted outputs already obtained with the same parameters. Default is NULL.}
+
+\item{only_positive}{A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.}
 
 \item{formula}{an object of class "formula"
 (or a list of "formula" which the length is equal to the number of modeled principal components)

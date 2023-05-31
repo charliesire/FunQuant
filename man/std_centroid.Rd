@@ -5,7 +5,7 @@
 \title{Computation of the IS centroid standard deviation for different sets of prototypes.}
 \usage{
 std_centroid(
-  data,
+  data = NULL,
   prototypes_list,
   density_ratio,
   distance_func = function(A1, A2) {
@@ -13,7 +13,11 @@ std_centroid(
  },
   cells,
   cell_numbers = NULL,
-  nv
+  nv,
+  outputs_function = NULL,
+  inputs = NULL,
+  batch_size = NULL,
+  return_cell_numbers = FALSE
 )
 }
 \arguments{
@@ -30,6 +34,14 @@ std_centroid(
 \item{cell_numbers}{An optional list providing for each set of prototypes the voronoi cell number of every data element.}
 
 \item{nv}{The size of the sample for which we want to estimate the IS centroid standard deviation.}
+
+\item{outputs_function}{Function to compute the outputs from the inputs.}
+
+\item{inputs}{If data and cell_numbers are not provided, inputs is a dataframe of the inputs at which the outputs will be computed.}
+
+\item{batch_size}{If the computation is by batch, the number of elements by batch. Optional.}
+
+\item{return_cell_numbers}{Boolean indicating whether the cell_numbers must be provided or not.}
 }
 \value{
 A list providing for each set of prototypes a list the IS centroid standard deviation for each voronoi cell

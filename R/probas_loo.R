@@ -8,6 +8,8 @@
 #' @param ncoeff_vec A vector providing the different values of ncoeff to be tested. ncoeff fixes the number of coefficients used for PCA.
 #' @param npc_vec A vector providing the different numbers of principal components to be tested.
 #' @param return_pred A boolean indicating whether the predicted outputs should be returned or not
+#' @param outputs_pred A list of the predicted outputs already obtained with the same parameters. Default is NULL.
+#' @param only_positive A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.
 #' @param formula  an object of class "formula"
 #' (or a list of "formula" which the length is equal to the number of modeled principal components)
 #' specifying the linear trend of the kriging model (see \code{\link{lm}}) on each principal component.
@@ -73,31 +75,37 @@
 #' list_probas_loo = probas_loo(outputs = outputs, density_ratio = density_ratio,
 #'  prototypes = prototypes, distance_func = distance_func, ncoeff_vec = c(50,100,200,400),
 #'   npc_vec = 2:4, design = design, control = list(trace = FALSE))
-probas_loo = function(outputs, density_ratio, prototypes, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},model_tuning = NULL, ncoeff_vec,npc_vec,return_pred = FALSE, formula = ~1,design, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
+probas_loo = function(outputs, density_ratio, prototypes, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},model_tuning = NULL, ncoeff_vec,npc_vec,return_pred = FALSE, outputs_pred = NULL, only_positive = FALSE, formula = ~1,design, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                       coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                       nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                       parinit = NULL, multistart=1,
                       kernel=NULL,control = NULL,type = "UK",bias = NULL,...){
 
   if(is.null(bias)){bias = rep(0,length(prototypes))}
-  if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design, covtype=covtype,
-                                                                coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
-                                                                nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
-                                                                parinit = parinit, multistart=multistart,
-                                                                kernel=kernel,control = control,...)}
   grid_cv = expand.grid(ncoeff = ncoeff_vec, npc = npc_vec)
   probas_true = get_probas(density_ratio = density_ratio, data = outputs, prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
   probas_pred_df = data.frame()
   relative_error_df = data.frame()
   outputs_loo_list = list()
+  if(is.null(outputs_pred)){
+    if(is.null(model_tuning)){model_tuning = create_models_tuning(outputs = outputs, ncoeff_vec = ncoeff_vec, npc = max(npc_vec), formula = formula,design = design, covtype=covtype,
+                                                                  coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
+                                                                  nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
+                                                                  parinit = parinit, multistart=multistart,
+                                                                  kernel=kernel,control = control,...)}
+  }
   for(i in 1:nrow(grid_cv)){
-    ncoeff = grid_cv[i,1]
-    npc = grid_cv[i,2]
-    indice_coeff = which(ncoeff_vec == ncoeff)
-    fp = Fpca2d.Wavelets(outputs, wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
-    model = lapply(1:npc, function(k){model_tuning[[indice_coeff]][[k]]})
-    pred = sapply(1:npc, function(i){leaveOneOut.km(model[[i]], type=type)$mean})
-    outputs_loo = inverse_Fpca2d(pred,fp)
+    if(is.null(outputs_pred)){
+      ncoeff = grid_cv[i,1]
+      npc = grid_cv[i,2]
+      indice_coeff = which(ncoeff_vec == ncoeff)
+      fp = Fpca2d.Wavelets(outputs, wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
+      model = lapply(1:npc, function(k){model_tuning[[indice_coeff]][[k]]})
+      pred = sapply(1:npc, function(i){leaveOneOut.km(model[[i]], type=type)$mean})
+      outputs_loo = inverse_Fpca2d(pred,fp)
+      if(only_positive){outputs_loo = (outputs_loo > 0)*outputs_loo}
+    }
+    else{outputs_loo = outputs_pred[[i]]}
     if(return_pred == TRUE){outputs_loo_list[[i]] = outputs_loo}
     probas_pred_cv = get_probas(density_ratio = density_ratio, data = outputs_loo, prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
     probas_pred_df = rbind(probas_pred_df, c(as.numeric(grid_cv[i,]), probas_pred_cv))

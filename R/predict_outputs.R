@@ -80,6 +80,7 @@ predict_outputs = function(metamodel_fitted = NULL, design_train = NULL, design_
                            nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                            parinit = NULL, multistart=1,
                            kernel=NULL,control = NULL,type = "UK", classification = FALSE, control_classification = NULL,threshold_classification = NULL,threshold_fpca = NULL,...){
+  colnames(design_test) = colnames(design_train)
   if(is.null(metamodel_fitted)){
     metamodel_fitted = fit_metamodel(design_train = design_train, outputs_train = outputs_train, seed = seed, ncoeff = ncoeff, npc = npc,
                                      formula = formula, covtype = covtype, wf = wf, boundary = boundary, J=J,  coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,

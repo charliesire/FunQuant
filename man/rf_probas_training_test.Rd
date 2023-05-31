@@ -18,6 +18,7 @@ rf_probas_training_test(
      return(sqrt(sum((A1 - A2)^2)))
  },
   return_pred = FALSE,
+  outputs_pred = NULL,
   only_positive = FALSE,
   seed = NULL,
   ncoeff,
@@ -69,6 +70,8 @@ to the ith evaluation.}
 \item{distance_func}{A function computing a distance between two elements in the output spaces.}
 
 \item{return_pred}{A boolean indicating whether the predicted outputs should be returned or not}
+
+\item{outputs_pred}{A list of the predicted outputs already obtained with the same parameters. Default is NULL.}
 
 \item{only_positive}{A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.}
 

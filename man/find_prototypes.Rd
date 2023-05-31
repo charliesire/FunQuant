@@ -2,14 +2,15 @@
 % Please edit documentation in R/find_prototypes.R
 \name{find_prototypes}
 \alias{find_prototypes}
-\title{The algorithm to find prototypes with multistart. Providing prototype data and their probability masses.}
+\title{The algorithm to find prototypes with multistart. Providing prototypes and their probability masses.}
 \usage{
 find_prototypes(
   starting_proto = NULL,
   nb_cells = NULL,
-  data,
+  data = NULL,
   multistart = 1,
   method_IS = "unique",
+  sampling_cells = NULL,
   density_ratio = rep(1, dim(data)[length(dim(data))]),
   budget = 10^3,
   threshold = 0,
@@ -20,9 +21,15 @@ find_prototypes(
   trace = FALSE,
   all_starts = FALSE,
   bias = NULL,
-  index_sampling_error = NULL,
+  index_sampling_error = 1,
   seed = NULL,
-  batch = FALSE
+  batch = FALSE,
+  density_function = NULL,
+  density_biased_function = NULL,
+  inputs_ref = NULL,
+  data_ref = NULL,
+  inputs_function = NULL,
+  outputs_function = NULL
 )
 }
 \arguments{
@@ -30,11 +37,13 @@ find_prototypes(
 
 \item{nb_cells}{Required only if starting_proto is NULL. Indicates the number of prototypes of the quantization.}
 
-\item{data}{The data that needs to be quantized. If method = "percell", a list of data samples must be provided, of length equal to the number of Voronoï cells.}
+\item{data}{The data that needs to be quantized. If method = "percell", a list of data samples must be provided.}
 
 \item{multistart}{Number of starts of the algorithm}
 
 \item{method_IS}{The method of Importance Sampling : "unique" means there is a unique biased density involved, "percell" means there is one biased density (and then one biased sample) for each cell. Default is "unique".}
+
+\item{sampling_cells}{If method == "percell" and data is provided, sampling_cells is a vector indicating for each cell, the index element of data associated to this cell.}
 
 \item{density_ratio}{A vector indicating the weight fX/g of each data element. Default is a vector of 1. If method = "percell", a list of density_ratio must be provided, of length equal to the number of Voronoï cells.}
 
@@ -57,6 +66,18 @@ find_prototypes(
 \item{seed}{An optional random seed.}
 
 \item{batch}{A boolean indicating whether the computations must be performed by batch or not. If TRUE, data, cell_numbers and density_ratio must be lists. Default is False.}
+
+\item{density_function}{Density function of the inputs. Required only if method = "percell" and if the density biased function is updated at each iteration.}
+
+\item{density_biased_function}{Density functions of the biased importance sampling. It must be a list of length equal to the number of Voronoi cells. Each element is a function of x and the inputs of the associated Voronoi cell.}
+
+\item{inputs_ref}{Dataframe of inputs to delimit the Voronoi cells.}
+
+\item{data_ref}{Outputs associated to inputs ref.}
+
+\item{inputs_function}{List of functions to generate the inputs in each Voronoi cell with density equal to the elements of density biased function.}
+
+\item{outputs_function}{Function to compute the outputs from the inputs.}
 }
 \value{
 A list containing :
@@ -64,12 +85,12 @@ A list containing :
 - probas : a vector indicating the probability mass of the prototypes
 - cell_numbers : a vector indicating the cell number associated to each data element
 - iterations : an integer indicating the number of iterations performed
-- record : a list containing all the centroids computed through the iterations of the best start
+- record : a list containing all the centroids computed through the iterations of the best start. Provided only if trace = TRUE.
 - all_errors : a vector indicating the quantization error of each start
 - all_starts : a list indicating all the best prototypes obtained for each start. Provided only if all_start = TRUE.
 }
 \description{
-The algorithm to find prototypes with multistart. Providing prototype data and their probability masses.
+The algorithm to find prototypes with multistart. Providing prototypes and their probability masses.
 }
 \examples{
 set.seed(20)

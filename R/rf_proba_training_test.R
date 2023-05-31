@@ -17,6 +17,7 @@
 #' @param prototypes A set of l prototypes defining the Voronoï cells
 #' @param distance_func  A function computing a distance between two elements in the output spaces.
 #' @param return_pred A boolean indicating whether the predicted outputs should be returned or not
+#' @param outputs_pred A list of the predicted outputs already obtained with the same parameters. Default is NULL.
 #' @param only_positive A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.
 #' @param ncoeff The number of coefficients used for PCA
 #' @param npc The number of principal components
@@ -97,55 +98,61 @@
 #' distance_func= distance_func,
 #' ncoeff = 400, npc = 6, control = list(trace = FALSE))
 
-rf_probas_training_test = function(design_train, design_test, outputs_train, outputs_test,threshold_classification, threshold_fpca = NULL, list_search, density_ratio, prototypes, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},return_pred = FALSE, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
+rf_probas_training_test = function(design_train, design_test, outputs_train, outputs_test,threshold_classification, threshold_fpca = NULL, list_search, density_ratio, prototypes, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},return_pred = FALSE, outputs_pred = NULL, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
                            coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
                            nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
                            parinit = NULL, multistart=1,
                            kernel=NULL,control = NULL,type = "UK",bias = NULL,...){
   if(is.null(seed)==FALSE){set.seed(seed)}
   if(is.null(threshold_fpca)){threshold_fpca = threshold_classification}
+  bool_outputs_pred = outputs_pred
   probas_true = get_probas(density_ratio = density_ratio, data = outputs_test, prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
   probas_pred_df = data.frame()
   relative_error_df = data.frame()
+
   sum_depth = Vectorize(function(it){sum(asub(x = outputs_train, idx = it, dims = length(dim(outputs_train)), drop = "selected"))})(1:dim(outputs_train)[length(dim(outputs_train))])
   y = as.factor(sum_depth > threshold_classification)
   indexes_train_fpca = which(sum_depth > threshold_fpca)
-  outputs_pred = list()
-  fp = Fpca2d.Wavelets(asub(x = outputs_train, dims = length(dim(outputs_train)), idx = indexes_train_fpca,drop = FALSE), wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
-  model = km_Fpca2d(formula = formula, design = design_train[indexes_train_fpca,], response = fp,  covtype=covtype,
+  if(is.null(bool_outputs_pred)){
+    outputs_pred = list()
+    fp = Fpca2d.Wavelets(asub(x = outputs_train, dims = length(dim(outputs_train)), idx = indexes_train_fpca,drop = FALSE), wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
+    model = km_Fpca2d(formula = formula, design = design_train[indexes_train_fpca,], response = fp,  covtype=covtype,
                     coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
                     nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
                     parinit = parinit, multistart=multistart,
                     kernel=kernel,control = control)
+  }
   for(i in 1:length(list_search[[1]])){
-    list_cv = list()
-    for(v in 1:length(list_search)){
-      list_cv[[v]] = list_search[[names(list_search)[v]]][[i]]
+    if(is.null(bool_outputs_pred)){
+
+      list_cv = list()
+      for(v in 1:length(list_search)){
+        list_cv[[v]] = list_search[[names(list_search)[v]]][[i]]
+      }
+      names(list_cv) = names(list_search)
+      list_cv = c(list_cv, list("x" = design_train, "y" = y, "xtest" = design_test,...))
+      rf = do.call(randomForest, list_cv)
+      rf_pred = as.numeric(rf$test$predicted) - 1
+      if(sum(rf_pred == 1)>0){
+        pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test[rf_pred == 1,], type = type, compute = FALSE)$mean}), ncol = npc)
+        outputs_pred_draft = inverse_Fpca2d(pred,fp)
+      }
+      outputs_pred[[i]] = array(0,dim = dim(outputs_test))
+      if(sum(rf_pred == 1)>0){
+        pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test[rf_pred == 1,], type = type, compute = FALSE)$mean}), ncol = npc)
+        outputs_pred_draft = inverse_Fpca2d(pred,fp)
+        dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
+        dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(which(rf_pred == 1)))
+        afill(outputs_pred[[i]]) = outputs_pred_draft
+      }
+      if(only_positive){outputs_pred[[i]] = (outputs_pred[[i]] > 0)*outputs_pred[[i]]}
     }
-    names(list_cv) = names(list_search)
-    list_cv = c(list_cv, list("x" = design_train, "y" = y, "xtest" = design_test,...))
-    rf = do.call(randomForest, list_cv)
-    rf_pred = as.numeric(rf$test$predicted) - 1
-    if(sum(rf_pred == 1)>0){
-      pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test[rf_pred == 1,], type = type, compute = FALSE)$mean}), ncol = npc)
-      outputs_pred_draft = inverse_Fpca2d(pred,fp)
-    }
-    outputs_pred[[i]] = array(0,dim = dim(outputs_test))
-    if(sum(rf_pred == 1)>0){
-      pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], newdata = design_test[rf_pred == 1,], type = type, compute = FALSE)$mean}), ncol = npc)
-      outputs_pred_draft = inverse_Fpca2d(pred,fp)
-      dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
-      dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(which(rf_pred == 1)))
-      afill(outputs_pred[[i]]) = outputs_pred_draft
-    }
-    if(only_positive){outputs_pred[[i]] = (outputs_pred[[i]] > 0)*outputs_pred[[i]]}
     probas_pred_cv = get_probas(density_ratio = density_ratio, data = outputs_pred[[i]], prototypes = prototypes, distance_func = distance_func, cells = 1:length(prototypes), bias = bias)
     probas_pred_df = rbind(probas_pred_df,probas_pred_cv)
     relative_error = abs(probas_pred_cv - probas_true)/probas_true
     relative_error[probas_pred_cv == 0 & probas_true == 0] = 0
     relative_error[probas_pred_cv != 0 & probas_true == 0] = Inf
     relative_error_df = rbind(relative_error_df, relative_error)
-    if(return_pred == FALSE){outputs_pred = list()}
   }
   if(return_pred == FALSE){outputs_pred = NULL}
   return(list(list_search = list_search,probas_pred = probas_pred_df, error = relative_error_df, outputs_pred = outputs_pred))

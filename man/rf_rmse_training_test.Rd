@@ -13,6 +13,7 @@ rf_rmse_training_test(
   threshold_fpca = NULL,
   list_search,
   return_pred = FALSE,
+  outputs_pred = NULL,
   only_positive = FALSE,
   seed = NULL,
   ncoeff,
@@ -57,6 +58,8 @@ to the ith evaluation.}
 \item{list_search}{A list containing for each hyperparameters to be tested a list of the tested values.}
 
 \item{return_pred}{A boolean indicating whether the predicted outputs should be returned or not}
+
+\item{outputs_pred}{A list of the predicted outputs already obtained with the same parameters. Default is NULL.}
 
 \item{only_positive}{A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.}
 

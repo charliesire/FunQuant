@@ -67,7 +67,6 @@ create_models_tuning = function(outputs, ncoeff_vec, npc, formula = ~1,design, c
                                 kernel=NULL, control = NULL,...){
   model_tuning = list()
   for(i in 1:length(ncoeff_vec)){
-    set.seed(1)
     ncoeff = ncoeff_vec[i]
     fp = Fpca2d.Wavelets(outputs, wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
     model_tuning[[i]] = km_Fpca2d(formula = formula, design = design, response = fp, covtype = covtype, coef.trend = coef.trend, coef.var = coef.var, coef.cov = coef.cov, control = control, nugget = nugget, multistart=multistart, lower = lower,...)

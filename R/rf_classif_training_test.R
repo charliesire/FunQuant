@@ -29,10 +29,10 @@
 #' df_search = expand.grid(seq(0.1,1,0.3), c(1,5,9,13,17))
 #' list_search = list("nodesize" = as.list(df_search[,2]), "classwt" =
 #' lapply(1:nrow(df_search), function(i){c(df_search[i,1], 1-df_search[i,1])}))
-#' list_rf_train_test = rf_pred_training_test(xtrain = xtrain, xtest = xtest,
+#' list_rf_train_test = rf_classif_training_test(xtrain = xtrain, xtest = xtest,
 #' ytrain = ytrain, list_search = list_search)
 
-rf_pred_training_test = function(xtrain, xtest, ytrain, list_search,...){
+rf_classif_training_test = function(xtrain, xtest, ytrain, list_search,...){
   pred = list()
   for(i in 1:length(list_search[[1]])){
     liste_cv = list()

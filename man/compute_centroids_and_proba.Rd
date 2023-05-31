@@ -8,6 +8,7 @@ compute_centroids_and_proba(
   data,
   cell_numbers,
   method_IS = "unique",
+  sampling_cells = NULL,
   density_ratio = rep(1, dim(data)[length(dim(data))]),
   bias = rep(0, length(unique(unlist(cell_numbers)))),
   batch = FALSE
@@ -19,6 +20,8 @@ compute_centroids_and_proba(
 \item{cell_numbers}{The voronoi cell number of every data element}
 
 \item{method_IS}{The method of Importance Sampling : "unique" means there is a unique biased density involved, "percell" means there is one biased density (and then one biased sample) for each cell.}
+
+\item{sampling_cells}{If method == "percell" and data is provided, sampling_cells is a vector indicating for each cell, the index element of data associated to this cell.}
 
 \item{density_ratio}{A vector indicating the weight fX/g of each data element. Default is a vector of 1. If method = "percell", a list of density_ratio must be provided, of length equal to the number of Voronoï cells.}
 

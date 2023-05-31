@@ -27,9 +27,9 @@
 #' outputs = func2D(x)
 #' y = as.factor(Vectorize(function(i){sum(outputs[,,i])})(1:dim(outputs)[3]) > 5)
 #' list_search = list("nodesize" = as.list(c(1,3,5,7,9,11)))
-#' rf_pred_k_fold(x = x,y = y, list_search = list_search, nb_folds = 4)
+#' rf_classif_k_fold(x = x,y = y, list_search = list_search, nb_folds = 4)
 
-rf_pred_k_fold = function(x, y, list_search, nb_folds, seed = NULL,...){
+rf_classif_k_fold = function(x, y, list_search, nb_folds, seed = NULL,...){
   if(is.null(seed)==FALSE){set.seed(seed)}
   folds = kfold(length(y), nb_folds)
   pred = list()

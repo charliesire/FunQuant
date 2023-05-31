@@ -12,6 +12,7 @@ rf_rmse_k_fold(
   list_search,
   nb_folds,
   return_pred = FALSE,
+  outputs_pred = NULL,
   only_positive = FALSE,
   seed = NULL,
   ncoeff,
@@ -50,6 +51,8 @@ rf_rmse_k_fold(
 \item{nb_folds}{Number of folds}
 
 \item{return_pred}{A boolean indicating whether the predicted outputs should be returned or not}
+
+\item{outputs_pred}{A list of the predicted outputs already obtained with the same parameters. Default is NULL.}
 
 \item{only_positive}{A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.}
 

@@ -5,7 +5,7 @@
 \title{Computation of the IS coefficients of variation of the membership probability for different set of prototypes.}
 \usage{
 std_proba(
-  data,
+  data = NULL,
   prototypes_list,
   density_ratio,
   distance_func = function(A1, A2) {
@@ -13,11 +13,15 @@ std_proba(
  },
   cells,
   cell_numbers = NULL,
-  nv
+  nv,
+  outputs_function = NULL,
+  inputs = NULL,
+  batch_size = NULL,
+  return_cell_numbers = FALSE
 )
 }
 \arguments{
-\item{data}{The data that needs to be quantized. Useful only if cell_numbers == NULL.}
+\item{data}{The data that needs to be quantized. Useful only if cell_numbers == NULL and outputs_function == NULL.}
 
 \item{prototypes_list}{A list of set of prototypes on which we want to evaluate the IS centroid standard deviation. Each element is a list of prototypes.}
 
@@ -30,6 +34,14 @@ std_proba(
 \item{cell_numbers}{An optional list providing for each set of prototypes the voronoi cell number of every data element.}
 
 \item{nv}{The size of the sample for which we want to estimate the IS coefficient of variation of the membership probability}
+
+\item{outputs_function}{Function to compute the outputs from the inputs.}
+
+\item{inputs}{If data and cell_numbers are not provided, inputs is a dataframe of the inputs at which the outputs will be computed.}
+
+\item{batch_size}{If the computation is by batch, the number of elements by batch. Optional.}
+
+\item{return_cell_numbers}{Boolean indicating whether the cell_numbers must be provided or not.}
 }
 \value{
 A list of IS coefficients of variation of the membership probability obtained for each set of prototypes.
