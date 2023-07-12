@@ -14,9 +14,8 @@ Suggests:
     rmarkdown,
     ggplot2,
     evd,
-    gridExtra,
-    testthat (>= 3.0.0)
-Imports: abind, waveslim, rlibkriging, foreach, dismo, randomForest, GpOutput2D
+    gridExtra
+Imports: abind, waveslim, DiceKriging, rlibkriging, foreach, dismo, randomForest, GpOutput2D
 Remotes: tranvivielodie/GpOutput2D/GpOutput2D, libKriging/rlibkriging
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
