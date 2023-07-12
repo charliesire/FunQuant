@@ -54,7 +54,10 @@ In addition, FunQuant is designed to mitigate the computational burden associate
 
 Additional theoretical information can be found in @sire. The paper provides a comprehensive exploration of the application of FunQuant to the quantization of flooding maps.
 
+# Acknowledgments
 
+This research was conducted with the support of the consortium in
+Applied Mathematics CIROQUO, gathering partners in technological and academia in the development of advanced methods for Computer Experiments.
 
 # References
 
