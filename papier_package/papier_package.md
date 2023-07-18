@@ -56,7 +56,7 @@ Additional theoretical information can be found in @sire. The paper provides a c
 
 # Illustrative example
 
-![alt text](https://github.com/charliesire/FunQuant/papier_package/image.jpg?raw=true)
+![alt text](https://github.com/charliesire/FunQuant/papier_package/fX.jpg?raw=true)
 
 # Acknowledgments
 
