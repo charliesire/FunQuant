@@ -20,7 +20,132 @@ Importance Sampling is employed with the aim of reducing the variances in the es
 
 In addition, FunQuant is designed to mitigate the computational burden associated with the evaluation of costly data. While users have the flexibility to utilize their own metamodels to generate additional data, FunQuant offers several functions tailored specifically for a metamodel dedicated to spatial outputs such as maps. This metamodel is based on Functional Principal Component Analysis and Gaussian Processes, based on the work of [@Perrin] and her related GpOutput2D R package. FunQuant assist in the fine-tuning of its hyperparameters for a quantization task, with different performance metrics involved.
 
+```{r}
+library(FunQuant)
+library(ggplot2)
+library(ggvoronoi)
+cdf_r = function(r){2*(r-r^2/2)}
+
+inverse = function(f, lower = 0, upper = 1) {
+   return(Vectorize(function (y){as.numeric(uniroot((function (x) f(x) - y), lower = lower, upper = upper)[1])}))
+}
+inverse_cdf = inverse(cdf_r)
+
+inverse_cdf(c(0.4,0.5))
+rtest = function(n,p = 0.01){
+  res = matrix(0, ncol=2, nrow = n)
+  u = runif(n)
+  vec_normes = runif(sum(u<p))
+  vec_r = inverse_cdf(vec_normes)
+  angles = runif(sum(u<p), 0, pi/2)
+  res[which(u<p),] =  cbind(vec_r*cos(angles), vec_r*sin(angles))
+  return(res)
+}
+
+rbias = function(n,p){
+  u = runif(n)
+  vec_r = c(rep(0, sum(u>p)),runif(sum(u<=p)))
+  angles = runif(n, 0, pi/2)
+  return(cbind(vec_r*cos(angles), vec_r*sin(angles)))
+}
+```
 
 
+```{r}
+set.seed(10)
+ff = rtest(1000, p=0.01)
+res_kmeans = kmeans(ff, centers= 5,nstart = 3)
+
+plot(ff[,1],ff[,2])
+points(res_kmeans$centers[,1], res_kmeans$centers[,2],pch = 17, cex = 2,col="red")
+
+outline = as.data.frame(rbind(c(0,0), c(0,1), c(1,1), c(1,0)))
+df = as.data.frame(res_kmeans$centers)
+
+df_tot = rbind(setNames(as.data.frame(cbind(df, 3,10)), c("V1","V2","V3","V4")), as.data.frame(cbind(ff, 1,1)))
+df_tot$V3=as.factor(df_tot$V3)
+ggplot(data = df, aes(x = V1,y=V2)) + stat_voronoi(geom = "path", outline = outline)  + theme_bw() + geom_point(data = df_tot, aes(x=V1, y=V2, shape = V3,size = V3,col = V4)) + xlim(0,1) + ylim(0,1)+ coord_fixed() + scale_shape_manual(name = "", 
+                     labels = c("Sampled points","Prototypes"), 
+                     values = c(1,9)) + scale_color_gradient(low = "black", high = "brown",guide = "none") + scale_size_discrete(guide = "none")
+```
+
+```{r}
+set.seed(10)
+ff2 = rbias(1000, 0.8)
+density_ratio = apply(ff2, 1, function(x){
+  r = sqrt(x[1]^2+x[2]^2)
+  if(r==0){return(0.99/0.2)}
+  else{return(0.01/0.8*(1-r^2))}
+})
+
+```
+
+```{r}
+set.seed(10)
+res_proto = find_prototypes(nb_cells = 5,multistart = 3,data = t(ff2),density_ratio = density_ratio)
+protos = t(Reduce(cbind,res_proto$prototypes))
+
+ff_plot = as.data.frame(cbind(ff2, Weights = density_ratio))
+
+df = as.data.frame(protos)
+ggplot(data = df, aes(x = V1,y=V2)) + stat_voronoi(geom = "path", outline = outline)+ theme_bw() +geom_point(data = ff_plot[ff_plot$Weights <= 1,],aes(V1,V2, col = Weights)) +  scale_color_continuous(trans='log10',type = "viridis") + geom_point(data = as.data.frame(rbind(c(0,0,1))),mapping = aes(x = V1,y=V2, color=V3), color = "red",size = 2, shape=15,show.legend = F) + theme_bw()+ xlim(0,1) + ylim(0,1)+ coord_fixed()   + geom_point(shape = 9, colour = "brown", size = 5) 
+
+ggplot(ff_plot[ff_plot$Weights <= 1,])  +  scale_color_continuous(trans='log10',type = "viridis") + geom_point(data = as.data.frame(rbind(c(0,0,1))),mapping = aes(x = V1,y=V2, color=V3), color = "br",size = 2, shape=15,show.legend = F) + theme_bw() # + guides(colour=guide_legend(title="Proba"))
+# plot(ff2[,1],ff2[,2], colour = density_ratio)
+# points(protos[,1], protos[,2],pch = 17, cex = 3,col="red")
+```
+
+```{r}
+set.seed(10)
+ff = rtest(10^6, p=0.01)
+
+e1 = quanti_error(data = t(ff),prototypes = lapply(1:5, function(x){matrix(res_kmeans$centers[x,])}), density_ratio = rep(1,nrow(ff)))
+```
+
+```{r}
+e2= quanti_error(data = t(ff),prototypes = res_proto$prototypes, density_ratio = rep(1,nrow(ff)))
+```
+
+
+
+```{r}
+fX_polar = function(r,theta){
+  if(r==0){return(99/100)}
+  else if(r<=1){
+  return(1/100*2/pi*(1-r)*2)
+  }
+  else(return(0))
+}
+
+fX = function(x){
+  r = sqrt(x[1]^2+x[2]^2)
+  theta = acos(x[1])
+  return(fX_polar(r,theta))
+}
+
+design = as.data.frame(expand.grid(x = seq(10^-3,1,l=1000),y= seq(10^-3,1,l=1000)))
+design = cbind(design, f = apply(design,1,fX))
+design$f=as.numeric(design$f)
+design[design$f==0,] = NA
+
+ggplot() + theme_bw() + geom_contour_filled(data=design,aes(x,y,z=f))+  guides(fill=guide_legend(title="fX")) + geom_point(data = as.data.frame(rbind(c(0,0,1))),mapping = aes(x = V1,y=V2, color=V3), color = "red",size = 2, shape=15,show.legend = F) +  theme(legend.key.size = unit(0.4, 'cm'))
+
+# data_dir = as.data.frame(rbind(c(0,0,"a")))
+# ggplot(design) + geom_point(data = as.data.frame(rbind(c(0,0,"green"))),aes(x = V1,y=V2, col=V3), size = 2, shape=15)+scale_color_manual(name='At (0,0)',
+#                      breaks=c('a'),
+#                      values=c("red"))
+   
+#   
+# set.seed(10)
+# design =  as.data.frame(rtest(10^7, p=0.01))
+# # 
+# p = ggplot(design)+ geom_hex(aes(V1,V2,fill = stat(density))) + theme_bw() +scale_fill_gradient(name = "count", trans = "log") + geom_point(x = 0,y=0,colour="red", size = 2, shape=15)
+# # 
+
+```
+
+```{r}
+
+```
 
 
