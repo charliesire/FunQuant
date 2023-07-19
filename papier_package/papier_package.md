@@ -64,16 +64,16 @@ $$\left\{
 \right.$$
 
 The density function of $X$, denoted $f_{X}$, is represented in the following figure.
-<p align="center">
-  <img src="fX.jpg" width="350" title="hover text">
+![Density function $f_{X}$.](fX.jpg){ width="350" style="display: block; margin: 0 auto" }
+
 
 $99\%$ of the probability mass is concentrated at $(0,0)$.
 
 We want to perform quantization on $X$ here (or $Y(X)$ with $Y$ the identity function).
  If the classical K-Means algorithm is performed with a budget of $1000$ points, it leads to the following outcome, with only a few sampled points different of $(0,0)$. Then, the centroids of the Voronoi cells that do not contain $(0,0)$ are computed with a very small number of points, leading to a very high variance.
 
- <p align="center">
-  <img src="kmeans_quanti.jpg" width="350" title="K-Means centroids and Voronoi cells">
+![Sampling and quantization with classical K-Means](kmeans_quanti.jpg){ width="350" style="display: block; margin: 0 auto" }
+
 
 The FunQuant package to adapt the sampling and consider the probabilistic weights of each sample, with is the ratio $\frac{f_{X}}{g}$ where $g$ is density function associated to the adapted sampling. 
 
@@ -85,40 +85,44 @@ $$\left\{
     \end{array}
 \right.$$
 
+```
+sample_g = function(n){
+  u = runif(n)
+  vec_r = c(rep(0, sum(u>0.8)),runif(sum(u<=0.8)))
+  vec_theta = runif(n, 0, pi/2)
+  return(cbind(vec_r*cos(vec_theta), vec_r*sin(vec_theta)))
+}
 
-    sample_g = function(n){
-      u = runif(n)
-      vec_r = c(rep(0, sum(u>0.8)),runif(sum(u<=0.8)))
-      vec_theta = runif(n, 0, pi/2)
-      return(cbind(vec_r*cos(vec_theta), vec_r*sin(vec_theta)))
-    }
+g = function(x){
+    r = sqrt(x[1]^2+x[2]^2)
+  if(r==0){return(0.2)}
+  else if(r<=1){return(0.8/(2*pi))}
+  else(return(0))
+}
 
-    g = function(x){
-        r = sqrt(x[1]^2+x[2]^2)
-      if(r==0){return(0.2)}
-      else if(r<=1){return(0.8/(2*pi))}
-      else(return(0))
-    }
+inputs = sample_g(1000)
+density_ratio = compute_density_ratio(f = fX, g = g, inputs = inputs)
+quantization = find_prototypes(nb_cells = 5,multistart = 3,data = t(inputs),density_ratio = density_ratio)
 
-    inputs = sample_g(1000)
-    density_ratio = compute_density_ratio(f = fX, g = g, inputs = inputs)
-    quantization = find_prototypes(nb_cells = 5,multistart = 3,data = t(inputs),density_ratio = density_ratio)
-
+```
 
 Figure 3 shows the sampled points, their associated probabilistic weights, and the obtained prototypes. It clearly appears that this sampling brings more information about each Voronoi cells. 
 
- <p align="center">
-  <img src="is_quanti.jpg" width="350" title="K-Means centroids and Voronoi cells"> 
+![Sampling and quantization with importance sampling weights](is_quanti.jpg){ width="350" style="display: block; margin: 0 auto" }
+
+
 
 
 FunQuant allows to estimate the standard deviations of the estimators of the centroids for each Voronoi cell, highlighting the variance reduction obtained with the adapted sampling for the cells that do not contain $(0,0)$.
 
 
-    large_sample = sample_fX(10^5)
+```large_sample = sample_fX(10^5)
 
-    std_centroid_kmeans = std_centroid(data = t(large_sample), prototypes_list = list(protos_kmeans), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
+std_centroid_kmeans = std_centroid(data = t(large_sample), prototypes_list = list(protos_kmeans), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
 
-    std_centroid_kmeans #the cells are ordered by increasing "x" coordinate of their centroid
+std_centroid_kmeans #the cells are ordered by increasing "x" coordinate of their centroid
+
+```
 
     ## [[1]]
     ## [[1]][[1]]
@@ -166,33 +170,3 @@ academia in the development of advanced methods for Computer
 Experiments.
 
 # References
-
-Bock, Hans-Hermann. 2008. “Origins and Extensions of the k-Means
-Algorithm in Cluster Analysis.” *Journal Électronique d’Histoire Des
-Probabilités Et de La Statistique \[Electronic Only\]* 4 (January):
-Article 14.
-
-Havé, Pascal, Yann Richet, Yves Deville, Conrad Sanderson, Colin Fang,
-Ciyou Zhu, Richard Byrd, Jorge Nocedal, and Jose Luis Morales. 2022.
-“Rlibkriging: Kriging Models Using the ’libKriging’ Library.” *GitHub
-Repository*. GitHub. <https://github.com/libKriging/rlibkriging>.
-
-Paananen, Topi, Juho Piironen, Paul-Christian Bürkner, and Aki Vehtari.
-2021. “Implicitly Adaptive Importance Sampling.” *Statistics and
-Computing* 31 (2). <https://doi.org/10.1007/s11222-020-09982-2>.
-
-Pagès, Gilles. 2014. “<span class="nocase">Introduction to optimal
-vector quantization and its applications for numerics</span>.” LPMA.
-<https://hal.archives-ouvertes.fr/hal-01034196>.
-
-Perrin, T. V. E., O. Roustant, J. Rohmer, Olivier Alata, J. P. Naulin,
-D. Idier, R. Pedreros, D. Moncoulon, and P. Tinard. 2021. “Functional
-Principal Component Analysis for Global Sensitivity Analysis of Model
-with Spatial Output.” *Reliability Engineering and System Safety* 211
-(July): 107522. <https://doi.org/10.1016/j.ress.2021.107522>.
-
-Sire, Charlie, Rodolphe Le Riche, Didier Rullière, Jérémy Rohmer, Lucie
-Pheulpin, and Yann Richet. 2023. “Quantizing Rare Random Maps:
-Application to Flooding Visualization.” *Journal of Computational and
-Graphical Statistics* 0: 1–31.
-<https://doi.org/10.1080/10618600.2023.2203764>.
