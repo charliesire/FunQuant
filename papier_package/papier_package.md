@@ -64,7 +64,8 @@ $$\left\{
 \right.$$
 
 The density function of $X$, denoted $f_{X}$, is represented in the following figure.
-![Density function $f_{X}$.](fX.jpg){ width="350" style="display: block; margin: 0 auto" }
+
+![Density function $f_{X}$.](fX.jpg){ width="800" style="display: block; margin: 0 auto" }
 
 
 $99\%$ of the probability mass is concentrated at $(0,0)$.
@@ -72,7 +73,7 @@ $99\%$ of the probability mass is concentrated at $(0,0)$.
 We want to perform quantization on $X$ here (or $Y(X)$ with $Y$ the identity function).
  If the classical K-Means algorithm is performed with a budget of $1000$ points, it leads to the following outcome, with only a few sampled points different of $(0,0)$. Then, the centroids of the Voronoi cells that do not contain $(0,0)$ are computed with a very small number of points, leading to a very high variance.
 
-![Sampling and quantization with classical K-Means](kmeans_quanti.jpg){ width="350" style="display: block; margin: 0 auto" }
+![Sampling and quantization with classical K-Means](kmeans_quanti.jpg){ width="800" style="display: block; margin: 0 auto" }
 
 
 The FunQuant package to adapt the sampling and consider the probabilistic weights of each sample, with is the ratio $\frac{f_{X}}{g}$ where $g$ is density function associated to the adapted sampling. 
@@ -116,7 +117,8 @@ Figure 3 shows the sampled points, their associated probabilistic weights, and t
 FunQuant allows to estimate the standard deviations of the estimators of the centroids for each Voronoi cell, highlighting the variance reduction obtained with the adapted sampling for the cells that do not contain $(0,0)$.
 
 
-```large_sample = sample_fX(10^5)
+```
+large_sample = sample_fX(10^5)
 
 std_centroid_kmeans = std_centroid(data = t(large_sample), prototypes_list = list(protos_kmeans), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
 
