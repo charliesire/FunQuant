@@ -86,7 +86,7 @@ $$\left\{
     \end{array}
 \right.$$
 
-```{.r, .numberLines}
+```r
 sample_g = function(n){
   u = runif(n)
   vec_r = c(rep(0, sum(u>0.8)),runif(sum(u<=0.8)))
@@ -116,7 +116,7 @@ Figure 3 shows the sampled points, their associated probabilistic weights, and t
 FunQuant allows to estimate the standard deviations of the estimators of the centroids for each Voronoi cell, highlighting the variance reduction obtained with the adapted sampling for the cells that do not contain $(0,0)$.
 
 
-```{.r, .numberLines}
+```r
 large_sample = sample_fX(10^5)
 
 std_centroid_kmeans = std_centroid(data = t(large_sample), prototypes_list = list(protos_kmeans), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
