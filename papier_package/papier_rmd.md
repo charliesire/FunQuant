@@ -45,12 +45,12 @@ flexibility to utilize their own metamodels to generate additional data,
 FunQuant offers several functions tailored specifically for a metamodel
 dedicated to spatial outputs such as maps. This metamodel relies on
 Functional Principal Component Analysis and Gaussian Processes, based on
-the work of Perrin et al. (2021), adapted with the rlibkriging R package
+the work of (Perrin et al. 2021), adapted with the rlibkriging R package
 (Havé et al. 2022). FunQuant assists in the fine-tuning of its
 hyperparameters for a quantization task, with different performance
 metrics involved.
 
-Additional theoretical information can be found in Sire et al. (2023).
+Additional theoretical information can be found in (Sire et al. 2023).
 The paper provides a comprehensive exploration of the application of
 FunQuant to the quantization of flooding maps.
 
@@ -73,25 +73,69 @@ in the following figure.
 
 <img src="fX.jpg" width="350" title="hover text">
 
-99% of the probability mass is concentrated at (0,0). If a classical K
+99% of the probability mass is concentrated at (0,0). If a classical
 
     sample_g = function(n){
       u = runif(n)
-      vec_r = c(rep(0, sum(u>0.8)),runif(sum(u<=0.8)))
+      vec_r = c(rep(0, sum(u>0.95)),runif(sum(u<=0.95)))
       angles = runif(n, 0, pi/2)
       return(cbind(vec_r*cos(angles), vec_r*sin(angles)))
     }
 
     g = function(x){
         r = sqrt(x[1]^2+x[2]^2)
-      if(r==0){return(0.2)}
-      else if(r<=1){return(0.8/(2*pi))}
+      if(r==0){return(0.05)}
+      else if(r<=1){return(0.95/(2*pi))}
       else(return(0))
     }
 
     inputs = sample_g(1000)
     density_ratio = compute_density_ratio(f = fX, g = g, inputs = inputs)
     res_proto = find_prototypes(nb_cells = 5,multistart = 3,data = t(inputs),density_ratio = density_ratio)
+
+    large_sample = sample_fX(10^5)
+
+    std_centroid_kmeans = std_centroid(data = t(large_sample), prototypes_list = list(protos_kmeans), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
+
+    std_centroid_kmeans
+
+    ## [[1]]
+    ## [[1]][[1]]
+    ## [1] 7.786362e-05 7.366411e-05
+    ## 
+    ## [[1]][[2]]
+    ## [1] 0.03561213 0.05429926
+    ## 
+    ## [[1]][[3]]
+    ## [1] 0.08347199 0.10650128
+    ## 
+    ## [[1]][[4]]
+    ## [1] 0.05506697 0.04682364
+    ## 
+    ## [[1]][[5]]
+    ## [1] 0.09770415 0.12095001
+
+    large_sample_g = sample_g(10^5)
+
+    std_centroid_funquant = std_centroid(data = t(large_sample_g), prototypes_list = list(protos_funquant), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
+
+    std_centroid_funquant
+
+    ## [[1]]
+    ## [[1]][[1]]
+    ## [1] 0.002392146 0.002499710
+    ## 
+    ## [[1]][[2]]
+    ## [1] 0.005661370 0.005629974
+    ## 
+    ## [[1]][[3]]
+    ## [1] 0.007004364 0.012310445
+    ## 
+    ## [[1]][[4]]
+    ## [1] 0.014033466 0.006112396
+    ## 
+    ## [[1]][[5]]
+    ## [1] 0.01082570 0.01121463
 
 # Acknowledgments
 

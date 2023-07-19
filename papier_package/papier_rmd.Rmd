@@ -80,6 +80,8 @@ $99\%$ of the probability mass is concentrated at $(0,0)$. If a classical
 library(FunQuant)
 library(ggplot2)
 library(ggvoronoi)
+set.seed(10)
+
 ```
 
 ```{r, include = FALSE}
@@ -124,12 +126,10 @@ ggplot() + theme_bw() + geom_contour_filled(data=design,aes(x,y,z=f))+  guides(f
 
 
 ```{r,include=FALSE}
-set.seed(10)
 ff = sample_fX(1000, p=0.01)
 res_kmeans = kmeans(ff, centers= 5,nstart = 3)
 
 protos_kmeans = lapply(order(res_kmeans$centers[,1]), function(i){matrix(res_kmeans$centers[i,])})
-points(res_kmeans$centers[,1], res_kmeans$centers[,2],pch = 17, cex = 2,col="red")
 
 outline = as.data.frame(rbind(c(0,0), c(0,1), c(1,1), c(1,0)))
 df = as.data.frame(res_kmeans$centers)
@@ -165,7 +165,7 @@ res_proto = find_prototypes(nb_cells = 5,multistart = 3,data = t(inputs),density
 
 ```
 
-```{r, echo = FALSE, eval = FALSE}
+```{r, include = FALSE}
 protos = t(Reduce(cbind,res_proto$prototypes))
 protos_funquant = lapply(order(protos[,1]), function(i){res_proto$prototypes[[i]]})
 
@@ -186,7 +186,6 @@ std_centroid_kmeans
 ```
 
 ```{r}
-set.seed(10)
 large_sample_g = sample_g(10^5)
 
 std_centroid_funquant = std_centroid(data = t(large_sample_g), prototypes_list = list(protos_funquant), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
@@ -195,7 +194,7 @@ std_centroid_funquant
 ```
 
 
-```{r,include=FALSE, echo = FALSE}
+```{r,include=FALSE, eval = FALSE}
 large_sample = sample_fX(10^6)
 error_quanti_1 = quanti_error(data = t(large_sample), prototypes = lapply(1:5, function(i){res_kmeans$centers[i,]}), density_ratio = rep(1, nrow(large_sample)))
 error_quanti_2 = quanti_error(data = t(large_sample), prototypes = res_proto$prototypes,density_ratio = rep(1, nrow(large_sample)))
