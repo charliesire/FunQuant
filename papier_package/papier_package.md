@@ -53,6 +53,7 @@ Importance Sampling is employed with the aim of reducing the variance of the est
 In addition, FunQuant is designed to mitigate the computational burden associated with the evaluation of costly data. While users have the flexibility to utilize their own metamodels to generate additional data, FunQuant offers several functions tailored specifically for a metamodel dedicated to spatial outputs such as maps. This metamodel relies on Functional Principal Component Analysis and Gaussian Processes, based on the work of [@Perrin], adapted with the rlibkriging R package [@rlib]. FunQuant assists in the fine-tuning of its hyperparameters for a quantization task, with different performance metrics involved.
 
 Additional theoretical information can be found in [@sire]. The paper provides a comprehensive exploration of the application of FunQuant to the quantization of flooding maps.
+
 # Illustrative example
 
 We consider a random variable $X = (R cos(\Theta), R sin(\Theta)) \in \mathbb{R}^{2}$ with $R$ and $\Theta$ 2 independant random variables defined by the following probability density functions:
@@ -71,14 +72,14 @@ The density function of $X$, denoted $f_{X}$, is represented in \autoref{fx}.
 $99\%$ of the probability mass is concentrated at $(0,0)$.
 
 We want to perform quantization on $X$ here (or $Y(X)$ with $Y$ the identity function).
- If the classical K-Means algorithm is performed with a budget of $1000$ points, it leads to the following outcome, with only a few sampled points different of $(0,0)$. Then, the centroids of the Voronoi cells that do not contain $(0,0)$ are computed with a very small number of points, leading to a very high variance.
+ If the classical K-Means algorithm is performed with a budget of $1000$ points, it leads to the outcome illustrated in \autoref{kmeans_quanti}, with only a few sampled points not equal to $(0,0)$. Then, the centroids of the Voronoi cells that do not contain $(0,0)$ are computed with a very small number of points, leading to a very high variance.
 
 ![Sampling and quantization with classical K-Means. \label{kmeans_quanti}](kmeans_quanti.jpg){ width="1100" style="display: block; margin: 0 auto" }
 
 
 The FunQuant package to adapt the sampling and consider the probabilistic weights of each sample, with is the ratio $\frac{f_{X}}{g}$ where $g$ is density function associated to the adapted sampling. 
 
-A possible function $g$ is $g = g_{R}\times g_{\Theta}$ 
+A possible function $g$ is $g = g_{R}\times g_{\Theta}$ with
 $$\left\{
     \begin{array}{ll}
         g_{R}(r) = 0.05 \delta_{0} + 0.95\mathbb{1}_{]0,1]}(r)\\
@@ -89,15 +90,15 @@ $$\left\{
 ```r
 sample_g = function(n){
   u = runif(n)
-  vec_r = c(rep(0, sum(u>0.8)),runif(sum(u<=0.8)))
+  vec_r = c(rep(0, sum(u>0.95)),runif(sum(u<=0.95)))
   vec_theta = runif(n, 0, pi/2)
   return(cbind(vec_r*cos(vec_theta), vec_r*sin(vec_theta)))
 }
 
 g = function(x){
     r = sqrt(x[1]^2+x[2]^2)
-  if(r==0){return(0.2)}
-  else if(r<=1){return(0.8/(2*pi))}
+  if(r==0){return(0.05)}
+  else if(r<=1){return(0.95/(2*pi))}
   else(return(0))
 }
 
@@ -116,7 +117,7 @@ quantization = find_prototypes(nb_cells = 5,
 
 
 
-FunQuant allows to estimate the standard deviations of the estimators of the centroids for each Voronoi cell, highlighting the variance reduction obtained with the adapted sampling for the cells that do not contain $(0,0)$.
+FunQuant allows to estimate the standard deviations of the two coordinates of the estimators of the centroids for each Voronoi cell, highlighting the variance reduction obtained with the adapted sampling for the cells that do not contain $(0,0)$.
 
 
 ```r
@@ -153,7 +154,7 @@ std_centroid_kmeans #the cells are ordered by the increasing coordinate x
 
 large_sample_g = sample_g(10^5)
 
-std_centroid_kmeans = std_centroid(data = t(large_sample), 
+std_centroid_kmeans = std_centroid(data = t(large_sample_g), 
                                    prototypes_list = list(protos_funquant),
                                    cells = 1:5, 
                                    nv = 1000)
