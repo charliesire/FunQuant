@@ -119,9 +119,14 @@ FunQuant allows to estimate the standard deviations of the estimators of the cen
 ```r
 large_sample = sample_fX(10^5)
 
-std_centroid_kmeans = std_centroid(data = t(large_sample), prototypes_list = list(protos_kmeans), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
+std_centroid_kmeans = std_centroid(
+  data = t(large_sample), 
+  prototypes_list = list(protos_kmeans)
+, cells = 1:5, 
+nv = 1000)
 
-std_centroid_kmeans #the cells are ordered by increasing "x" coordinate of their centroid
+std_centroid_kmeans #the cells are ordered by the increasing coordinate x
+#of their centroid
 
 ```
 
@@ -141,11 +146,20 @@ std_centroid_kmeans #the cells are ordered by increasing "x" coordinate of their
     ## [[1]][[5]]
     ## [1] 0.09770415 0.12095001
 
-    large_sample_g = sample_g(10^5)
 
-    std_centroid_funquant = std_centroid(data = t(large_sample_g), prototypes_list = list(protos_funquant), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
+```r
 
-    std_centroid_funquant #the cells are ordered by increasing "x" coordinate of their centroid
+large_sample_g = sample_g(10^5)
+
+std_centroid_funquant = std_centroid(
+  data = t(large_sample_g), 
+  prototypes_list = list(protos_funquant),  
+  cells = 1:5, 
+  nv = 1000)
+
+std_centroid_funquant #the cells are ordered by the increasing coordinate x 
+#of their centroid
+```
 
     ## [[1]]
     ## [[1]][[1]]
