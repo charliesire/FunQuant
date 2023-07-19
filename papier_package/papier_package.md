@@ -63,7 +63,7 @@ $$\left\{
     \end{array}
 \right.$$
 
-The density function of $X$, denoted $f_{X}$, is represented in Figure \autoref{fx}.
+The density function of $X$, denoted $f_{X}$, is represented in \autoref{fx}.
 
 ![Density function $f_{X}$.\label{fx}](fX.jpg){ width="1100" style="display: block; margin: 0 auto" }
 
@@ -109,7 +109,7 @@ quantization = find_prototypes(nb_cells = 5,
                                density_ratio = density_ratio)
 ```
 
-Figure \autoref{is_quanti} shows the sampled points, their associated probabilistic weights, and the obtained prototypes. It clearly appears that this sampling brings more information about each Voronoi cells. 
+\autoref{is_quanti} shows the sampled points, their associated probabilistic weights, and the obtained prototypes. It clearly appears that this sampling brings more information about each Voronoi cells. 
 
 ![Sampling and quantization with importance sampling weights. \label{is_quanti}](is_quanti.jpg){ width="1100" style="display: block; margin: 0 auto" }
 
