@@ -1,3 +1,42 @@
+---
+title: "FunQuant"
+output: md_document
+tags:
+  - R
+  - Quantization
+  - Statistics
+  - Metamodel
+  - Importance Sampling
+authors:
+  - name: Charlie Sire
+    orcid: 0000-0002-4432-7940
+    affiliation: "1, 2, 3" # (Multiple affiliations must be quoted)
+    corresponding: true
+  - name: Yann Richet
+    orcid: 0000-0002-5677-8458
+    affiliation: 3
+  - name: Rodolphe Le Riche
+    orcid: 0000-0002-3518-2110
+    affiliation: 1
+  - name: Didier Rullière
+    affiliation: 1
+  - name: Jérémy Rohmer
+    orcid: 0000-0001-9083-5965
+    affiliation: 2
+  - name: Lucie Pheulpin
+    affiliation: 3
+
+
+affiliations:
+ - name: Mines Saint-Etienne, Univ. Clermont Auvergne, CNRS, UMR 6158 LIMOS
+   index: 1
+ - name: BRGM
+   index: 2
+ - name: IRSN
+   index: 3
+bibliography: biblio.bib
+---
+
 
 # Summary
 
