@@ -97,7 +97,7 @@ in the following figure.
 
     std_centroid_kmeans = std_centroid(data = t(large_sample), prototypes_list = list(protos_kmeans), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
 
-    std_centroid_kmeans
+    std_centroid_kmeans #the cells are ordered by increasing "x" coordinate of their centroid
 
     ## [[1]]
     ## [[1]][[1]]
@@ -119,7 +119,7 @@ in the following figure.
 
     std_centroid_funquant = std_centroid(data = t(large_sample_g), prototypes_list = list(protos_funquant), density_ratio = rep(1, nrow(large_sample)), cells = 1:5, nv = 1000)
 
-    std_centroid_funquant
+    std_centroid_funquant #the cells are ordered by increasing "x" coordinate of their centroid
 
     ## [[1]]
     ## [[1]][[1]]
