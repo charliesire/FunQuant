@@ -103,7 +103,10 @@ g = function(x){
 
 inputs = sample_g(1000)
 density_ratio = compute_density_ratio(f = fX, g = g, inputs = inputs)
-quantization = find_prototypes(nb_cells = 5,multistart = 3,data = t(inputs),density_ratio = density_ratio)
+quantization = find_prototypes(nb_cells = 5,
+                               multistart = 3,
+                               data = t(inputs),
+                               density_ratio = density_ratio)
 ```
 
 Figure 3 shows the sampled points, their associated probabilistic weights, and the obtained prototypes. It clearly appears that this sampling brings more information about each Voronoi cells. 
@@ -119,11 +122,10 @@ FunQuant allows to estimate the standard deviations of the estimators of the cen
 ```r
 large_sample = sample_fX(10^5)
 
-std_centroid_kmeans = std_centroid(
-  data = t(large_sample), 
-  prototypes_list = list(protos_kmeans)
-, cells = 1:5, 
-nv = 1000)
+std_centroid_kmeans = std_centroid(data = t(large_sample), 
+                                   prototypes_list = list(protos_kmeans),
+                                   cells = 1:5, 
+                                   nv = 1000)
 
 std_centroid_kmeans #the cells are ordered by the increasing coordinate x
 #of their centroid
@@ -151,11 +153,10 @@ std_centroid_kmeans #the cells are ordered by the increasing coordinate x
 
 large_sample_g = sample_g(10^5)
 
-std_centroid_funquant = std_centroid(
-  data = t(large_sample_g), 
-  prototypes_list = list(protos_funquant),  
-  cells = 1:5, 
-  nv = 1000)
+std_centroid_kmeans = std_centroid(data = t(large_sample), 
+                                   prototypes_list = list(protos_funquant),
+                                   cells = 1:5, 
+                                   nv = 1000)
 
 std_centroid_funquant #the cells are ordered by the increasing coordinate x 
 #of their centroid
