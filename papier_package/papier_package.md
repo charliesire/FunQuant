@@ -193,6 +193,8 @@ std_centroid_funquant #the cells are ordered by the increasing coordinate x
     ## [1] 0.009168924 0.009620646
 
 
+This example remains basic. Advanced computations of the centroids with tailored density functions $g$ can be performed. FunQuant was built to tackle industrial problems with large amounts of data, with possibilities to split the computations into different batches for instance. 
+
 # Acknowledgments
 
 This research was conducted with the support of the consortium in
