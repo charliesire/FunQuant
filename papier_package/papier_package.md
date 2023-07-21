@@ -46,7 +46,7 @@ Quantization helps summarizing continuous distributions by providing a discrete 
 
 FunQuant is a R package that has been specifically developed for carrying out quantization in the context of rare events. While numerous cutting-edge packages facilitate straightforward implementation of the Lloyd's algorithm, they lack the incorporation of any probabilistic factors, treating all data points equally in terms of weighting. Conversely, FunQuant employs Importance Sampling estimators [@Paananen] instead of traditional Monte Carlo approach for calculating the centroids. To be more precise, when data $Y$ depends on probabilistic inputs $X$, the centroid of a cluster $C$ is estimated by the following formula: 
 
-$$\frac{\frac{1}{n} \sum^{n}_{k=1} Y(\tilde{X}_{k})\mathbb{1}_{Y(\tilde{X}_{k})\in C}\frac{f_{X}(\tilde{X}^k)}{g(\tilde{X}_{k})}}{\frac{1}{n} \sum^{n}_{k=1} \mathbb{1}_{Y(\tilde{X}^k)\in C} \frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}}$$
+$$\frac{\frac{1}{n} \sum^{n}_{k=1} Y(\tilde{X}_{k})\mathbb{1}_{Y(\tilde{X}_{k})\in C}\frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}}{\frac{1}{n} \sum^{n}_{k=1} \mathbb{1}_{Y(\tilde{X}_k)\in C} \frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}}$$
 where $f_{X}$ is the known density function of the inputs $X$, and $(\tilde{X}_k)^{n}_{k=1}$ i.i.d. random variables of density function $g$.
 Importance Sampling is employed with the aim of reducing the variance of the estimators of the centroids when compared to classical Monte Carlo methods. FunQuant provides various approaches for implementing these estimators, depending on the sampling density denoted as $g$. The simplest method involves using the same function $g$ for each iteration and every cluster, which is straightforward to work with and still yields significant variance reduction. More advanced implementations enable the adaptation of the sampling density for each cluster at every iteration.
 
@@ -81,7 +81,7 @@ $$H(x) = \left\{
 with $\alpha$ such that $P(G(X) = (0,0)) = 0.99.$.
 
 The density $f_{Y}$ of the output $Y = H(X)$ is represented in \autoref{fy}.
-![Density function $f_{Y}$.\label{fx}](fY.jpg){ width="1100" style="display: block; margin: 0 auto" }
+![Density function $f_{Y}$.\label{fy}](fY.jpg){ width="1100" style="display: block; margin: 0 auto" }
 
 $99\%$ of the probability mass is concentrated at $(0,0)$.
 
@@ -132,7 +132,7 @@ FunQuant allows to estimate the standard deviations of the two coordinates of th
 ```r
 large_inputs = sample_fX(10^5)
 large_outputs = apply(large_inputs,1, Y)
-std_centroid_kmeans = std_centroid(data = t(large_outputs), 
+std_centroid_kmeans = std_centroid(data = large_outputs, 
                                    prototypes_list = list(protos_kmeans),
                                    cells = 1:5, 
                                    nv = 1000)
@@ -163,7 +163,7 @@ std_centroid_kmeans #the cells are ordered by the increasing coordinate x
 
 large_inputs_is = sample_g(10^5)
 large_outputs_is = apply(large_inputs_is,1, Y)
-std_centroid_funquant = std_centroid(data = t(large_outputs_is), 
+std_centroid_funquant = std_centroid(data = large_outputs_is, 
                                    prototypes_list = list(protos_funquant),
                                    cells = 1:5, 
                                    nv = 1000)
