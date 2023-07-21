@@ -40,7 +40,7 @@ bibliography: biblio.bib
 
 # Summary
 
-Quantization helps summarizing continuous distributions by providing a discrete approximation [@Pages]. Among the widely adopted methods for data quantization is the Lloyd's algorithm, which partitions the space into Voronoï cells, that can be seen as clusters, and constructs a discrete distribution based on their centroids and probabilistic masses. Lloyd's algorithm investigates the optimal centroids in a minimal expected distance sense [@Bock], but this approach poses significant challenges in scenarios where data evaluation is costly, and relates to a rare event that accumulates the majority of the probabilistic mass in a single cluster. In this context, a metamodel is required [@Friedman] and adapted sampling methods are relevant to increase the precision of the computations on the rare clusters.
+Quantization summarises continuous distributions by providing a discrete approximation [@Pages]. Among the widely adopted methods for data quantization is the Lloyd's algorithm, which partitions the space into Voronoï cells, that can be seen as clusters, and constructs a discrete distribution based on their centroids and probabilistic masses. Lloyd's algorithm investigates the optimal centroids in a minimal expected distance sense [@Bock], but this approach poses significant challenges in scenarios where data evaluation is costly, and relates to a rare event that accumulates the majority of the probabilistic mass in a single cluster. In this context, a metamodel is required [@Friedman] and adapted sampling methods are relevant to increase the precision of the computations on the rare clusters.
 
 # Statement of need
 
