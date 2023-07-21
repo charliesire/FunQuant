@@ -44,7 +44,7 @@ Quantization helps summarizing continuous distributions by providing a discrete 
 
 # Statement of need
 
-FunQuant is a R package that has been specifically developed for carrying out quantization in the context of rare events. While numerous cutting-edge packages facilitate straightforward implementation of the Lloyd's algorithm, they lack the incorporation of any probabilistic factors, treating all data points equally in terms of weighting. Conversely, FunQuant employs Importance Sampling estimators [@Paananen] instead of traditional Monte Carlo approach for calculating the centroids. To be more precise, when data $Y$ depends on probabilistic inputs $X$, the centroid of a cluster $C$ is estimated by the following formula: 
+FunQuant is a R package that has been specifically developed for carrying out quantization in the context of rare events. While numerous cutting-edge packages facilitate straightforward implementation of the Lloyd's algorithm, they lack the incorporation of any probabilistic factors, treating all data points equally in terms of weighting. Conversely,  FunQuant considers probabilistic weights based on the Importance Sampling formulation [@Paananen] to handle the problem of rare event. To be more precise, when $X$ and $Y$ are the random input and the output of a computer code respectively,  the quantization of $Y(X)$ is performed by estimating the centroid of a given cluster $C$ with the following formula: 
 
 $$\frac{\frac{1}{n} \sum^{n}_{k=1} Y(\tilde{X}_{k})\mathbb{1}_{Y(\tilde{X}_{k})\in C}\frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}}{\frac{1}{n} \sum^{n}_{k=1} \mathbb{1}_{Y(\tilde{X}_k)\in C} \frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}}$$
 where $f_{X}$ is the known density function of the inputs $X$, and $(\tilde{X}_k)^{n}_{k=1}$ i.i.d. random variables of density function $g$.
@@ -132,14 +132,16 @@ FunQuant allows to estimate the standard deviations of the two coordinates of th
 ```r
 large_inputs = sample_fX(10^5)
 large_outputs = apply(large_inputs,1, Y)
-std_centroid_kmeans = std_centroid(data = large_outputs, 
-                                   prototypes_list = list(protos_kmeans),
-                                   cells = 1:5, 
-                                   nv = 1000)
+std_centroid_kmeans = std_centroid(
+              data = large_outputs, 
+              prototypes_list = list(protos_kmeans),
+              cells = 1:5, 
+              nv = 1000)
 
 std_centroid_kmeans #the cells are ordered by the increasing coordinate x
 #of their centroid
 
+# std centroid returns a list of lists: for each tested set of prototypes (here only one set is tested), a list of the estimated standard deviations is provided, each element of this list is associated to a Voronoï cell
 ```
 
     ## [[1]]
@@ -163,13 +165,15 @@ std_centroid_kmeans #the cells are ordered by the increasing coordinate x
 
 large_inputs_is = sample_g(10^5)
 large_outputs_is = apply(large_inputs_is,1, Y)
-std_centroid_funquant = std_centroid(data = large_outputs_is, 
-                                   prototypes_list = list(protos_funquant),
-                                   cells = 1:5, 
-                                   nv = 1000)
+std_centroid_funquant = std_centroid(
+              data = large_outputs_is, 
+              prototypes_list = list(protos_funquant),
+              cells = 1:5, 
+              nv = 1000)
 
 std_centroid_funquant #the cells are ordered by the increasing coordinate x 
 #of their centroid
+
 ```
 
     ## [[1]]
