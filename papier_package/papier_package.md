@@ -81,6 +81,7 @@ $$H(x) = \left\{
 with $\alpha$ such that $P(G(X) = (0,0)) = 0.99.$.
 
 The density $f_{Y}$ of the output $Y = H(X)$ is represented in \autoref{fy}.
+
 ![Density function $f_{Y}$.\label{fy}](fY.jpg){ width="1100" style="display: block; margin: 0 auto" }
 
 $99\%$ of the probability mass is concentrated at $(0,0)$.

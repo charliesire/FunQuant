@@ -49,7 +49,7 @@ Quantization helps understand continuous distributions by providing a discrete a
 
 # Statement of need
 
-FunQuant is an R package that has been specifically developed for carrying out quantization in the realm of rare events. While numerous cutting-edge packages facilitate straightforward implementation of the K-Means algorithm, they lack the incorporation of any probabilistic factors, treating all data points equally in terms of weighting. Conversely, FunQuant employs Importance Sampling estimators [@Paananen] instead of traditional Monte Carlo approach for calculating the centroids. To be more precise, when data $Y$ depends on probabilistic inputs $X$, the centroid of a cluster $C$ is estimated by the following formula: 
+FunQuant is an R package that has been specifically developed for carrying out quantization in the realm of rare events. While numerous cutting-edge packages facilitate straightforward implementation of the K-Means algorithm, they lack the incorporation of any probabilistic factors, treating all data points equally in terms of weighting. Conversely, FunQuant employs Importance Sampling estimators [@Paananen] instead of traditional Monte Carlo approach for calculating the centroids. To be more precise, when data $X$ is the random input of a computer code, and $Y(X)$ the output, the centroid of a cluster $C$ is estimated by the following formula: 
 
 $$\frac{\frac{1}{n} \sum^{n}_{k=1} Y(\tilde{X}_{k})\mathbb{1}_{Y(\tilde{X}_{k})\in C}\frac{f_{X}(\tilde{X}^k)}{g(\tilde{X}_{k})}}{\frac{1}{n} \sum^{n}_{k=1} \mathbb{1}_{Y(\tilde{X}^k)\in C} \frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}}$$
 where $f_{X}$ is the known density function of the inputs $X$, and $(\tilde{X}_k)^{n}_{k=1}$ i.i.d. random variables of density function $g$.
