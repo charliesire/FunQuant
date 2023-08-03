@@ -6,8 +6,6 @@
 #' @param sampling_cells If method == "percell" and data is provided, sampling_cells is a vector indicating for each cell, the index element of data associated to this cell.
 #' @param density_ratio A vector indicating the weight fX/g of each data element. Default is a vector of 1. If method = "percell", a list of density_ratio must be provided, of length equal to the number of Voronoï cells.
 #' @param bias A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default is 0 for all Voronoi cells.
-#' @param batch A boolean indicating whether the computations must be performed by batch or not. If TRUE, data, cell_numbers and density_ratio must be lists. Default is False.
-
 #'
 #' @return The centroid and the probability mass of each probability cell
 #' @import abind
