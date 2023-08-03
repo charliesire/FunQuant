@@ -1,5 +1,6 @@
 ---
-title: "FunQuant"
+title: "FunQuant: A R package to perform probabilistic quantization in the context of rare events and
+time-consuming simulations"
 output: md_document
 tags:
   - R
@@ -103,7 +104,10 @@ fX = function(x){
     dtruncnorm(x = x[1],mean = 0,sd = sd1,a=-1, b=1)*dtruncnorm(x = x[2],mean = 0,sd = sd2,a=-1, b=1))
 }
 
-g = function(x){return(1/4)}
+g = function(x){
+  if(sum((x>-1)*(x<1))==2){return(1/4)}
+  else{return(0)}
+}
 
 sample_g = function(n){cbind(runif(n,-1,1), runif(n,-1,1))
 }
