@@ -78,7 +78,7 @@ $$H(x) = \left\{
     \end{array}
 \right.$$
 
-with $\alpha$ such that $P(G(X) = (0,0)) = 0.99.$.
+with $\alpha$ such that $P(G(X) = (0,0)) = 0.99.$
 
 The density $f_{Y}$ of the output $Y = H(X)$ is represented in \autoref{fy}.
 
