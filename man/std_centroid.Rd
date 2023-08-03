@@ -7,7 +7,7 @@
 std_centroid(
   data = NULL,
   prototypes_list,
-  density_ratio,
+  density_ratio = rep(1, dim(data)[length(data)]),
   distance_func = function(A1, A2) {
      return(sqrt(sum((A1 - A2)^2)))
  },
@@ -16,12 +16,13 @@ std_centroid(
   nv,
   outputs_function = NULL,
   inputs = NULL,
-  batch_size = NULL,
-  return_cell_numbers = FALSE
+  batch_size = nrow(inputs),
+  return_cell_numbers = FALSE,
+  bootstrap = NULL
 )
 }
 \arguments{
-\item{data}{The data samples that need to be quantized. Useful only if cell_numbers == NULL.}
+\item{data}{The data samples that need to be quantized. An array of any dimension is expected, the kth element must be selected with data[,..,k]. Useful only if cell_numbers == NULL.}
 
 \item{prototypes_list}{A list of set of prototypes on which we want to evaluate the IS centroid standard deviation. Each element is a list of prototypes.}
 
@@ -42,6 +43,8 @@ std_centroid(
 \item{batch_size}{If the computation is by batch, the number of elements by batch. Optional.}
 
 \item{return_cell_numbers}{Boolean indicating whether the cell_numbers must be provided or not.}
+
+\item{bootstrap}{Integer indicating the number of bootstramp samples to generate. If NULL, no boostrap is performed. Default is NULL.}
 }
 \value{
 A list providing for each set of prototypes a list the IS centroid standard deviation for each voronoi cell

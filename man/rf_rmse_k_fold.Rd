@@ -14,26 +14,20 @@ rf_rmse_k_fold(
   return_pred = FALSE,
   outputs_pred = NULL,
   only_positive = FALSE,
-  seed = NULL,
   ncoeff,
   npc,
-  formula = ~1,
-  covtype = "matern5_2",
+  kernel = "matern5_2",
   wf = "d4",
   boundary = "periodic",
   J = 1,
-  coef.trend = NULL,
-  coef.cov = NULL,
-  coef.var = NULL,
-  nugget = NULL,
-  noise.var = NULL,
-  lower = NULL,
-  upper = NULL,
-  parinit = NULL,
-  multistart = 1,
-  kernel = NULL,
-  control = NULL,
-  type = "UK",
+  regmodel = "constant",
+  normalize = FALSE,
+  optim = "BFGS",
+  objective = "LL",
+  parameters = NULL,
+  noise = FALSE,
+  nugget = FALSE,
+  seed = NULL,
   ...
 )
 }
@@ -56,55 +50,33 @@ rf_rmse_k_fold(
 
 \item{only_positive}{A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.}
 
-\item{seed}{An optional random seed}
-
 \item{ncoeff}{The number of coefficients used for PCA}
 
 \item{npc}{The number of principal components}
 
-\item{formula}{an object of class "formula"
-(or a list of "formula" which the length is equal to the number of modeled principal components)
-specifying the linear trend of the kriging model (see \code{\link{lm}}) on each principal component.
- This formula should concern only the input variables (\code{design}), and not the output (\code{response}).
- The default is ~1, which defines a constant trend on each principal component.#'}
-
-\item{covtype}{optional character string or vector of character strings
-specifying the covariance structure to be used on each modeled principal component
-(see \code{\link{km}} for possible inputs of \code{covtype}).
-If a vector, the length should be equal to the number of modeled principal components.}
+\item{kernel}{Character defining the covariance model: "exp", "gauss", "matern3_2", "matern5_2".}
 
 \item{wf}{name of the wavelet filter to use in the decomposition}
 
-\item{boundary}{a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).}
+\item{boundary}{a character string which specifies how boundaries are treated. Only "periodic" is currently implemented .}
 
 \item{J}{depth of the wavelet decomposition, must be a number less than or equal to log(min(M,N),2). Default is 1.}
 
-\item{coef.trend, coef.cov, coef.var}{optional vectors or matrices containing
-the values for the trend, covariance and variance parameters.
-If matrices, the number of rows should be equal to the number of modeled principal components.
-For details, see \code{\link{km}}).}
+\item{regmodel}{Universal Kriging linear trend: "constant", "linear", "interactive".}
 
-\item{nugget}{an optional variance value or vector standing for the homogeneous nugget effect.
-If vector, the length should be equal to the number of modeled principal components.}
+\item{normalize}{Logical. If TRUE both the input matrix X and the response y in normalized to take values in the interval [0, 1].}
 
-\item{noise.var}{an optional vector or matrix containing the noise variance
-at each observation on each modeled principal component.}
+\item{optim}{Character giving the Optimization method used to fit hyper-parameters. Possible values are: "BFGS", "Newton" and "none", the later simply keeping the values given in parameters. The method "BFGS" uses the gradient of the objective. The method "Newton" uses both the gradient and the Hessian of the objective.}
 
-\item{lower, upper}{optional vectors or matrices containing the bounds of the correlation parameters
-of each principal component for optimization. For details, see \code{\link{km}}).}
+\item{objective}{Character giving the objective function to optimize. Possible values are: "LL" for the Log-Likelihood, "LOO" for the Leave-One-Out sum of squares and "LMP" for the Log-Marginal Posterior.}
 
-\item{parinit}{an optional vector or matrix containing the initial values for the variables to be optimized over.
-For details, see \code{\link{km}}).}
+\item{parameters}{Initial values for the hyper-parameters. When provided this must be named list with elements "sigma2" and "theta" containing the initial value(s) for the variance and for the range parameters. If theta is a matrix with more than one row, each row is used as a starting point for optimization.}
 
-\item{multistart}{an optional integer indicating the number of initial points from which running the BFGS optimizer.
-(see \code{\link{km}}).}
+\item{noise}{Boolean specifying whether to execute NoiseKriging or not}
 
-\item{kernel}{an optional function or list of functions containing a new covariance structure
-for each principal component. At this stage, the parameters must be provided as well, and are not estimated.}
+\item{nugget}{Boolean specifying whether to execute NuggetKriging or not}
 
-\item{control}{an optional list of control parameters for optimization. For details, see \code{\link{km}}).}
-
-\item{type}{A character string corresponding to the kriging family, to be chosen between simple kriging ("SK"), or universal kriging ("UK"). Default is "UK.}
+\item{seed}{An optional random seed}
 
 \item{...}{other parameters of \code{\link{randomForest}} function from \code{randomForest}.}
 }
@@ -135,5 +107,5 @@ list_search = list("nodesize" = as.list(c(1,3,5,7,9,11)))
 list_rf_rmse_k_fold = rf_rmse_k_fold(design = design,outputs = outputs,
  threshold_classification = 2, threshold_fpca = 0,
  list_search = list_search, nb_folds = 10, ncoeff = 400,
-  npc = 6, control = list(trace = FALSE))
+  npc = 6)
 }

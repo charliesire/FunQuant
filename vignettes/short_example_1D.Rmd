@@ -22,7 +22,7 @@ library(randtoolbox)
 library(evd)
 ```
 
-We will investigate the function $f(x) = sin(x_{1})*sin(x_{2})$
+We will investigate the function $f(x) = sin(x_{1})\times sin(x_{2})$
 
 We can introduce the design of experiments 
 

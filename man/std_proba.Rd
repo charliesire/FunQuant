@@ -7,7 +7,7 @@
 std_proba(
   data = NULL,
   prototypes_list,
-  density_ratio,
+  density_ratio = rep(1, dim(data)[length(data)]),
   distance_func = function(A1, A2) {
      return(sqrt(sum((A1 - A2)^2)))
  },
@@ -17,11 +17,13 @@ std_proba(
   outputs_function = NULL,
   inputs = NULL,
   batch_size = NULL,
-  return_cell_numbers = FALSE
+  return_cell_numbers = FALSE,
+  bootstrap = NULL
 )
 }
 \arguments{
-\item{data}{The data that needs to be quantized. Useful only if cell_numbers == NULL and outputs_function == NULL.}
+\item{data}{The data that needs to be quantized. An array of any dimension is expected, the kth element must be selected with data[,..,k].
+Useful only if cell_numbers == NULL and outputs_function == NULL.}
 
 \item{prototypes_list}{A list of set of prototypes on which we want to evaluate the IS centroid standard deviation. Each element is a list of prototypes.}
 
@@ -42,6 +44,8 @@ std_proba(
 \item{batch_size}{If the computation is by batch, the number of elements by batch. Optional.}
 
 \item{return_cell_numbers}{Boolean indicating whether the cell_numbers must be provided or not.}
+
+\item{bootstrap}{Integer indicating the number of bootstramp samples to generate. If NULL, no boostrap is performed. Default is NULL.}
 }
 \value{
 A list of IS coefficients of variation of the membership probability obtained for each set of prototypes.

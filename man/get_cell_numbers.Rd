@@ -13,7 +13,7 @@ get_cell_numbers(
 )
 }
 \arguments{
-\item{data}{The data that needs to be quantized. Useful only if cell_numbers == NULL.}
+\item{data}{The data that needs to be quantized. An array of any dimension is expected, the kth element must be selected with data[,..,k]. Useful only if cell_numbers == NULL.}
 
 \item{prototypes}{A set of prototypes. Useful only if cell_numbers == NULL.}
 

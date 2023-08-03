@@ -17,7 +17,7 @@ quanti_error(
 )
 }
 \arguments{
-\item{data}{The data that needs to be quantized. Useful only if inputs == NULL.}
+\item{data}{The data that needs to be quantized. An array of any dimension is expected, the kth element must be selected with data[,..,k]. Useful only if inputs == NULL.}
 
 \item{prototypes}{A set of prototypes. Useful only if cell_numbers == NULL.}
 

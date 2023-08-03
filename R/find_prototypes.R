@@ -4,7 +4,7 @@
 #' @param starting_proto Optional. If multistart = 1, starting_proto is a list of initial prototypes. Else, starting_proto is a list of list of prototypes, which length is equal to multistart.
 #'
 #' @param nb_cells Required only if starting_proto is NULL. Indicates the number of prototypes of the quantization.
-#' @param data The data that needs to be quantized. If method = "percell", a list of data samples must be provided.
+#' @param data The data that needs to be quantized. An array of any dimension is expected, the kth element must be selected with data[,..,k]. If method = "percell", a list of data samples must be provided.
 #' @param multistart Number of starts of the algorithm
 #' @param method_IS The method of Importance Sampling : "unique" means there is a unique biased density involved, "percell" means there is one biased density (and then one biased sample) for each cell. Default is "unique".
 #' @param sampling_cells If method == "percell" and data is provided, sampling_cells is a vector indicating for each cell, the index element of data associated to this cell.

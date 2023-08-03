@@ -1,7 +1,7 @@
 #' @title Compututation of the empirical quantization error
 #'
 
-#' @param data The data that needs to be quantized. Useful only if inputs == NULL.
+#' @param data The data that needs to be quantized. An array of any dimension is expected, the kth element must be selected with data[,..,k]. Useful only if inputs == NULL.
 #' @param prototypes A set of prototypes. Useful only if cell_numbers == NULL.
 #' @param density_ratio density_ratio indicates the weight fX/g of each data element.
 #' @param distance_func A function computing a distance between two data elements. Useful only if cell_numbers == NULL.

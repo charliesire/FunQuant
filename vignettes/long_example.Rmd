@@ -18,6 +18,7 @@ knitr::opts_chunk$set(
 
 ```{r setup}
 library(FunQuant)
+library(GpOutput2D)
 
 library(randtoolbox)
 library(ggplot2)
@@ -132,7 +133,7 @@ We use the function rmse_f_fold that computes, for each pair of tested hyperpara
 ```{r}
 npc_vec = 2:5
 ncoeff_vec = c(100,200,300,400)
-list_rmse_k_fold = rmse_k_fold(outputs = outputs[,, sum_depth > 0], design = design[sum_depth > 0,], nb_folds = 10, npc_vec = npc_vec, ncoeff_vec = ncoeff_vec, seed = 10, control = list(trace = FALSE)) 
+list_rmse_k_fold = rmse_k_fold(outputs = outputs[,, sum_depth > 0], design = design[sum_depth > 0,], nb_folds = 10, npc_vec = npc_vec, ncoeff_vec = ncoeff_vec, seed = 10) 
 quantile_90 = sapply(list_rmse_k_fold$outputs_rmse, function(x){quantile(x, 0.9)}) #We take the quantile 90% of the rmse maps
 
 best_params = list_rmse_k_fold$grid_cv[quantile_90 == min(quantile_90),] #We identify the pairs of parameters minimizing the quantile 90%
@@ -145,7 +146,7 @@ plot_map(list_rmse_k_fold$outputs_rmse[[2]])
 We can also tune the hyperparameters regarding the relative error made when computing the Voronoï cells membership probabilities (for a given set of prototypes) with the predicted maps instead of the true maps. We use the function probas_k_fold to this end.
 
 ```{r}
-list_probas_k_fold = probas_k_fold(outputs = outputs[,, sum_depth > 0], design = design[sum_depth > 0,], nb_folds = 10, density_ratio = density_ratio[sum_depth >0], prototypes = prototypes_apriori, distance_func = distance_func, npc_vec = npc_vec, ncoeff_vec = ncoeff_vec, seed = 10, control = list(trace = FALSE))
+list_probas_k_fold = probas_k_fold(outputs = outputs[,, sum_depth > 0], design = design[sum_depth > 0,], nb_folds = 10, density_ratio = density_ratio[sum_depth >0], prototypes = prototypes_apriori, distance_func = distance_func, npc_vec = npc_vec, ncoeff_vec = ncoeff_vec, seed = 10)
 
 ```
 
@@ -156,7 +157,7 @@ Here we choose to tune the hyperparameters "nodesize" and "classwt", and we use 
 ```{r}
 df_search = expand.grid(classwt1 = seq(0.2,0.8,0.3), nodesize = c(1,3,5))
 list_search = list("nodesize" = as.list(df_search[,2]), "classwt" = lapply(1:nrow(df_search), function(i){c(df_search[i,1], 1-df_search[i,1])}))
-list_rf_rmse_k_fold = rf_rmse_k_fold(design = design,outputs = outputs, threshold_classification = 0, list_search = list_search, nb_folds = 10, ncoeff = 200, npc = 2, control = list(trace = FALSE), seed = 10)
+list_rf_rmse_k_fold = rf_rmse_k_fold(design = design,outputs = outputs, threshold_classification = 0, list_search = list_search, nb_folds = 10, ncoeff = 200, npc = 2, seed = 10)
 quantile_90_rf = sapply(list_rf_rmse_k_fold$outputs_rmse, function(x){quantile(x, 0.9)})
 
 best_params_rf = df_search[quantile_90_rf == min(quantile_90_rf),]
@@ -168,7 +169,7 @@ plot_map(list_rf_rmse_k_fold$outputs_rmse[[1]])
 Likewise, rf_probas_k_fold does the same as probas_k_fold but integrates the random forests classifier, focusing on the classifier hyperparameters.
 
 ```{r}
-list_rf_probas_k_fold = rf_probas_k_fold(design = design,outputs = outputs, density_ratio = density_ratio, prototypes = prototypes_apriori, distance_func = distance_func,threshold_classification = 0, list_search = list_search, nb_folds = 10, ncoeff = 200, npc = 2, control = list(trace = FALSE), seed = 10)
+list_rf_probas_k_fold = rf_probas_k_fold(design = design,outputs = outputs, density_ratio = density_ratio, prototypes = prototypes_apriori, distance_func = distance_func,threshold_classification = 0, list_search = list_search, nb_folds = 10, ncoeff = 200, npc = 2, seed = 10)
 
 ```
 
@@ -180,7 +181,7 @@ design_test = as.data.frame(matrix(runif(2*10^4), ncol=2)*2-1)
 #We compute the true outputs
 outputs_test = func2D(design_test)
 #We predict the outputs
-outputs_pred = predict_outputs(design_train = design, design_test = design_test, outputs_train = outputs, seed = 10, ncoeff = 200, npc = 2, control = list(trace = FALSE), classification = TRUE, control_classification = list("nodesize" = 1, classwt = c(0.5,0.5)), threshold_classification = 0)
+outputs_pred = predict_outputs(design_train = design, design_test = design_test, outputs_train = outputs, seed = 10, ncoeff = 200, npc = 2, classification = TRUE, control_classification = list("nodesize" = 1, classwt = c(0.5,0.5)), threshold_classification = 0)
 #We compute the importance sampling weights
 density_ratio_pred = compute_density_ratio(fX,g,design_test)
 
@@ -207,11 +208,13 @@ do.call("grid.arrange", c(list_plots_pred, ncol=2))
 
 We estimate the relative standard deviation of the membership probabilities of the obtained optimal Voronoi cells.
 
+
 ```{r}
 res_std_probas = std_proba(outputs_pred, prototypes_list = list(res_proto_pred$prototypes), density_ratio = density_ratio_pred, distance_func = distance_func, cells = 1:5, nv = 10^4)
 
 res_std_probas
 ```
+
 
 We also estimate the standard deviation of the estimation of each optimal prototype pixel
 

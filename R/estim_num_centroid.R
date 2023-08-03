@@ -1,6 +1,6 @@
 #' @title Compute the estimator which is the numerator of the centroid estimation
 #'
-#' @param data The data that needs to be quantized
+#' @param data The data that needs to be quantized. An array of any dimension is expected, the kth element must be selected with data[,..,k].
 #' @param cell_numbers The voronoi cell number of every data element
 #' @param density_ratio density_ratio indicates the weight fX/g of each data element
 #' @param cell The cell number of the computed centroid

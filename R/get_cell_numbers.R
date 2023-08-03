@@ -1,7 +1,7 @@
 
 #' @title Provide the Voronoï cell number associated to each sample
 #'
-#' @param data The data that needs to be quantized. Useful only if cell_numbers == NULL.
+#' @param data The data that needs to be quantized. An array of any dimension is expected, the kth element must be selected with data[,..,k]. Useful only if cell_numbers == NULL.
 #' @param prototypes A set of prototypes. Useful only if cell_numbers == NULL.
 #' @param distance_func A function computing a distance between two data elements. Useful only if cell_numbers == NULL.
 #'

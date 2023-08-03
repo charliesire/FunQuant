@@ -15,7 +15,7 @@ compute_centroids_and_proba(
 )
 }
 \arguments{
-\item{data}{The data that needs to be quantized. If method = "percell", a list of data samples must be provided, of length equal to the number of Voronoï cells.}
+\item{data}{The data that needs to be quantized. An array of any dimension is expected, the kth element must be selected with data[,..,k]. If method = "percell", a list of data samples must be provided, of length equal to the number of Voronoï cells.}
 
 \item{cell_numbers}{The voronoi cell number of every data element}
 

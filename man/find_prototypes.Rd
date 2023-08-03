@@ -37,7 +37,7 @@ find_prototypes(
 
 \item{nb_cells}{Required only if starting_proto is NULL. Indicates the number of prototypes of the quantization.}
 
-\item{data}{The data that needs to be quantized. If method = "percell", a list of data samples must be provided.}
+\item{data}{The data that needs to be quantized. An array of any dimension is expected, the kth element must be selected with data[,..,k]. If method = "percell", a list of data samples must be provided.}
 
 \item{multistart}{Number of starts of the algorithm}
 

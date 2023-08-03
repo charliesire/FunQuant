@@ -9,6 +9,7 @@
 #'
 #' @return A list containing a vector of predicted classes for each combination of tested hyperparameters.
 #' @export
+#'
 #' @importFrom randomForest randomForest
 #' @importFrom dismo kfold
 #' @examples

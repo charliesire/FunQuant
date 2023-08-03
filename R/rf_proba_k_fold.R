@@ -15,37 +15,18 @@
 #' @param only_positive A boolean indicating whether the predicted outputs should only contained positive values or not. Default is FALSE.
 #' @param ncoeff The number of coefficients used for PCA
 #' @param npc The number of principal components
-#' @param formula  an object of class "formula"
-#' (or a list of "formula" which the length is equal to the number of modeled principal components)
-#' specifying the linear trend of the kriging model (see \code{\link{lm}}) on each principal component.
-#'  This formula should concern only the input variables (\code{design}), and not the output (\code{response}).
-#'  The default is ~1, which defines a constant trend on each principal component.#'
-#' @param covtype optional character string or vector of character strings
-#' specifying the covariance structure to be used on each modeled principal component
-#' (see \code{\link{km}} for possible inputs of \code{covtype}).
-#' If a vector, the length should be equal to the number of modeled principal components.
 #' @param wf name of the wavelet filter to use in the decomposition
-#' @param boundary a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).
+#' @param boundary a character string which specifies how boundaries are treated. Only "periodic" is currently implemented .
 #' @param J depth of the wavelet decomposition, must be a number less than or equal to log(min(M,N),2). Default is 1.
-#' @param coef.trend,coef.cov,coef.var optional vectors or matrices containing
-#' the values for the trend, covariance and variance parameters.
-#' If matrices, the number of rows should be equal to the number of modeled principal components.
-#' For details, see \code{\link{km}}).
-#' @param nugget an optional variance value or vector standing for the homogeneous nugget effect.
-#' If vector, the length should be equal to the number of modeled principal components.
-#' @param noise.var an optional vector or matrix containing the noise variance
-#' at each observation on each modeled principal component.
-#' @param lower,upper optional vectors or matrices containing the bounds of the correlation parameters
-#' of each principal component for optimization. For details, see \code{\link{km}}).
-#' @param parinit an optional vector or matrix containing the initial values for the variables to be optimized over.
-#' For details, see \code{\link{km}}).
-#' @param multistart an optional integer indicating the number of initial points from which running the BFGS optimizer.
-#'  (see \code{\link{km}}).
-#' @param kernel an optional function or list of functions containing a new covariance structure
-#' for each principal component. At this stage, the parameters must be provided as well, and are not estimated.
-#' @param control an optional list of control parameters for optimization. For details, see \code{\link{km}}).
-#' @param type A character string corresponding to the kriging family, to be chosen between simple kriging ("SK"), or universal kriging ("UK"). Default is "UK.
+#' @param kernel Character defining the covariance model: "exp", "gauss", "matern3_2", "matern5_2".
+#' @param regmodel Universal Kriging linear trend: "constant", "linear", "interactive".
+#' @param normalize Logical. If TRUE both the input matrix X and the response y in normalized to take values in the interval [0, 1].
+#' @param optim Character giving the Optimization method used to fit hyper-parameters. Possible values are: "BFGS", "Newton" and "none", the later simply keeping the values given in parameters. The method "BFGS" uses the gradient of the objective. The method "Newton" uses both the gradient and the Hessian of the objective.
+#' @param objective  Character giving the objective function to optimize. Possible values are: "LL" for the Log-Likelihood, "LOO" for the Leave-One-Out sum of squares and "LMP" for the Log-Marginal Posterior.
+#' @param parameters Initial values for the hyper-parameters. When provided this must be named list with elements "sigma2" and "theta" containing the initial value(s) for the variance and for the range parameters. If theta is a matrix with more than one row, each row is used as a starting point for optimization.
 #' @param bias A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoï cell.
+#' @param noise Boolean specifying whether to execute NoiseKriging or not
+#' @param nugget Boolean specifying whether to execute NuggetKriging or not
 #' @param ... other parameters of \code{\link{randomForest}} function from \code{randomForest}.
 #'
 #' @return A list containing several outputs :
@@ -56,7 +37,8 @@
 #' @export
 #' @import waveslim
 #' @import foreach
-#' @import DiceKriging
+#' @import rlibkriging
+#' @import GpOutput2D
 #' @import abind
 #' @importFrom randomForest randomForest
 #' @examples
@@ -82,13 +64,10 @@
 #' list_search = list_search, nb_folds = 10,
 #' density_ratio = density_ratio, prototypes = prototypes,
 #' distance_func= distance_func, ncoeff = 400,
-#' npc = 6, control = list(trace = FALSE))
+#' npc = 6)
 
-rf_probas_k_fold = function(design, outputs, threshold_classification, threshold_fpca = NULL, list_search, nb_folds, density_ratio, prototypes, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},return_pred = FALSE, outputs_pred = NULL, only_positive = FALSE, seed = NULL, ncoeff,npc, formula = ~1, covtype="matern5_2", wf = "d4", boundary = "periodic",J=1,
-                          coef.trend = NULL, coef.cov = NULL, coef.var = NULL,
-                          nugget = NULL, noise.var=NULL, lower = NULL, upper = NULL,
-                          parinit = NULL, multistart=1,
-                          kernel=NULL,control = NULL,type = "UK",bias = NULL,...){
+rf_probas_k_fold = function(design, outputs, threshold_classification, threshold_fpca = NULL, list_search, nb_folds, density_ratio, prototypes, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},return_pred = FALSE, outputs_pred = NULL, only_positive = FALSE, seed = NULL, ncoeff,npc,  kernel="matern5_2", wf = "d4", boundary = "periodic",J=1,
+                            regmodel = "constant", normalize = FALSE, optim = "BFGS", objective = "LL", parameters = NULL,noise=FALSE, nugget = FALSE,bias = NULL,...){
   if(is.null(seed)==FALSE){set.seed(seed)}
   if(is.null(threshold_fpca)){threshold_fpca = threshold_classification}
   bool_outputs_pred = outputs_pred
@@ -108,11 +87,8 @@ rf_probas_k_fold = function(design, outputs, threshold_classification, threshold
       indexes_test = which(folds == k)
       indexes_train_fpca = which(sum_depth[indexes_train] > threshold_fpca)
       fp[[k]] = Fpca2d.Wavelets(asub(x = outputs, dims = length(dim(outputs)), idx = indexes_train[indexes_train_fpca],drop = FALSE), wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc) #We apply FPCA on the maps with water in the training group
-      model[[k]] = km_Fpca2d(formula = formula, design = design[indexes_train[indexes_train_fpca],], response = fp[[k]],  covtype=covtype,
-                             coef.trend = coef.trend, coef.cov = coef.cov, coef.var = coef.var,
-                             nugget = nugget, noise.var=noise.var, lower = lower, upper = upper,
-                             parinit = parinit, multistart=multistart,
-                             kernel=kernel,control = control)
+      model[[k]] = km_Fpca2d_lib(X = design[indexes_train[indexes_train_fpca],], response = fp[[k]], kernel=kernel,
+                              regmodel = regmodel, normalize = normalize, optim = optim, objective = objective, parameters = parameters,noise=noise,nugget=nugget)
     }
   }
   for(i in 1:length(list_search[[1]])){
@@ -132,7 +108,7 @@ rf_probas_k_fold = function(design, outputs, threshold_classification, threshold
         rf = do.call(randomForest, list_cv_fold)
         rf_pred = as.numeric(rf$test$predicted) - 1
         if(sum(rf_pred == 1)>0){
-          pred =  matrix(sapply(1:npc, function(g){predict(object = model[[k]][[g]], newdata = design[indexes_test[rf_pred == 1],], type = type, compute = FALSE, checkNames = FALSE)$mean}), ncol = npc)
+          pred =  matrix(sapply(1:npc, function(g){predict(object = model[[k]][[g]], x = design[indexes_test[rf_pred == 1],])$mean}), ncol = npc)
           outputs_pred_draft = inverse_Fpca2d(pred,fp[[k]])
           dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(indexes_test[rf_pred == 1]))
           afill(outputs_pred[[i]]) = outputs_pred_draft
