@@ -28,7 +28,7 @@ jobs:
 
       - run: |
           Rscript -e "install.packages('BiocManager',repos='https://cloud.r-project.org'); BiocManager::install('Rhdf5lib'); remove.packages('BiocManager')"
-          Rscript -e "library(devtools); install_github('libKriging/rlibkriging'); if (!library('rlibkriging', character.only=TRUE, logical.return=TRUE)) quit(status=1, save='no')"
+          Rscript -e "install.packages('devtools',repos='https://cloud.r-project.org');library(devtools); install_github('libKriging/rlibkriging'); if (!library('rlibkriging', character.only=TRUE, logical.return=TRUE)) quit(status=1, save='no')"
 
       - uses: r-lib/actions/setup-r-dependencies@v2
 
