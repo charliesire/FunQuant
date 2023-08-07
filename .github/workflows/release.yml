@@ -16,6 +16,9 @@ jobs:
 
     runs-on: ${{ matrix.os }}
 
+    env:
+      GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - uses: actions/checkout@v2
         with:
@@ -26,9 +29,11 @@ jobs:
           r-version: ${{ matrix.R }}
           rtools-version: '43'
 
+      - run: sudo apt install -y libharfbuzz-dev libfribidi-dev
+        if: matrix.os == 'ubuntu-latest'
+
       - run: |
           Rscript -e "install.packages('BiocManager',repos='https://cloud.r-project.org'); BiocManager::install('Rhdf5lib'); remove.packages('BiocManager')"
-          sudo apt install -y libharfbuzz-dev libfribidi-dev
           Rscript -e "install.packages('devtools',repos='https://cloud.r-project.org');library(devtools); install_github('libKriging/rlibkriging'); if (!library('rlibkriging', character.only=TRUE, logical.return=TRUE)) quit(status=1, save='no')"
 
       - uses: r-lib/actions/setup-r-dependencies@v2
