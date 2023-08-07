@@ -29,7 +29,7 @@ jobs:
           r-version: ${{ matrix.R }}
           rtools-version: '43'
 
-      - run: sudo apt install -y libharfbuzz-dev libfribidi-dev
+      - run: sudo apt install -y libharfbuzz-dev libfribidi-dev libcurl4-openssl-dev
         if: matrix.os == 'ubuntu-latest'
 
       - run: |
