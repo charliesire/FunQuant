@@ -1,5 +1,5 @@
 ---
-title: "`FunQuant`: A R package to perform probabilistic quantization in the context of rare events and
+title: "`FunQuant`: A R package to perform quantization in the context of rare events and
 time-consuming simulations"
 output: md_document
 tags:
