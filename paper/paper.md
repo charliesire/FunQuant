@@ -1,5 +1,5 @@
 ---
-title: "FunQuant: A R package to perform probabilistic quantization in the context of rare events and
+title: "`FunQuant`: A R package to perform probabilistic quantization in the context of rare events and
 time-consuming simulations"
 output: md_document
 tags:
@@ -45,15 +45,15 @@ Quantization summarizes continuous distributions by calculating a discrete appro
 
 # Statement of need
 
-FunQuant is a R package that has been specifically developed for carrying out quantization in the context of rare events. While several packages facilitate straightforward implementations of the Lloyd's algorithm, they lack the specific specification of any probabilistic factors, treating all data points equally in terms of weighting. Conversely,  FunQuant considers probabilistic weights based on the Importance Sampling formulation [@Paananen] to handle the problem of rare event. To be more precise, when $X$ and $Y$ are the random vectors of inputs and outputs of a computer code,  the quantization of $Y(X)$ is performed by estimating the centroid of a given cluster $C$ with the following formula,
+`FunQuant` is a R package that has been specifically developed for carrying out quantization in the context of rare events. While several packages facilitate straightforward implementations of the Lloyd's algorithm, they lack the specific specification of any probabilistic factors, treating all data points equally in terms of weighting. Conversely,  `FunQuant` considers probabilistic weights based on the Importance Sampling formulation [@Paananen] to handle the problem of rare event. To be more precise, when $X$ and $Y$ are the random vectors of inputs and outputs of a computer code,  the quantization of $Y(X)$ is performed by estimating the centroid of a given cluster $C$ with the following formula,
 
 $$\frac{\frac{1}{n} \sum^{n}_{k=1} Y(\tilde{X}_{k})\mathbb{1}_{Y(\tilde{X}_{k})\in C}\frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}}{\frac{1}{n} \sum^{n}_{k=1} \mathbb{1}_{Y(\tilde{X}_k)\in C} \frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}},$$
 where $f_{X}$ is the known density function of the inputs $X$, and $(\tilde{X}_k)^{n}_{k=1}$ i.i.d. random variables of density function $g$.
-Importance Sampling is employed with the aim of reducing the variance of the estimators of the centroids when compared to classical Monte Carlo methods. FunQuant provides various approaches for implementing these estimators, depending on the sampling density $g$. The simplest method involves using the same function $g$ for each iteration and every cluster, which is straightforward to work with and still yields significant variance reductions. More advanced implementations enable the adaptation of the sampling density for each cluster at every iteration.
+Importance Sampling is employed with the aim of reducing the variance of the estimators of the centroids when compared to classical Monte Carlo methods. `FunQuant` provides various approaches for implementing these estimators, depending on the sampling density $g$. The simplest method involves using the same function $g$ for each iteration and every cluster, which is straightforward to work with and still yields significant variance reductions. More advanced implementations enable the adaptation of the sampling density for each cluster at every iteration.
 
-In addition, FunQuant is designed to mitigate the computational burden associated with the evaluation of costly data. While users have the flexibility to use their own metamodels to generate additional data, FunQuant offers several functions tailored specifically for a metamodel dedicated to spatial outputs such as maps. This metamodel relies on Functional Principal Component Analysis and Gaussian Processes, based on the work of [@Perrin], adapted with the `rlibkriging` R package [@rlib]. FunQuant assists users in the fine-tuning of its hyperparameters for a quantization task, by providing a set of relevant performance metrics.
+In addition, `FunQuant` is designed to mitigate the computational burden associated with the evaluation of costly data. While users have the flexibility to use their own metamodels to generate additional data, `FunQuant` offers several functions tailored specifically for spatial outputs such as maps. This metamodel relies on Functional Principal Component Analysis and Gaussian Processes, based on the work of [@Perrin], adapted with the `rlibkriging` R package [@rlib]. `FunQuant` assists users in the fine-tuning of its hyperparameters for a quantization task, by providing a set of relevant performance metrics.
 
-Additional theoretical information can be found in [@sire]. The paper provides a comprehensive exploration of the application of FunQuant to the quantization of flooding maps.
+Additional theoretical information can be found in [@sire]. The paper provides a comprehensive exploration of the application of `FunQuant` to the quantization of flooding maps.
 
 # Illustrative example
 
@@ -94,7 +94,7 @@ We want to quantize on $Y(X)$.
 ![Sampling and quantization with classical Lloyd. \label{kmeans_quanti}](kmeans_quanti.jpg){ width="1100" style="display: block; margin: 0 auto" }
 
 
-The FunQuant package allows to adapt the sampling by introducing a random variable $\tilde{X}$ of density $g$, and considering the probabilistic weights of each sample, with are the ratio $\frac{f_{X}}{g}$.
+The `FunQuant` package allows to adapt the sampling by introducing a random variable $\tilde{X}$ of density $g$, and considering the probabilistic weights of each sample, with are the ratio $\frac{f_{X}}{g}$.
 
 A possible function $g$ is $g(x) = \frac{1}{4}\mathbb{1}_{[-1,1]^2}(x)$, corresponding to a uniform distribution in $[-1,1]^2$.
 
@@ -131,7 +131,7 @@ res_proto = find_prototypes(data = t(outputs),
 
 
 
-FunQuant allows to estimate the standard deviations of the two coordinates of the estimators of the centroids for each Voronoi cell, highlighting the variance reduction obtained with the adapted sampling for the cells that do not contain $(0,0)$.
+`FunQuant` allows to estimate the standard deviations of the two coordinates of the estimators of the centroids for each Voronoi cell, highlighting the variance reduction obtained with the adapted sampling for the cells that do not contain $(0,0)$.
 
 
 ```r
@@ -170,13 +170,13 @@ std_centroid_kmeans #the cells are ordered by the increasing coordinate x
 
 large_inputs_is = sample_g(10^5)
 large_outputs_is = apply(large_inputs_is,1, Y)
-std_centroid_funquant = std_centroid(
+std_centroid_`FunQuant` = std_centroid(
               data = large_outputs_is, 
-              prototypes_list = list(protos_funquant),
+              prototypes_list = list(protos_`FunQuant`),
               cells = 1:5, 
               nv = 1000)
 
-std_centroid_funquant #the cells are ordered by the increasing coordinate x 
+std_centroid_`FunQuant` #the cells are ordered by the increasing coordinate x 
 #of their centroid
 
 ```
@@ -198,7 +198,7 @@ std_centroid_funquant #the cells are ordered by the increasing coordinate x
     ## [1] 0.009168924 0.009620646
 
 
-This example remains basic. Advanced computations of the centroids with tailored density functions $g$ can be performed. FunQuant was built to tackle industrial problems with large amounts of data, and comes with additional features such as the possibility to split the computations into different batches. 
+This example remains basic. Advanced computations of the centroids with tailored density functions $g$ can be performed. `FunQuant` was built to tackle industrial problems with large amounts of data, and comes with additional features such as the possibility to split the computations into different batches. 
 
 # Acknowledgments
 
