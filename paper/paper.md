@@ -87,7 +87,7 @@ The density $f_{Y}$ of the output $Y = H(X)$ is represented in \autoref{fy}.
 
 $99\%$ of the probability mass is concentrated at $(0,0)$.
 
-We want to quantize on $Y(X)$.
+We want to quantize $Y(X)$.
 
  If the classical Lloyd's algorithm is run with a budget of $1000$ points, it leads to the outcome illustrated in \autoref{kmeans_quanti}, with only a few sampled points not equal to $(0,0)$. Then, the centroids of the Voronoi cells that do not contain $(0,0)$ are computed with a very small number of points, leading to a very high variance.
 
