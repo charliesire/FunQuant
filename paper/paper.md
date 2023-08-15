@@ -146,7 +146,9 @@ std_centroid_kmeans = std_centroid(
 std_centroid_kmeans #the cells are ordered by the increasing coordinate x
 #of their centroid
 
-# std centroid returns a list of lists: for each tested set of prototypes (here only one set is tested), a list of the estimated standard deviations is provided, each element of this list is associated to a Voronoï cell
+# std centroid returns a list of lists: for each tested set of prototypes 
+#(here only one set is tested), a list of the estimated standard deviations 
+#is provided, each element of this list is associated to a Voronoï cell
 ```
 
     ## [[1]]
