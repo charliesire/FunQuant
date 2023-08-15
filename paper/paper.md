@@ -170,13 +170,13 @@ std_centroid_kmeans #the cells are ordered by the increasing coordinate x
 
 large_inputs_is = sample_g(10^5)
 large_outputs_is = apply(large_inputs_is,1, Y)
-std_centroid_`FunQuant` = std_centroid(
+std_centroid_FunQuant = std_centroid(
               data = large_outputs_is, 
-              prototypes_list = list(protos_`FunQuant`),
+              prototypes_list = list(protos_FunQuant),
               cells = 1:5, 
               nv = 1000)
 
-std_centroid_`FunQuant` #the cells are ordered by the increasing coordinate x 
+std_centroid_FunQuant #the cells are ordered by the increasing coordinate x 
 #of their centroid
 
 ```
