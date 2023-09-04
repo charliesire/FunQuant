@@ -13,7 +13,9 @@ quanti_error(
      return(sqrt(sum((A1 - A2)^2)))
  },
   inputs = NULL,
-  outputs_function = NULL
+  outputs_function = NULL,
+  method_IS = "unique",
+  sampling_cells = 1:length(data)
 )
 }
 \arguments{

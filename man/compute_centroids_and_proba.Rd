@@ -8,10 +8,11 @@ compute_centroids_and_proba(
   data,
   cell_numbers,
   method_IS = "unique",
-  sampling_cells = NULL,
+  sampling_cells = 1:length(data),
   density_ratio = rep(1, dim(data)[length(dim(data))]),
-  bias = rep(0, length(unique(unlist(cell_numbers)))),
-  batch = FALSE
+  bias = NULL,
+  batch = FALSE,
+  cells = NULL
 )
 }
 \arguments{
@@ -25,9 +26,7 @@ compute_centroids_and_proba(
 
 \item{density_ratio}{A vector indicating the weight fX/g of each data element. Default is a vector of 1. If method = "percell", a list of density_ratio must be provided, of length equal to the number of Voronoï cells.}
 
-\item{bias}{A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default is 0 for all Voronoi cells.}
-
-\item{batch}{A boolean indicating whether the computations must be performed by batch or not. If TRUE, data, cell_numbers and density_ratio must be lists. Default is False.}
+\item{bias}{A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default NULL.}
 }
 \value{
 The centroid and the probability mass of each probability cell

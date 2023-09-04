@@ -32,12 +32,11 @@ get_probas = function(density_ratio, method_IS = "unique", cell_numbers = NULL, 
   if(is.null(cells)){cells = 1:length(prototypes)}
   if(is.null(bias)){bias = rep(0,length(cells))}
   probas = c()
-  for(cell in cells){
+  for(idx_cell in 1:length(cells)){
     if(method_IS == "unique"){
-      probas = c(probas, sum(density_ratio[cell_numbers == cell])/length(density_ratio)-bias[cell])
-    }
-    else if(method_IS == "percell"){
-      probas = c(probas, sum(density_ratio[cell_numbers[[cell]] == cell])/length(density_ratio[[cell]])-bias[cell])
+      probas = c(probas, sum(density_ratio[cell_numbers == cells[idx_cell]])/length(density_ratio)-bias[idx_cell])
+    }else if(method_IS == "percell"){
+      probas = c(probas, sum(density_ratio[cell_numbers[[idx_cell]] == cells[idx_cell]])/length(density_ratio[[idx_cell]])-bias[idx_cell])
     }
 
   }

@@ -68,7 +68,7 @@ std_centroid = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(
     for(it in 1:length(prototypes_list)){
       prototypes = prototypes_list[[it]]
       list_density_voronoi[[it]] = Vectorize(function(i){density_ratio*(cell_numbers[[it]] == i)})(cells)
-      std_ratio_list[[it]] = vector(mode='list', length=length(prototypes))
+      std_ratio_list[[it]] = vector(mode='list', length=length(cells))
       for(cell in 1:length(cells)){
         j=cells[cell]
         covariance = 1/(nrow(inputs)-1)*(list_covs[[it]][[cell]]-mean(list_density_voronoi[[it]][,cell])*list_mean_maps[[it]][[cell]])/nv
@@ -84,7 +84,7 @@ std_centroid = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(
     weighted_map = t(matrix(data, nrow = prod(dim(data)[-length(dim(data))]),ncol = dim(data)[length(dim(data))]))*density_ratio
     for(it in 1:length(prototypes_list)){
       prototypes = prototypes_list[[it]]
-      std_ratio_list[[it]] = vector(mode='list', length=length(prototypes))
+      std_ratio_list[[it]] = vector(mode='list', length=length(cells))
       if(is.null(cell_numbers)){cell_numbers_it = get_cell_numbers(data = data, prototypes = prototypes, distance_func = distance_func)}
       else{cell_numbers_it = cell_numbers[[it]]}
       if(!is.null(bootstrap)){
@@ -92,17 +92,23 @@ std_centroid = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(
         for(boot in 1:bootstrap){
           idxs = sample(1:length(cell_numbers_it), size = length(cell_numbers_it), replace = TRUE)
           cell_numbers_boot = cell_numbers_it[idxs]
-          list_centro_boot[[boot]] = lapply(cells,function(cell){compute_centroids_and_proba(data = asub(data,dims = length(dim(data)), idx = idxs), density_ratio = density_ratio[idxs], method_IS = "unique",cell_numbers = cell_numbers_boot)$centroids[[cell]]})
+          data <<- asub(data,dims = length(dim(data)), idx = idxs)
+          density_ratio <<- density_ratio[idxs]
+          cell_numbers <<- cell_numbers_boot
+          aa <<- compute_centroids_and_proba(data = asub(data,dims = length(dim(data)), idx = idxs), density_ratio = density_ratio[idxs], method_IS = "unique",cell_numbers = cell_numbers_boot, cells = cells)$centroids
+          list_centro_boot[[boot]] = compute_centroids_and_proba(data = asub(data,dims = length(dim(data)), idx = idxs), density_ratio = density_ratio[idxs], method_IS = "unique",cell_numbers = cell_numbers_boot, cells = cells)$centroids
         }
-        for(j in cells){
-          std_ratio_list[[it]][[j]] = array(0, dim = dim(list_centro_boot[[1]][[1]]))
-          for(pix in 1:length(std_ratio_list[[it]][[j]])){
-            std_ratio_list[[it]][[j]][pix] = sqrt(var(sapply(lapply(list_centro_boot, function(x){x[[j]]}), function(h){h[pix]})))
+        for(cell in 1:length(cells)){
+          j=cells[cell]
+          std_ratio_list[[it]][[cell]] = array(0, dim = dim(list_centro_boot[[1]][[1]]))
+          for(pix in 1:length(std_ratio_list[[it]][[cell]])){
+            std_ratio_list[[it]][[cell]][pix] = sqrt(var(sapply(lapply(list_centro_boot, function(x){x[[cell]]}), function(h){h[pix]})))*sqrt(dim(data)[length(dim(data))])/sqrt(nv)
           }
         }
       }
       else{
-        for(j in cells){#for all voronoi cells
+        for(cell in 1:length(cells)){#for all voronoi cells
+          j = cells[cell]
           map_loop = weighted_map #weighted map is the set of maps multiplied by the weights f_{x}/mu
           density_voronoi = density_ratio*(cell_numbers_it == j) #density_voronoi is the vector of the weights multiplied by the characteristic function of the voronoi cell
           map_loop[cell_numbers_it != j,] = 0 #map_loop is now the set of maps multiplied by the weights f_{x}/mu multiplied by the characteristic function of the voronoi cell
@@ -111,7 +117,7 @@ std_centroid = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(
           moy2 = mean(density_voronoi) #This is the empirical expectation of B
           var1 = apply(map_loop,2,var)/nv #This is the empirical variance of Ai for all i
           var2 = var(density_voronoi)/nv #This is the empirical variance of B
-          std_ratio_list[[it]][[j]] = sqrt(1/moy2^2*(var1+var2/moy2^2*moy1^2-2*covariance*moy1/moy2)) #This is the empirical standard error of the ratio
+          std_ratio_list[[it]][[cell]] = sqrt(1/moy2^2*(var1+var2/moy2^2*moy1^2-2*covariance*moy1/moy2)) #This is the empirical standard error of the ratio
         }
       }
     }

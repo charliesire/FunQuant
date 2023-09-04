@@ -44,7 +44,7 @@
 #' find_prototypes(nb_cells = 3, data = data,
 #' multistart = 2, distance_func = distance_func)
 
-find_prototypes = function(starting_proto = NULL, nb_cells = NULL, data = NULL, multistart = 1, method_IS = "unique", sampling_cells = NULL, density_ratio = rep(1, dim(data)[length(dim(data))]), budget = 10^3, threshold = 0, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},print_progress = FALSE, trace = FALSE, all_starts = FALSE,bias = NULL, index_sampling_error = 1, seed = NULL, batch = FALSE, density_function = NULL, density_biased_function = NULL, inputs_ref = NULL, data_ref = NULL, inputs_function = NULL, outputs_function = NULL){
+find_prototypes = function(starting_proto = NULL, nb_cells = NULL, data = NULL, multistart = 1, method_IS = "unique", sampling_cells = 1:length(data), density_ratio = rep(1, dim(data)[length(dim(data))]), budget = 10^3, threshold = 0, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},print_progress = FALSE, trace = FALSE, all_starts = FALSE,bias = NULL, index_sampling_error = 1, seed = NULL, batch = FALSE, density_function = NULL, density_biased_function = NULL, inputs_ref = NULL, data_ref = NULL, inputs_function = NULL, outputs_function = NULL){
   data_bool = is.null(data)
   if(is.null(dim(data)) & !is.null(data)){data = t(as.matrix(data))}
   if(!is.null(seed)){set.seed(seed)}

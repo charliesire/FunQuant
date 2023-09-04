@@ -10,7 +10,7 @@ find_prototypes(
   data = NULL,
   multistart = 1,
   method_IS = "unique",
-  sampling_cells = NULL,
+  sampling_cells = 1:length(data),
   density_ratio = rep(1, dim(data)[length(dim(data))]),
   budget = 10^3,
   threshold = 0,

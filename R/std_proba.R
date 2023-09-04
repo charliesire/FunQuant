@@ -40,7 +40,6 @@ std_proba = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(dat
     nb_batch = nrow(inputs)%/%batch_size
     cell_numbers = vector(mode='list', length=length(prototypes_list))
     for(batch in 1:nb_batch){
-      print(batch)
       data = outputs_function(inputs[((batch-1)*batch_size+1):(batch_size*batch),])
       for(it in 1:length(prototypes_list)){
         cell_numbers[[it]] = c(cell_numbers[[it]],get_cell_numbers(data = data, prototypes = prototypes_list[[it]], distance_func = distance_func))
@@ -58,11 +57,11 @@ std_proba = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(dat
         cell_numbers_boot = cell_numbers_it[idxs]
         df_probas_boot = rbind(df_probas_boot,get_probas(density_ratio = density_ratio[idxs], method_IS = "unique",cell_numbers = cell_numbers_boot, distance_func = distance_func, cells = cells))
       }
-      std_list[[it]] = apply(df_probas_boot, 2, function(x){sqrt(var(x))})*sqrt(length(cell_numbers_it))/sqrt(nv)/estim_probas
+      std_list[[it]] = as.numeric(apply(df_probas_boot, 2, function(x){sqrt(var(x))})*sqrt(length(cell_numbers_it))/sqrt(nv)/estim_probas)
     }
     else{
     df_for_std = Vectorize(function(i){density_ratio*(cell_numbers_it == i)})(cells)
-    std_list[[it]] = apply(df_for_std, 2, function(x){sqrt(var(x))})/apply(df_for_std,2,mean)/sqrt(nv) #for all voronoi cells, we compute the relative standard error
+    std_list[[it]] = as.numeric(apply(df_for_std, 2, function(x){sqrt(var(x))})/apply(df_for_std,2,mean)/sqrt(nv)) #for all voronoi cells, we compute the relative standard error
     }
   }
   if(!return_cell_numbers){return(std_list)}
