@@ -32,7 +32,7 @@
 #' - probas_true the probabilities computed with the true outputs
 #' - outputs_pred an array providing the predicted outputs if return_pred is TRUE. If return_pred is FALSE, then outputs_pred is NULL.
 #' @export
-#' @import GpOutput2D
+#' @rawNamespace import(GpOutput2D, except = Fpca2d.Wavelets)
 #' @import rlibkriging
 #' @importFrom dismo kfold
 #' @import foreach

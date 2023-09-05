@@ -43,7 +43,7 @@
 #' @export
 #' @import waveslim
 #' @import foreach
-#' @import GpOutput2D
+#' @rawNamespace import(GpOutput2D, except = Fpca2d.Wavelets)
 #' @import rlibkriging
 #' @import abind
 #' @importFrom randomForest randomForest
