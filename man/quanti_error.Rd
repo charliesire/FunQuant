@@ -32,6 +32,10 @@ quanti_error(
 \item{inputs}{If data is not provided, inputs is a dataframe of the inputs at which the outputs will be computed.}
 
 \item{outputs_function}{Function to compute the outputs from the inputs.}
+
+\item{method_IS}{The method of Importance Sampling : "unique" means there is a unique biased density involved, "percell" means there is one biased density (and then one biased sample) for each cell.}
+
+\item{sampling_cells}{If method == "percell" and data is provided, sampling_cells is a vector indicating for each cell, the index element of data associated to this cell.}
 }
 \value{
 An estimation of the quantization error

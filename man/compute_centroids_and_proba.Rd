@@ -27,6 +27,10 @@ compute_centroids_and_proba(
 \item{density_ratio}{A vector indicating the weight fX/g of each data element. Default is a vector of 1. If method = "percell", a list of density_ratio must be provided, of length equal to the number of Voronoï cells.}
 
 \item{bias}{A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default NULL.}
+
+\item{batch}{A boolean indicating whether the computations must be performed by batch or not. If TRUE, data, cell_numbers and density_ratio must be lists. Default is False.}
+
+\item{cells}{The Voronoï cell numbers that are investigated.}
 }
 \value{
 The centroid and the probability mass of each probability cell
