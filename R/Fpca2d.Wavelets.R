@@ -34,6 +34,8 @@
 #' @seealso \code{\link{Fpca2d}}
 #'
 #' @importFrom stats prcomp
+#' @export
+
 
 Fpca2d.Wavelets<-function(x,
                           wf,J,boundary="periodic", # wavelet parameters
