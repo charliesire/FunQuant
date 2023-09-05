@@ -47,7 +47,6 @@ quanti_error = function(data = NULL, prototypes, density_ratio, batch_size = NUL
   else if(method_IS == "percell"){
     res = 0
       for(idx_sampling in unique(sampling_cells)){
-        print(idx_sampling)
         dists_cells =  t(Vectorize(function(it){distance_to_prototypes(x = asub(x = data[[idx_sampling]], dims = length(dim(data[[idx_sampling]])), idx = it,drop = drop), prototypes = prototypes, distance_func = distance_func)})(1:dim(data[[idx_sampling]])[length(dim(data[[idx_sampling]]))]))
         for(cell in which(sampling_cells == idx_sampling)){
           res = res + sum(as.numeric(dists_cells[dists_cells[,1] == cell,2])^2*density_ratio[[idx_sampling]][dists_cells[,1] == cell])/length(density_ratio[[idx_sampling]])
