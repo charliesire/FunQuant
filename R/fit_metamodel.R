@@ -28,7 +28,7 @@
 #' - a trained Fpca2d object
 #' - a list of trained km object
 #' @export
-#' @rawNamespace import(GpOutput2D, except = Fpca2d.Wavelets)
+#' @import GpOutput2D
 #' @import waveslim
 #' @import foreach
 #' @import rlibkriging

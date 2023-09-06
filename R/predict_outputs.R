@@ -32,7 +32,7 @@
 #' @export
 #' @import waveslim
 #' @import foreach
-#' @rawNamespace import(GpOutput2D, except = Fpca2d.Wavelets)
+#' @import GpOutput2D
 #' @import rlibkriging
 #' @examples
 #'  set.seed(5)
