@@ -5,7 +5,7 @@
 #'
 #' @return approximation of scores.
 #'
-#'
+#' @export
 #' @keywords internal
 inverse_Fpca2d <-function(scores,fpca){
 
