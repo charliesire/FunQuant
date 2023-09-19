@@ -91,5 +91,7 @@ probas_training_test = function(outputs_train,outputs_test, density_ratio, proto
     probas_pred_df = rbind(probas_pred_df, c(as.numeric(grid_cv[i,]), probas_pred_cv))
     relative_error_df = rbind(relative_error_df, c(as.numeric(grid_cv[i,]), abs(probas_pred_cv - probas_true)/probas_true))
   }
+  colnames(relative_error_df) = c("ncoeff", "npc", 1:(ncol(relative_error_df)-2))
+  colnames(probas_pred_df) = c("ncoeff", "npc", 1:(ncol(probas_pred_df)-2))
   return(list(probas_pred = probas_pred_df, error = relative_error_df, model_tuning = model_tuning, outputs_pred = outputs_pred_list))
 }

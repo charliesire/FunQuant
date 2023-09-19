@@ -21,7 +21,6 @@ find_prototypes(
   trace = FALSE,
   all_starts = FALSE,
   bias = NULL,
-  index_sampling_error = 1,
   seed = NULL,
   batch = FALSE,
   density_function = NULL,
@@ -60,8 +59,6 @@ find_prototypes(
 \item{all_starts}{A boolean indicating whether the function should return the optimal prototypes obtained for each start.}
 
 \item{bias}{A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default is 0 for all Voronoi cells.}
-
-\item{index_sampling_error}{Required only if method_IS = "percell". Indicates which of the data samples must be used for the computation of the quantization error.}
 
 \item{seed}{An optional random seed.}
 

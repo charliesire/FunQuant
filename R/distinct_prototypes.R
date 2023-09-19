@@ -8,9 +8,12 @@
 #' @examples
 #' distinct_prototypes(list(1,2,34,1))
 distinct_prototypes = function(prototypes){
-  for(i in 1:(length(prototypes)-1)){
-    dist_prototypes = distance_to_prototypes(prototypes[[i]], lapply((i+1):length(prototypes), function(j){prototypes[[j]]}))$dist
-    if(dist_prototypes == 0){return(FALSE)}
+  if(length(prototypes) == 1){return(TRUE)}
+  else{
+    for(i in 1:(length(prototypes)-1)){
+      dist_prototypes = distance_to_prototypes(prototypes[[i]], lapply((i+1):length(prototypes), function(j){prototypes[[j]]}))$dist
+      if(dist_prototypes == 0){return(FALSE)}
+    }
+    return(TRUE)
   }
-  return(TRUE)
 }

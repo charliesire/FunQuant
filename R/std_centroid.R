@@ -34,7 +34,8 @@
 #' list_std_centroid = std_centroid(data = data, prototypes_list =
 #' prototypes_list, density_ratio = density_ratio, distance_func = distance_func
 #' , cells = 1:length(prototypes_list[[1]]), nv = 50)
-std_centroid = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(data)[length(data)]), distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},cells, cell_numbers = NULL, nv,outputs_function = NULL, inputs = NULL, batch_size = nrow(inputs), return_cell_numbers = FALSE, bootstrap = NULL){
+std_centroid = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(data)[length(dim(data))]), distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},cells, cell_numbers = NULL, nv = NULL,outputs_function = NULL, inputs = NULL, batch_size = nrow(inputs), return_cell_numbers = FALSE, bootstrap = NULL){
+  if(is.null(nv)){nv = length(density_ratio)}
   bool_cell_numbers = is.null(cell_numbers)
   std_ratio_list = list()
   if(is.null(data)){
@@ -92,10 +93,6 @@ std_centroid = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(
         for(boot in 1:bootstrap){
           idxs = sample(1:length(cell_numbers_it), size = length(cell_numbers_it), replace = TRUE)
           cell_numbers_boot = cell_numbers_it[idxs]
-          data <<- asub(data,dims = length(dim(data)), idx = idxs)
-          density_ratio <<- density_ratio[idxs]
-          cell_numbers <<- cell_numbers_boot
-          aa <<- compute_centroids_and_proba(data = asub(data,dims = length(dim(data)), idx = idxs), density_ratio = density_ratio[idxs], method_IS = "unique",cell_numbers = cell_numbers_boot, cells = cells)$centroids
           list_centro_boot[[boot]] = compute_centroids_and_proba(data = asub(data,dims = length(dim(data)), idx = idxs), density_ratio = density_ratio[idxs], method_IS = "unique",cell_numbers = cell_numbers_boot, cells = cells)$centroids
         }
         for(cell in 1:length(cells)){

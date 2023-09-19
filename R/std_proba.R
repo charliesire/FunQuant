@@ -34,7 +34,8 @@
 #' list_std_proba = std_proba(data = data, prototypes_list = prototypes_list,
 #'  density_ratio = density_ratio, distance_func = distance_func,
 #'  cells = 1:length(prototypes_list[[1]]), nv = 50)
-std_proba = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(data)[length(data)]), distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},cells, cell_numbers = NULL, nv, outputs_function = NULL, inputs = NULL, batch_size = NULL, return_cell_numbers = FALSE, bootstrap = NULL){
+std_proba = function(data = NULL, prototypes_list, density_ratio = rep(1,dim(data)[length(dim(data))]), distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},cells, cell_numbers = NULL, nv = NULL, outputs_function = NULL, inputs = NULL, batch_size = NULL, return_cell_numbers = FALSE, bootstrap = NULL){
+  if(is.null(nv)){nv = length(density_ratio)}
   std_list = list()
   if(is.null(data) & is.null(cell_numbers)){
     nb_batch = nrow(inputs)%/%batch_size

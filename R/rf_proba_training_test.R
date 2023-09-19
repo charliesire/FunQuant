@@ -127,6 +127,8 @@ rf_probas_training_test = function(design_train, design_test, outputs_train, out
     relative_error[probas_pred_cv != 0 & probas_true == 0] = Inf
     relative_error_df = rbind(relative_error_df, relative_error)
   }
+  colnames(relative_error_df) = c("ncoeff", "npc", 1:(ncol(relative_error_df)-2))
+  colnames(probas_pred_df) = c("ncoeff", "npc", 1:(ncol(probas_pred_df)-2))
   if(return_pred == FALSE){outputs_pred = NULL}
   return(list(list_search = list_search,probas_pred = probas_pred_df, error = relative_error_df, outputs_pred = outputs_pred))
 }

@@ -15,7 +15,6 @@
 #' @param threshold A real positive number. When the distance between the new centroids and the previous ones is lower than this value, then we stop the algorithm.
 #' @param trace A boolean. If TRUE, tracing information on the progress of the algorithm is produced. Default is FALSE.
 #' @param bias A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoi cell. Default is 0 for all Voronoi cells.
-#' @param index_sampling_error Required only if method_IS = "percell". Indicates which of the data samples must be used for the computation of the quantization error.
 #' @param all_starts A boolean indicating whether the function should return the optimal prototypes obtained for each start.
 #' @param seed An optional random seed.
 #' @param batch A boolean indicating whether the computations must be performed by batch or not. If TRUE, data, cell_numbers and density_ratio must be lists. Default is False.
@@ -44,7 +43,7 @@
 #' find_prototypes(nb_cells = 3, data = data,
 #' multistart = 2, distance_func = distance_func)
 
-find_prototypes = function(starting_proto = NULL, nb_cells = NULL, data = NULL, multistart = 1, method_IS = "unique", sampling_cells = 1:length(data), density_ratio = rep(1, dim(data)[length(dim(data))]), budget = 10^3, threshold = 0, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},print_progress = FALSE, trace = FALSE, all_starts = FALSE,bias = NULL, index_sampling_error = 1, seed = NULL, batch = FALSE, density_function = NULL, density_biased_function = NULL, inputs_ref = NULL, data_ref = NULL, inputs_function = NULL, outputs_function = NULL){
+find_prototypes = function(starting_proto = NULL, nb_cells = NULL, data = NULL, multistart = 1, method_IS = "unique", sampling_cells = 1:length(data), density_ratio = rep(1, dim(data)[length(dim(data))]), budget = 10^3, threshold = 0, distance_func = function(A1,A2){return(sqrt(sum((A1-A2)^2)))},print_progress = FALSE, trace = FALSE, all_starts = FALSE,bias = NULL, seed = NULL, batch = FALSE, density_function = NULL, density_biased_function = NULL, inputs_ref = NULL, data_ref = NULL, inputs_function = NULL, outputs_function = NULL){
   data_bool = is.null(data)
   if(is.null(dim(data)) & !is.null(data)){data = t(as.matrix(data))}
   if(!is.null(seed)){set.seed(seed)}
@@ -56,10 +55,28 @@ find_prototypes = function(starting_proto = NULL, nb_cells = NULL, data = NULL, 
     if(print_progress){print(paste("start number", it))}
     if(is.null(starting_proto)){
       if(is.null(nb_cells)){stop("nb_cells must me provided if starting_proto is not")}
-      are_distinct = FALSE
-      while(are_distinct == FALSE){
-        prototypes_it = lapply(sample(x = 1:dim(data)[length(dim(data))], size = nb_cells), function(i){asub(data,dims = length(dim(data)), idx = i)})
-        are_distinct = distinct_prototypes(prototypes_it)
+      samples_init = c()
+      prototypes_it = list()
+      while(length(prototypes_it) < nb_cells){
+        if(method_IS == "unique"){
+          idx = sample(x = setdiff(1:dim(data)[length(dim(data))], samples_init), size = 1)
+          samples_init = c(samples_init, idx)
+          prototypes_prov = c(prototypes_it, list(asub(data,dims = length(dim(data)), idx = idx)))
+          if(distinct_prototypes(prototypes_prov)){prototypes_it = prototypes_prov}
+        }
+        else if(!data_bool & method_IS == "percell"){
+          idx_sample = sample(1:length(data), size = 1)
+          idx = sample(x = 1:dim(data[[idx_sample]])[length(dim(data[[idx_sample]]))], size = 1)
+          samples_init = c(samples_init, idx)
+          prototypes_prov = c(prototypes_it, list(asub(data[[idx_sample]],dims = length(dim(data[[idx_sample]])), idx = idx)))
+          if(distinct_prototypes(prototypes_prov)){prototypes_it = prototypes_prov}
+        }
+        else if(data_bool & method_IS == "percell"){
+          idx = sample(x = setdiff(1:dim(data_ref)[length(dim(data_ref))], samples_init), size = 1)
+          samples_init = c(samples_init, idx)
+          prototypes_prov = c(prototypes_it, list(asub(data_ref,dims = length(dim(data_ref)), idx = idx)))
+          if(distinct_prototypes(prototypes_prov)){prototypes_it = prototypes_prov}
+        }
       }
     }
     else{
@@ -100,7 +117,7 @@ find_prototypes = function(starting_proto = NULL, nb_cells = NULL, data = NULL, 
     }
     if(method_IS == "percell"){
       batch_size = NULL
-      error = quanti_error(data = data[[index_sampling_error]], prototypes = prototypes_it, density_ratio = density_ratio[[index_sampling_error]], batch_size = batch_size, distance_func = distance_func)
+      error = quanti_error(data = data, prototypes = prototypes_it, density_ratio = density_ratio, batch_size = batch_size, distance_func = distance_func, method_IS = method_IS, sampling_cells = sampling_cells)
     }
     else if(method_IS == "unique"){
       if(batch){batch_size = dim(data[[1]])[length(dim(data[[1]]))]}

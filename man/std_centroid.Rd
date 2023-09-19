@@ -7,13 +7,13 @@
 std_centroid(
   data = NULL,
   prototypes_list,
-  density_ratio = rep(1, dim(data)[length(data)]),
+  density_ratio = rep(1, dim(data)[length(dim(data))]),
   distance_func = function(A1, A2) {
      return(sqrt(sum((A1 - A2)^2)))
  },
   cells,
   cell_numbers = NULL,
-  nv,
+  nv = NULL,
   outputs_function = NULL,
   inputs = NULL,
   batch_size = nrow(inputs),

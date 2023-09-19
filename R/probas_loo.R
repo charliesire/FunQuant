@@ -86,5 +86,7 @@ probas_loo = function(outputs, density_ratio, prototypes, distance_func = functi
     probas_pred_df = rbind(probas_pred_df, c(as.numeric(grid_cv[i,]), probas_pred_cv))
     relative_error_df = rbind(relative_error_df, c(as.numeric(grid_cv[i,]), abs(probas_pred_cv - probas_true)/probas_true))
   }
+  colnames(relative_error_df) = c("ncoeff", "npc", 1:(ncol(relative_error_df)-2))
+  colnames(probas_pred_df) = c("ncoeff", "npc", 1:(ncol(probas_pred_df)-2))
   return(list(probas_pred = probas_pred_df, error = relative_error_df, outputs_pred = outputs_loo_list))
 }

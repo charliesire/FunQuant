@@ -23,7 +23,7 @@ fit_metamodel(
   nugget = FALSE,
   classification = FALSE,
   control_classification = NULL,
-  threshold_classification = NULL,
+  threshold_classification = 0,
   threshold_fpca = NULL
 )
 }

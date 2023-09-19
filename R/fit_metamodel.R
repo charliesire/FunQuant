@@ -51,7 +51,7 @@
 #' control_classification = list(nodesize = 4), threshold_classification = 2)
 
 fit_metamodel = function(design_train, outputs_train, seed = NULL, ncoeff,npc,kernel="matern5_2", wf = "d4", boundary = "periodic",J=1,
-                             regmodel = "constant", normalize = FALSE, optim = "BFGS", objective = "LL", parameters = NULL,noise=FALSE, nugget = FALSE, classification = FALSE, control_classification = NULL,threshold_classification = NULL,threshold_fpca = NULL){
+                             regmodel = "constant", normalize = FALSE, optim = "BFGS", objective = "LL", parameters = NULL,noise=FALSE, nugget = FALSE, classification = FALSE, control_classification = NULL,threshold_classification = 0,threshold_fpca = NULL){
   if(is.null(threshold_fpca)){threshold_fpca = threshold_classification}
   pred_fpca = TRUE
   if(classification){
