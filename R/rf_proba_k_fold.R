@@ -121,8 +121,8 @@ rf_probas_k_fold = function(design, outputs, threshold_classification, threshold
     probas_pred_df = rbind(probas_pred_df,probas_pred_cv)
     relative_error_df = rbind(relative_error_df, abs(probas_pred_cv - probas_true)/probas_true)
   }
-  colnames(relative_error_df) = c("ncoeff", "npc", 1:(ncol(relative_error_df)-2))
-  colnames(probas_pred_df) = c("ncoeff", "npc", 1:(ncol(probas_pred_df)-2))
+  colnames(relative_error_df) = 1:(ncol(relative_error_df))
+  colnames(probas_pred_df) = 1:(ncol(probas_pred_df))
   if(return_pred == FALSE){outputs_pred = NULL}
   return(list(list_search = list_search,probas_pred = probas_pred_df, error = relative_error_df, outputs_pred = outputs_pred))
 }
