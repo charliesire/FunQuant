@@ -34,7 +34,6 @@
 #' @export
 #' @import GpOutput2D
 #' @import rlibkriging
-#' @importFrom dismo kfold
 #' @import foreach
 #' @examples
 #' func2D <- function(X){

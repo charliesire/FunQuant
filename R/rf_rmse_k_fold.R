@@ -37,7 +37,6 @@
 #' @import rlibkriging
 #' @import abind
 #' @importFrom randomForest randomForest
-#' @importFrom dismo kfold
 #' @examples
 #' set.seed(5)
 #' func2D <- function(X){

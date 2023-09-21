@@ -33,7 +33,6 @@
 #' @import GpOutput2D
 #' @import rlibkriging
 #' @import abind
-#' @importFrom dismo kfold
 #' @examples
 #' func2D <- function(X){
 #' Zgrid <- expand.grid(z1 = seq(-5,5,l=20),z2 = seq(-5,5,l=20))
