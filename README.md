@@ -3,9 +3,8 @@
 ## Summary 
 
 `FunQuant` is a R package that has been specifically developed for carrying out quantization in the context of rare events. While several packages facilitate straightforward implementations of the Lloyd's algorithm, they lack the specific specification of any probabilistic factors, treating all data points equally in terms of weighting. Conversely,  `FunQuant` considers probabilistic weights based on the Importance Sampling formulation to handle the problem of rare event. To be more precise, when $X$ and $Y$ are the random vectors of inputs and outputs of a computer code,  the quantization of $Y(X)$ is performed by estimating the centroid of a given cluster $C$ with the following formula,
-
-$$\frac{\frac{1}{n} \sum^{n}_{k=1} Y(\tilde{X}_{k})\mathbb{1}_{Y(\tilde{X}_{k})\in C}\frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}}{\frac{1}{n} \sum^{n}_{k=1} \mathbb{1}_{Y(\tilde{X}_k)\in C} \frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}},$$
-where $f_{X}$ is the known density function of the inputs $X$, and $(\tilde{X}_k)^{n}_{k=1}$ i.i.d. random variables of density function $g$.
+$$\frac{\frac{1}{n} \sum_k Y(\tilde X_{k})\mathbb 1_{Y(\tilde X_{k})\in C}\frac{f_{X}(\tilde X_k)}{g(\tilde X_{k})}}{\frac{1}{n} \sum_k \mathbb 1_{Y(\tilde X_k)\in C} \frac{f_{X}(\tilde X_k)}{g(\tilde X_{k})}},$$
+where $f_{X}$ is the known density function of the inputs $X$, and $(\tilde X_k)^{n}_{k=1}$ i.i.d. random variables of density function $g$.
 Importance Sampling is employed with the aim of reducing the variance of the estimators of the centroids when compared to classical Monte Carlo methods. `FunQuant` provides various approaches for implementing these estimators, depending on the sampling density $g$. The simplest method involves using the same function $g$ for each iteration and every cluster, which is straightforward to work with and still yields significant variance reductions. More advanced implementations enable the adaptation of the sampling density for each cluster at every iteration.
 
 In addition, `FunQuant` is designed to mitigate the computational burden associated with the evaluation of costly data. While users have the flexibility to use their own metamodels to generate additional data, `FunQuant` offers several functions tailored specifically for spatial outputs such as maps. This metamodel relies on Functional Principal Component Analysis and Gaussian Processes, adapted with the `rlibkriging` R package. `FunQuant` assists users in the fine-tuning of its hyperparameters for a quantization task, by providing a set of relevant performance metrics.
@@ -22,40 +21,43 @@ remotes::install_github("rempsyc/lavaanExtra")
 ## Illustrative example
 
 We consider $X = (X_{1},X_{2}) \in \mathbb{R}^2$ a random input of a computer code $H$, with
-$$\left\{
+```math
+\left\{
     \begin{array}{ll}
         X_{i} \sim \mathcal{N}_{t}(0,0.25^2, -1, 1), i=1,2 \\
         X_{1} \text{ and }X_{2}\text{ independent}
     \end{array}
-\right.$$
+\right.
+```
+where $\mathcal N_{t}(\mu,\sigma^2, a, b)$ is the Gaussian distribution of mean $\mu$, variance $\sigma^2$, truncated between $a$ and $b$. 
 
-where $\mathcal{N}_{t}(\mu,\sigma^2, a, b)$ is the Gaussian distribution of mean $\mu$, variance $\sigma^2$, truncated between $a$ and $b$. 
+The density function of $X$, denoted $f_{X}$, is represented below.
 
-The density function of $X$, denoted $f_{X}$, is represented in \autoref{fx}.
-
-![Density function $f_{X}$.\label{fx}](paper/fX.jpg)
+![Density function $f_{X}$.](paper/fX.jpg)
 
 The computer code $H$ is defined with 
-$$H(x) = \left\{
+```math
+H(x) = \left\{
     \begin{array}{ll}
         (0,0) \text{ if } \lvert x_{1}\rvert \leq \alpha \\
         (\lvert x_{1} \rvert - \alpha, \lvert x_{2} \rvert) \text{ otherwise.}
     \end{array}
-\right.$$
+\right.
+```
 
 with $\alpha$ such that $P(H(X) = (0,0)) = 0.99.$
 
-The density $f_{Y}$ of the output $Y = H(X)$ is represented in \autoref{fy}.
+The density $f_{Y}$ of the output $Y = H(X)$ is represented below.
 
-![Density function $f_{Y}$.\label{fy}](paper/fY.jpg)
+![Density function $f_{Y}$.](paper/fY.jpg)
 
 $99\%$ of the probability mass is concentrated at $(0,0)$.
 
 We want to quantize $Y(X)$.
 
- If the classical Lloyd's algorithm is run with a budget of $1000$ points, it leads to the outcome illustrated in \autoref{kmeans_quanti}, with only a few sampled points not equal to $(0,0)$. Then, the centroids of the Voronoi cells that do not contain $(0,0)$ are computed with a very small number of points, leading to a very high variance.
+ If the classical Lloyd's algorithm is run with a budget of $1000$ points, it leads to the outcome illustrated below, with only a few sampled points not equal to $(0,0)$. Then, the centroids of the Voronoi cells that do not contain $(0,0)$ are computed with a very small number of points, leading to a very high variance.
 
-![Sampling and quantization with classical Lloyd. \label{kmeans_quanti}](paper/kmeans_quanti.jpg)
+![Sampling and quantization with classical Lloyd.](paper/kmeans_quanti.jpg)
 
 
 The `FunQuant` package allows to adapt the sampling by introducing a random variable $\tilde{X}$ of density $g$, and considering the probabilistic weights of each sample, with are the ratio $\frac{f_{X}}{g}$.
@@ -88,9 +90,9 @@ res_proto = find_prototypes(data = t(outputs),
                             density_ratio = density_ratio)
 ```
 
-\autoref{is_quanti} shows the sampled points $Y(\tilde{X}_{k})$, their associated probabilistic weights, and the obtained prototypes. It clearly appears that this sampling brings more information about each Voronoi cells. 
+The figure below shows the sampled points $Y(\tilde{X}_{k})$, their associated probabilistic weights, and the obtained prototypes. It clearly appears that this sampling brings more information about each Voronoi cells. 
 
-![Sampling and quantization with importance sampling weights. \label{is_quanti}](paper/is_quanti.jpg)
+![Sampling and quantization with importance sampling weights.](paper/is_quanti.jpg)
 
 
 
