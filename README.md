@@ -2,15 +2,13 @@
 
 ## Summary 
 
-`FunQuant` is a R package that has been specifically developed for carrying out quantization in the context of rare events. While several packages facilitate straightforward implementations of the Lloyd's algorithm, they lack the specific specification of any probabilistic factors, treating all data points equally in terms of weighting. Conversely,  `FunQuant` considers probabilistic weights based on the Importance Sampling formulation [@Paananen] to handle the problem of rare event. To be more precise, when $X$ and $Y$ are the random vectors of inputs and outputs of a computer code,  the quantization of $Y(X)$ is performed by estimating the centroid of a given cluster $C$ with the following formula,
+`FunQuant` is a R package that has been specifically developed for carrying out quantization in the context of rare events. While several packages facilitate straightforward implementations of the Lloyd's algorithm, they lack the specific specification of any probabilistic factors, treating all data points equally in terms of weighting. Conversely,  `FunQuant` considers probabilistic weights based on the Importance Sampling formulation to handle the problem of rare event. To be more precise, when $X$ and $Y$ are the random vectors of inputs and outputs of a computer code,  the quantization of $Y(X)$ is performed by estimating the centroid of a given cluster $C$ with the following formula,
 
-$\frac{\frac{1}{n} \sum^{n}_{k=1} Y(\tilde{X}_{k})\mathbb{1}_{Y(\tilde{X}_{k})\in C}\frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}}{\frac{1}{n} \sum^{n}_{k=1} \mathbb{1}_{Y(\tilde{X}_k)\in C} \frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}},$
+$$\frac{\frac{1}{n} \sum^{n}_{k=1} Y(\tilde{X}_{k})\mathbb{1}_{Y(\tilde{X}_{k})\in C}\frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}}{\frac{1}{n} \sum^{n}_{k=1} \mathbb{1}_{Y(\tilde{X}_k)\in C} \frac{f_{X}(\tilde{X}_k)}{g(\tilde{X}_{k})}},$$
 where $f_{X}$ is the known density function of the inputs $X$, and $(\tilde{X}_k)^{n}_{k=1}$ i.i.d. random variables of density function $g$.
 Importance Sampling is employed with the aim of reducing the variance of the estimators of the centroids when compared to classical Monte Carlo methods. `FunQuant` provides various approaches for implementing these estimators, depending on the sampling density $g$. The simplest method involves using the same function $g$ for each iteration and every cluster, which is straightforward to work with and still yields significant variance reductions. More advanced implementations enable the adaptation of the sampling density for each cluster at every iteration.
 
-In addition, `FunQuant` is designed to mitigate the computational burden associated with the evaluation of costly data. While users have the flexibility to use their own metamodels to generate additional data, `FunQuant` offers several functions tailored specifically for spatial outputs such as maps. This metamodel relies on Functional Principal Component Analysis and Gaussian Processes, based on the work of [@Perrin], adapted with the `rlibkriging` R package [@rlib]. `FunQuant` assists users in the fine-tuning of its hyperparameters for a quantization task, by providing a set of relevant performance metrics.
-
-Additional theoretical information can be found in [@sire]. The paper provides a comprehensive exploration of the application of `FunQuant` to the quantization of flooding maps.
+In addition, `FunQuant` is designed to mitigate the computational burden associated with the evaluation of costly data. While users have the flexibility to use their own metamodels to generate additional data, `FunQuant` offers several functions tailored specifically for spatial outputs such as maps. This metamodel relies on Functional Principal Component Analysis and Gaussian Processes, adapted with the `rlibkriging` R package. `FunQuant` assists users in the fine-tuning of its hyperparameters for a quantization task, by providing a set of relevant performance metrics.
 
 ## Installation
 
@@ -24,12 +22,12 @@ remotes::install_github("rempsyc/lavaanExtra")
 ## Illustrative example
 
 We consider $X = (X_{1},X_{2}) \in \mathbb{R}^2$ a random input of a computer code $H$, with
-$\left\{
+$$\left\{
     \begin{array}{ll}
         X_{i} \sim \mathcal{N}_{t}(0,0.25^2, -1, 1), i=1,2 \\
         X_{1} \text{ and }X_{2}\text{ independent}
     \end{array}
-\right.$
+\right.$$
 
 where $\mathcal{N}_{t}(\mu,\sigma^2, a, b)$ is the Gaussian distribution of mean $\mu$, variance $\sigma^2$, truncated between $a$ and $b$. 
 
@@ -38,12 +36,12 @@ The density function of $X$, denoted $f_{X}$, is represented in \autoref{fx}.
 ![Density function $f_{X}$.\label{fx}](paper/fX.jpg)
 
 The computer code $H$ is defined with 
-$H(x) = \left\{
+$$H(x) = \left\{
     \begin{array}{ll}
         (0,0) \text{ if } \lvert x_{1}\rvert \leq \alpha \\
         (\lvert x_{1} \rvert - \alpha, \lvert x_{2} \rvert) \text{ otherwise.}
     \end{array}
-\right.$
+\right.$$
 
 with $\alpha$ such that $P(H(X) = (0,0)) = 0.99.$
 
