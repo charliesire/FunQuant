@@ -62,7 +62,6 @@ fit kriging models on each principal component.
 return(Ymaps)
 }
 library(randtoolbox)
-library(GpOutput2D)
 X = as.data.frame(sobol(300,2))*2-1
 Y = func2D(X)
  fp = Fpca2d.Wavelets(Y, wf = "d4", boundary = "periodic", J = 1, ncoeff = 200, rank = 3)

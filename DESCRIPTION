@@ -15,8 +15,8 @@ Suggests:
     ggplot2,
     evd,
     gridExtra
-Imports: abind, waveslim, rlibkriging, foreach, randomForest, GpOutput2D
-Remotes: tranvivielodie/GpOutput2D/GpOutput2D, bioc::Rhdf5lib, libKriging/rlibkriging
+Imports: abind, waveslim, rlibkriging, foreach, randomForest
+Remotes: bioc::Rhdf5lib
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Config/testthat/edition: 3

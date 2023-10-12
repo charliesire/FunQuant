@@ -38,7 +38,6 @@
 #' @import waveslim
 #' @import foreach
 #' @import rlibkriging
-#' @import GpOutput2D
 #' @import abind
 #' @importFrom randomForest randomForest
 #' @examples

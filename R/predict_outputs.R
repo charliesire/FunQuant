@@ -32,7 +32,6 @@
 #' @export
 #' @import waveslim
 #' @import foreach
-#' @import GpOutput2D
 #' @import rlibkriging
 #' @examples
 #'  set.seed(5)

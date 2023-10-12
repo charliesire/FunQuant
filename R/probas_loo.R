@@ -34,7 +34,6 @@
 #' @export
 #' @import waveslim
 #' @import foreach
-#' @import GpOutput2D
 #' @import rlibkriging
 #' @import abind
 #' @examples

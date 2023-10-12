@@ -28,7 +28,6 @@
 #' - a trained Fpca2d object
 #' - a list of trained km object
 #' @export
-#' @import GpOutput2D
 #' @import waveslim
 #' @import foreach
 #' @import rlibkriging
