@@ -16,8 +16,7 @@ Suggests:
     evd,
     gridExtra
 Imports: abind, waveslim, foreach, randomForest
-Remotes: libKriging/rlibkriging
-Remotes: bioc::Rhdf5lib
+Remotes: libKriging/rlibkriging, bioc::Rhdf5lib
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Config/testthat/edition: 3
