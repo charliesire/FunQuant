@@ -74,7 +74,7 @@ rmse_training_test = function(outputs_train,outputs_test, model_tuning = NULL, n
       indice_coeff = which(ncoeff_vec == ncoeff)
       fp = Fpca2d.Wavelets(outputs_train, wf = wf, boundary = boundary, J = J, ncoeff = ncoeff, rank = npc)
       model = lapply(1:npc, function(k){model_tuning[[indice_coeff]][[k]]})
-      pred =  sapply(1:npc, function(k){predict(object = model[[k]],  x = design_test)$mean})
+      pred =  sapply(1:npc, function(k){rlibkriging::predict(object = model[[k]],  x = design_test)$mean})
       outputs_pred_i = inverse_Fpca2d(pred,fp)
       if(only_positive){outputs_pred_i = (outputs_pred_i > 0)*outputs_pred_i}
     }

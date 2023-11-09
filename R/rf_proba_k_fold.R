@@ -107,7 +107,7 @@ rf_probas_k_fold = function(design, outputs, threshold_classification, threshold
         rf = do.call(randomForest, list_cv_fold)
         rf_pred = as.numeric(rf$test$predicted) - 1
         if(sum(rf_pred == 1)>0){
-          pred =  matrix(sapply(1:npc, function(g){predict(object = model[[k]][[g]], x = design[indexes_test[rf_pred == 1],])$mean}), ncol = npc)
+          pred =  matrix(sapply(1:npc, function(g){rlibkriging::predict(object = model[[k]][[g]], x = design[indexes_test[rf_pred == 1],])$mean}), ncol = npc)
           outputs_pred_draft = inverse_Fpca2d(pred,fp[[k]])
           dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(indexes_test[rf_pred == 1]))
           afill(outputs_pred[[i]]) = outputs_pred_draft

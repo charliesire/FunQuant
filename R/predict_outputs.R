@@ -80,7 +80,6 @@ predict_outputs = function(metamodel_fitted = NULL, design_train = NULL, design_
   }
 
   if(pred_fpca){
-    pred =  matrix(sapply(1:length(model), function(g){predict(object = model[[g]], x = design_test_fpca)$mean}), ncol = length(model))
     outputs_pred_draft = inverse_Fpca2d(pred,fp)
   }
   outputs_pred = array(0,dim = c(dim(fp$EigFct)[-length(dim(fp$EigFct))], nrow(design_test)))

@@ -153,6 +153,7 @@ Fpca2d.Wavelets<-function(x,
   attr(res,"ncoeff")<-ncoeff # number of coefficients
   p.res <-sum(poe[idx_pca])
   attr(res,"total_poe")<-p.res
+  attr(res, "idx_pca")<- idx_pca
 
   return(res)
 }# end Fpca2d_wavelet

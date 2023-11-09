@@ -111,7 +111,7 @@ rf_probas_training_test = function(design_train, design_test, outputs_train, out
       rf_pred = as.numeric(rf$test$predicted) - 1
       outputs_pred[[i]] = array(0,dim = dim(outputs_test))
       if(sum(rf_pred == 1)>0){
-        pred =  matrix(sapply(1:npc, function(g){predict(object = model[[g]], x = design_test[rf_pred == 1,])$mean}), ncol = npc)
+        pred =  matrix(sapply(1:npc, function(g){rlibkriging::predict(object = model[[g]], x = design_test[rf_pred == 1,])$mean}), ncol = npc)
         outputs_pred_draft = inverse_Fpca2d(pred,fp)
         dimnames(outputs_pred[[i]]) = lapply(dim(outputs_pred[[i]]), function(i){1:i})
         dimnames(outputs_pred_draft) = c(lapply(dim(outputs_pred_draft)[-length(dim(outputs_pred_draft))], function(i){1:i}), list(which(rf_pred == 1)))
