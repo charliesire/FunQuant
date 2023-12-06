@@ -15,7 +15,7 @@ Suggests:
     ggplot2,
     evd,
     gridExtra
-Imports: abind, waveslim, foreach, randomForest, rlibkriging
+Imports: abind, waveslim, foreach, randomForest, rlibkriging, Wavelet2D
 RoxygenNote: 7.2.3
 VignetteBuilder: knitr
 Config/testthat/edition: 3
