@@ -20,7 +20,7 @@ The third dimension corresponds to the size of the data set
 performs inverse wavelet transform of each set of wavelet coefficients from a data set.
 }
 \seealso{
-\code{\link{Wavelet2D}}
+\code{Wavelet2D}
 }
 \author{
 Tran Vi-vi Elodie PERRIN

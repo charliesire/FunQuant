@@ -17,7 +17,7 @@
 #' @param parameters Initial values for the hyper-parameters. When provided this must be named list with elements "sigma2" and "theta" containing the initial value(s) for the variance and for the range parameters. If theta is a matrix with more than one row, each row is used as a starting point for optimization.
 #' @param noise Boolean specifying whether to execute NoiseKriging or not
 #' @param nugget Boolean specifying whether to execute NuggetKriging or not
-#' @return A list of lists of Kriging objects. The length of the output list is the length of ncoeff_vec. For each ncoeff of ncoeff_vec, a list of npc objects of class \code{\linkS4class{km}} is computed.
+#' @return A list of lists of Kriging objects. The length of the output list is the length of ncoeff_vec. For each ncoeff of ncoeff_vec, a list of npc objects of class km is computed.
 #' @import waveslim
 #' @import foreach
 #' @import rlibkriging

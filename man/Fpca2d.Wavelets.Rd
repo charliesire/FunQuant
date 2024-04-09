@@ -58,6 +58,3 @@ an object of class "Fpca2d" which is a list with the following items :
 performs FPCA on two-dimensional functional data (data set of images, maps, ...).
              The implementation of FPCA is based on wavelet basis.
 }
-\seealso{
-\code{\link{Fpca2d}}
-}

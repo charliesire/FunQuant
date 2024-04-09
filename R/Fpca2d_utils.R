@@ -94,9 +94,6 @@ inverse_Fpca2d <-function(scores,fpca){
   #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   #  if B-splines basis
   #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  if(attr(fpca,"method")=="Bsplines"){
-    OPhi<-attr(fpca,"SplinesBasis")
-    return(Inverse2D(OPhi,res_coeff))
-  }# end if Bsplines
+
 
 } # end inverse_Fpca2d

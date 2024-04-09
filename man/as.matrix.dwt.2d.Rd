@@ -7,7 +7,7 @@
 \method{as.matrix}{dwt.2d}(x, nrows, ncols, ...)
 }
 \arguments{
-\item{x}{an object of class \code{\link{dwt.2d}}.}
+\item{x}{an object of class \code{dwt.2d}.}
 
 \item{nrows, ncols}{the number of rows and columns.}
 

@@ -7,7 +7,7 @@
 \method{MeanPoe}{Wavelet2D}(object)
 }
 \arguments{
-\item{object}{an object of class \code{\link{Wavelet2D}}.}
+\item{object}{an object of class \code{Wavelet2D}.}
 }
 \value{
 a matrix K×L which contains the mean proportion of energy of each coefficient,

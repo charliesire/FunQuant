@@ -21,6 +21,7 @@ The third one is the number of maps.}
 an object of class "Wavelet2D", which corresponds to
          a matrix (for one map) or an array (for several maps)
          of same dimension as \code{x}, with the wavelet coefficients.
+#'
 }
 \description{
 performs two dimensional wavelet transforms on all images/maps of a data set.
@@ -43,9 +44,6 @@ w <-Wavelet2D(Y,wf="d4",J=2)
 # Inverse wavelet transform
 hatY <- Inverse2D(w)
 
-}
-\seealso{
-\code{\link{Inverse2D.Wavelet2D}}  \code{\link{Inverse2D}}
 }
 \author{
 Tran Vi-vi Elodie PERRIN

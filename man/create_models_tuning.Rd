@@ -56,7 +56,7 @@ to the ith evaluation.}
 \item{nugget}{Boolean specifying whether to execute NuggetKriging or not}
 }
 \value{
-A list of lists of Kriging objects. The length of the output list is the length of ncoeff_vec. For each ncoeff of ncoeff_vec, a list of npc objects of class \code{\linkS4class{km}} is computed.
+A list of lists of Kriging objects. The length of the output list is the length of ncoeff_vec. For each ncoeff of ncoeff_vec, a list of npc objects of class km is computed.
 }
 \description{
 Computation of GP models in the PCA space for different ncoeff values

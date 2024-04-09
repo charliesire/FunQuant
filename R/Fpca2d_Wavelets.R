@@ -31,7 +31,6 @@
 #'    \item \code{center}, \code{scale} : a logical value which indicates if data coefficients are respectively centered or scaled.
 #'  }
 #'
-#' @seealso \code{\link{Fpca2d}}
 #'
 #' @importFrom stats prcomp
 #'

@@ -48,7 +48,7 @@
 km_Fpca2d_lib <- function(X,response,kernel="matern5_2",
                           regmodel = "constant", normalize = FALSE, optim = "BFGS", objective = "LL", parameters = NULL,noise=FALSE, nugget = FALSE){
   X=as.matrix(X)
-  if(class(response)!="Fpca2d"){
+  if(!is(response,"Fpca2d")){
     stop("response must be an object of class 'Fpca2d'.")
   }# end if
 

@@ -5,7 +5,7 @@
 #' @description organizes the wavelet coefficients from a 2D DWT into a single matrix.
 #' @author Tran Vi-vi Elodie PERRIN
 #'
-#' @param x an object of class \code{\link{dwt.2d}}.
+#' @param x an object of class \code{dwt.2d}.
 #' @param nrows,ncols the number of rows and columns.
 #' @param ... additional arguments to be passed to or from methods.
 #'
@@ -148,9 +148,7 @@ as.dwt.2d <- function(x){
 #' @return an object of class "Wavelet2D", which corresponds to
 #'          a matrix (for one map) or an array (for several maps)
 #'          of same dimension as \code{x}, with the wavelet coefficients.
-#'
-#' @seealso \code{\link{Inverse2D.Wavelet2D}}  \code{\link{Inverse2D}}
-#'
+#'#'
 #' @examples
 #' # inputs of the Campbell2D function
 #' x1<-rep(-1,8); x2<-rep(5,8); x3<-c(5,3,1,-1,5,3,1,-1)
@@ -218,7 +216,7 @@ Wavelet2D <-function(x, wf ,J=1, boundary ="periodic"){
 #' @importFrom waveslim idwt.2d
 #' @method Inverse2D Wavelet2D
 #'
-#' @seealso \code{\link{Wavelet2D}}
+#' @seealso \code{Wavelet2D}
 #'
 #' @export
 Inverse2D.Wavelet2D <- function(object,...){
