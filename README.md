@@ -15,7 +15,7 @@ In addition, `FunQuant` is designed to mitigate the computational burden associa
 
 ``` r
 # If not already installed, install package `remotes` with `install.packages("remotes")`
-remotes::install_github("rempsyc/lavaanExtra")
+remotes::install_github("charliesire/FunQuant")
 ```
 
 ## Illustrative example
