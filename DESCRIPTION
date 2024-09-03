@@ -1,9 +1,9 @@
 Package: FunQuant
 Type: Package
 Title: Perform quantization of random outputs using importance sampling and metamodels
-Version: 0.1.1
+Version: 1.1.3
 Author: Charlie SIRE
-Maintainer: Charlie SIRE <charlie.sire@irsn.fr>
+Maintainer: Charlie SIRE <sire.charlie971@gmail.com>
 Description: Perform Lloyd's algorithm with importance sampling weights. Build a metamodel for spatial outputs and tune the hyperparameters using different metrics. Assess performance metrics around the quantization. 
 License: GPL-2
 Encoding: UTF-8
