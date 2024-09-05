@@ -33,7 +33,7 @@
 #' @param noise Boolean specifying whether to execute NoiseKriging or not
 #' @param nugget Boolean specifying whether to execute NuggetKriging or not
 #' @param bias A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoï cell.
-#' @param ... other parameters of \code{\link{randomForest}} function from \code{randomForest}.
+#' @param ... other parameters of \code{randomForest} function from \code{randomForest} package.
 #'
 #' @return A list containing several outputs :
 #' - list_search the list containing for each hyperparameters to be tested a list of the tested values.

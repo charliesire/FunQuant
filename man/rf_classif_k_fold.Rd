@@ -17,7 +17,7 @@ rf_classif_k_fold(x, y, list_search, nb_folds, seed = NULL, ...)
 
 \item{seed}{An optional random seed}
 
-\item{...}{other parameters of \code{\link{randomForest}} function from \code{randomForest}.}
+\item{...}{other parameters of \code{randomForest} function from \code{randomForest} package.}
 }
 \value{
 A list containing a vector of predicted classes for each combination of tested hyperparameters.

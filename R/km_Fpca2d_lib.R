@@ -24,7 +24,7 @@
 #' @import foreach
 #' @importFrom graphics image
 #' @importFrom rlibkriging Kriging NuggetKriging NoiseKriging
-#'
+#' @importFrom methods is
 #' @return a list of Kriging objects for each modeled principal component.
 #'
 #' @examples
@@ -45,6 +45,7 @@
 #'  fp = Fpca2d.Wavelets(Y, wf = "d4", boundary = "periodic", J = 1, ncoeff = 200, rank = 3)
 #' mm <- km_Fpca2d_lib(X=X,response=fp)
 #' @export
+#' 
 km_Fpca2d_lib <- function(X,response,kernel="matern5_2",
                           regmodel = "constant", normalize = FALSE, optim = "BFGS", objective = "LL", parameters = NULL,noise=FALSE, nugget = FALSE){
   X=as.matrix(X)

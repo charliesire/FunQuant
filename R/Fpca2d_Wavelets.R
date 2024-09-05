@@ -6,9 +6,9 @@
 #'
 #' @param x a three dimensional array, which contains two-dimensional data (images, maps, etc.).
 #'          The two first dimensions correspond to data dimensions, which are denoted M and N. The third one is the size of the data set.
-#' @param wf a character string which specifies the wavelet filter (see \code{\link{dwt.2d}}).
+#' @param wf a character string which specifies the wavelet filter.
 #' @param J depth of the wavelet decomposition, must be a number less than or equal to log(min(M,N),2).
-#' @param boundary a character string which specifies how boundaries are treated. Only "periodic" is currently implemented (see \code{\link{dwt.2d}}).
+#' @param boundary a character string which specifies how boundaries are treated. Only "periodic" is currently implemented.
 #' @param p a value which fixes the total mean proportion of energy (or mean spatial variance).
 #'          The number of coefficients (\code{ncoeff}) used for PCA is calibrated according to its value.
 #'          The default is 1. If a value is given in \code{ncoeff}, \code{p} is not used.

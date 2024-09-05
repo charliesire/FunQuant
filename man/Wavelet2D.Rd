@@ -13,7 +13,7 @@ The third one is the number of maps.}
 
 \item{wf}{name of the wavelet filter to use in the decomposition.}
 
-\item{J}{depth of the decomposition, must be a number less than or equal to log(min{M,N},2), with  M and N are respectively the number of rows and columns of each map.}
+\item{J}{depth of the decomposition, must be a number less than or equal to log(min(M,N)2), with  M and N are respectively the number of rows and columns of each map.}
 
 \item{boundary}{a character string which specified the method used for side effect. Only "periodic" is currently implemented.}
 }

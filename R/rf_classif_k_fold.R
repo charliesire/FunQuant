@@ -5,7 +5,7 @@
 #' @param list_search A list containing for each hyperparameters to be tested a list of the tested values.
 #' @param nb_folds Number of folds
 #' @param seed An optional random seed
-#' @param ... other parameters of \code{\link{randomForest}} function from \code{randomForest}.
+#' @param ... other parameters of \code{randomForest} function from \code{randomForest} package.
 #'
 #' @return A list containing a vector of predicted classes for each combination of tested hyperparameters.
 #' @export

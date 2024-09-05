@@ -23,7 +23,7 @@
 #' @param parameters Initial values for the hyper-parameters. When provided this must be named list with elements "sigma2" and "theta" containing the initial value(s) for the variance and for the range parameters. If theta is a matrix with more than one row, each row is used as a starting point for optimization.
 #' @param noise Boolean specifying whether to execute NoiseKriging or not
 #' @param nugget Boolean specifying whether to execute NuggetKriging or not
-#' @param ... other parameters of \code{\link{randomForest}} function from \code{randomForest}.
+#' @param ... other parameters of \code{randomForest} function from \code{randomForest} package.
 
 #'
 #' @return A list containing several outputs :

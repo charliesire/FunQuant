@@ -10,7 +10,7 @@ as.dwt.2d(x)
 \item{x}{a object of class "matrix.dwt.2d ", which is a matrix which contains wavelet coefficients.}
 }
 \value{
-an object of class \code{\link{dwt.2d}}.
+an object of class dwt.2d.
 }
 \description{
 creates an object of class \code{\link{dwt.2d}} by using

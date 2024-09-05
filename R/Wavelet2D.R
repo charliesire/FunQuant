@@ -96,7 +96,7 @@ as.matrix.dwt.2d <- function(x,nrows,ncols,...){
 #'
 #' @importFrom waveslim dwt.2d
 #'
-#' @return an object of class \code{\link{dwt.2d}}.
+#' @return an object of class dwt.2d.
 #'
 #' @keywords internal
 #' @export
@@ -140,7 +140,7 @@ as.dwt.2d <- function(x){
 #'          Two first dimensions correspond to maps dimensions.
 #'          The third one is the number of maps.
 #' @param wf name of the wavelet filter to use in the decomposition.
-#' @param J depth of the decomposition, must be a number less than or equal to log(min{M,N},2), with  M and N are respectively the number of rows and columns of each map.
+#' @param J depth of the decomposition, must be a number less than or equal to log(min(M,N)2), with  M and N are respectively the number of rows and columns of each map.
 #' @param boundary a character string which specified the method used for side effect. Only "periodic" is currently implemented.
 #'
 #' @importFrom waveslim dwt.2d

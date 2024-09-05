@@ -15,7 +15,7 @@ rf_classif_training_test(xtrain, xtest, ytrain, list_search, ...)
 
 \item{list_search}{A list containing for each hyperparameters to be tested a list of the tested values.}
 
-\item{...}{other parameters of \code{\link{randomForest}} function from \code{randomForest}.}
+\item{...}{other parameters of \code{randomForest} function from \code{randomForest} package.}
 }
 \value{
 A list containing a vector of predicted classes for each combination of tested hyperparameters.

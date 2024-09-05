@@ -92,7 +92,7 @@ rf_probas_k_fold(
 
 \item{bias}{A vector indicating the bias that came out when computing the importance sampling estimators of the membership probabilities. Each element of the vector is associated to a Voronoï cell.}
 
-\item{...}{other parameters of \code{\link{randomForest}} function from \code{randomForest}.}
+\item{...}{other parameters of \code{randomForest} function from \code{randomForest} package.}
 }
 \value{
 A list containing several outputs :
